@@ -1,41 +1,36 @@
 # SISPEC Backend
 
-Sistema Inteligente de Pecuária de Confinamento - Backend API
+Backend em Hono + JSON para o Sistema Inteligente de Pecuária de Confinamento.
 
 ## Instalação
 
 ```bash
-cd backend
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
+# Instalar Deno
+curl -fsSL https://deno.land/install.sh | sh
 
-## Execução
+# Rodar seed (dados de exemplo)
+deno run --allow-net --allow-read --allow-write src/seed.ts
 
-```bash
-# Sem seed
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-
-# Com dados de exemplo
-python seed.py
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+# Iniciar servidor
+deno run --allow-net --allow-read --allow-write src/index.ts
 ```
 
 ## Endpoints
 
-- `GET /` - Info da API
-- `GET /api/v1/health` - Status do sistema
+- `GET /api/v1/health` - Status da API
 - `GET /api/v1/lotes` - Listar lotes
 - `GET /api/v1/animais` - Listar animais
 - `GET /api/v1/dashboard/kpis` - Métricas do dashboard
-- `GET /docs` - Documentação Swagger
-- `GET /redoc` - Documentação ReDoc
+- `GET /api/v1/dashboard/alertas` - Alertas do sistema
 
-## API com dados de exemplo
+## Variáveis de Ambiente
 
-```bash
-# Após seed, use:
-curl http://localhost:8000/api/v1/animais
-curl http://localhost:8000/api/v1/dashboard/kpis
+Criar arquivo `.env`:
+
+```env
+PORT=3000
+HOST=0.0.0.0
+GMD_META=1.0
+PESO_ABATE=480
+ICA_IDEAL=6.0
 ```
