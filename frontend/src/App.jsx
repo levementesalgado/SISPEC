@@ -1,14 +1,48 @@
-import { useState, useEffect } from 'react'
-import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
+import { useState, useEffect, lazy, Suspense } from 'react'
+import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom'
 import Dashboard from './pages/Dashboard'
 import Animais from './pages/Animais'
 import Lotes from './pages/Lotes'
 import Cadastro from './pages/Cadastro'
-import { Menu, X, LayoutDashboard, Users, FolderTree, PlusCircle } from 'lucide-react'
+import Login from './pages/Login'
+import { Menu, X, LayoutDashboard, Users, FolderTree, PlusCircle, LogOut, Loader2 } from 'lucide-react'
+
+// Loading component
+function Loading() {
+  return (
+    <div className="flex items-center justify-center h-64">
+      <Loader2 className="animate-spin text-sage" size={32} />
+    </div>
+  )
+}
+
+// Protected Route wrapper
+function ProtectedRoute({ children }) {
+  const user = JSON.parse(localStorage.getItem('user') || 'null')
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+  return children
+}
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [user, setUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('user')) || null
+    } catch {
+      return null
+    }
+  })
   const location = useLocation()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    setUser(null)
+    navigate('/login')
+  }
 
   const navItems = [
     { path: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -22,7 +56,7 @@ function App() {
   return (
     <div className="min-h-screen bg-ink text-paper">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-ink/95 backdrop-blur-sm border-b border-sage/10">
+      <header className="sticky top-0 z-50 bg-ink/95 backdrop-blur-sm border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <span className="text-2xl font-serif italic text-sage">SIS</span>
@@ -45,6 +79,12 @@ function App() {
                 {label}
               </Link>
             ))}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-white/40 hover:text-white hover:bg-white/5 transition-colors"
+            >
+              <LogOut size={18} />
+            </button>
           </nav>
 
           {/* Mobile Menu Button */}
@@ -58,7 +98,7 @@ function App() {
 
         {/* Mobile Nav */}
         {menuOpen && (
-          <nav className="md:hidden border-t border-sage/10 bg-ink/98">
+          <nav className="md:hidden border-t border-white/5 bg-ink/98">
             {navItems.map(({ path, label, icon: Icon }) => (
               <Link
                 key={path}
@@ -74,6 +114,13 @@ function App() {
                 {label}
               </Link>
             ))}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 px-4 py-3 text-white/40 w-full"
+            >
+              <LogOut size={20} />
+              Sair
+            </button>
           </nav>
         )}
       </header>
@@ -81,10 +128,10 @@ function App() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-6">
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/animais" element={<Animais />} />
-          <Route path="/lotes" element={<Lotes />} />
-          <Route path="/cadastro" element={<Cadastro />} />
+          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/animais" element={<ProtectedRoute><Animais /></ProtectedRoute>} />
+          <Route path="/lotes" element={<ProtectedRoute><Lotes /></ProtectedRoute>} />
+          <Route path="/cadastro" element={<ProtectedRoute><Cadastro /></ProtectedRoute>} />
         </Routes>
       </main>
     </div>
@@ -94,7 +141,10 @@ function App() {
 export default function Root() {
   return (
     <BrowserRouter>
-      <App />
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/*" element={<App />} />
+      </Routes>
     </BrowserRouter>
   )
 }
