@@ -3,12 +3,12 @@
 @tailwind utilities;
 
 :root {
-  --ink: #0a0f0b;
-  --paper: #f4f1eb;
-  --field: #1b4332;
-  --moss: #2d6a4f;
+  --ink: #12181a;
+  --paper: #e8e4dc;
+  --field: #1e362e;
+  --moss: #2d5a42;
   --sage: #52b788;
-  --dew: #b7e4c7;
+  --dew: #c8e0d0;
   --amber: #d4a017;
   --rust: #c1440e;
 }
@@ -21,19 +21,19 @@ body {
 
 @layer components {
   .btn-primary {
-    @apply px-4 py-2 bg-sage text-ink font-semibold rounded-lg hover:bg-dew transition-colors;
+    @apply px-4 py-2 bg-sage text-ink font-semibold rounded-lg hover:bg-dew transition-all;
   }
 
   .btn-secondary {
-    @apply px-4 py-2 bg-transparent border border-sage/30 text-sage rounded-lg hover:bg-sage/10 transition-colors;
+    @apply px-4 py-2 bg-transparent border border-white/20 text-white/70 rounded-lg hover:bg-white/[0.08] hover:border-white/30 transition-all;
   }
 
   .card {
-    @apply bg-white/5 border border-sage/10 rounded-xl p-4 backdrop-blur-sm;
+    @apply bg-white/[0.06] border border-white/[0.08] rounded-xl p-4 backdrop-blur-sm;
   }
 
   .input {
-    @apply w-full bg-white/5 border border-sage/20 rounded-lg px-4 py-2 text-paper placeholder:text-white/30 focus:border-sage/50 focus:outline-none transition-colors;
+    @apply w-full bg-white/[0.06] border border-white/[0.12] rounded-lg px-4 py-2 text-paper placeholder:text-white/25 focus:border-sage/50 focus:outline-none transition-colors;
   }
 
   .table {
