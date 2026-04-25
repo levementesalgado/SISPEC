@@ -85,6 +85,14 @@ animais.post("/", async (c) => {
     return c.json({ error: "Peso não pode ser negativo" }, 400);
   }
   
+  // Validação: composição cruzado não pode passar de 100%
+  if (body.raca === 'Cruzado' && body.composicao) {
+    const total = body.composicao.reduce((sum: number, c: any) => sum + (c.porcentagem || 0), 0);
+    if (total > 100) {
+      return c.json({ error: `Porcentagem total (${total}%) não pode passar de 100%` }, 400);
+    }
+  }
+  
   const db = await readDB();
   
   // Verifica brinco duplicado

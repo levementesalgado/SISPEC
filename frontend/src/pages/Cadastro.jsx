@@ -98,6 +98,17 @@ export default function Cadastro() {
     setError(null)
     setSuccess(false)
 
+    // Validação: porcentagem total não pode passar de 100%
+    if (form.raca === 'Cruzado') {
+      const totalPorcentagem = composicao.reduce((sum, c) => sum + (c.porcentagem || 0), 0)
+      if (totalPorcentagem > 100) {
+        setError(`Porcentagem total (${totalPorcentagem}%) não pode passar de 100%`)
+        addToast(`Porcentagem total (${totalPorcentagem}%) não pode passar de 100%`, 'error')
+        setLoading(false)
+        return
+      }
+    }
+
     try {
       const animalData = {
         ...form,
