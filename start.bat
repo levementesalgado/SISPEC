@@ -6,6 +6,13 @@ set PORT=3000
 set DENO_DIR=%USERPROFILE%\.deno\bin
 
 echo 🚀 Iniciando SISPEC...
+echo 🧹 Limpando portas...
+
+REM Mata processos nas portas
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :3000 ^| findstr LISTENING') do taskkill /F /PID %%a >nul 2>nul
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :5173 ^| findstr LISTENING') do taskkill /F /PID %%a >nul 2>nul
+
+timeout /t 1 /nobreak > nul
 
 REM Verifica Deno
 where deno >nul 2>nul

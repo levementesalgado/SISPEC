@@ -7,6 +7,12 @@ PORT=${PORT:-3000}
 
 echo "🚀 Iniciando SISPEC..."
 
+# Mata processos nas portas 3000 e 5173
+echo "🧹 Limpando portas..."
+fuser -k 3000/tcp 2>/dev/null
+fuser -k 5173/tcp 2>/dev/null
+sleep 1
+
 # Verifica Deno
 DENO_DIR="$HOME/.deno/bin"
 if ! command -v deno &> /dev/null && [ ! -x "$DENO_DIR/deno" ]; then
