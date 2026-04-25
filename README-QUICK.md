@@ -2,24 +2,25 @@
 
 ## Quick Start
 
-### Windows (sem admin)
-1. Clique duas vezes em `start.bat`
-2. O navegador abre automaticamente em `http://localhost:5173`
+### Windows
+Clique duas vezes em `start.bat` e escolha opção 1
 
 ### Linux/macOS
 ```bash
 ./start.sh
 ```
-Acesse `http://localhost:5173`
+Escolha opção 1 para ambos
 
 ## O que faz
-- **Backend**: API em `http://localhost:3000`
-- **Frontend**: Interface web em `http://localhost:5173`
+- **Backend**: API em http://localhost:3000
+- **Frontend**: Interface web em http://localhost:5173
 
-## Requisitos
-- Windows 10+ ou Linux/macOS
-- Sem installation necessária
+## Menu
+1. Ambos (backend + frontend) - Para Uso normal
+2. Apenas Backend - Para testes de API
+3. Apenas Frontend - Para desarrollo
+4. Sair
 
 ## Problemas?
-- Mude a porta no arquivo: edite `set PORT=3000`
-- Feche outros programas na porta 3000 ou 5173
+- Acesse http://localhost:5173 no navegador
+- Mude a porta: edite `set PORT=3000` ou `PORT=3000`
