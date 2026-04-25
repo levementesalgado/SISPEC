@@ -32,12 +32,13 @@ def seed_data():
     # Raças
     racas = ["Nelore", "Angus", "Brahman", "Senepol", "Girolando", "Cruzado"]
     
-    # Cria animais
+    # Cria animais - datas atuais (abril 2026)
     animais = []
     for i in range(1, 49):
         brinco = f"BR-{i:04d}"
         raca = random.choice(racas)
-        data_entrada = date(2025, 1, 5) + timedelta(days=random.randint(0, 30))
+        # Entrada nos últimos 30-60 dias
+        data_entrada = date.today() - timedelta(days=random.randint(30, 60))
         peso_entrada = random.randint(350, 420)
         lote = random.choice(lotes)
         
