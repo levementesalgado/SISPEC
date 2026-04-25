@@ -66,6 +66,19 @@ export async function criarAnimal(data) {
   return res.json()
 }
 
+export async function criarPesagem(data) {
+  const res = await fetch(`${API_BASE}/pesagens`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.detail || error.error || 'Erro ao criar pesagem')
+  }
+  return res.json()
+}
+
 export async function criarLote(data) {
   const res = await fetch(`${API_BASE}/lotes`, {
     method: 'POST',

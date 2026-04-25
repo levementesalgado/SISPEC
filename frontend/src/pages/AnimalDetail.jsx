@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Scale, TrendingUp, Calendar, AlertTriangle } from 'lucide-react'
-import { fetchAnimal, fetchPesagens } from '../utils/api'
+import { ChevronLeft, Scale, TrendingUp, Calendar, Plus, X } from 'lucide-react'
+import { fetchAnimal, fetchPesagens, criarPesagem } from '../utils/api'
 import { useToasts } from '../components/Toast'
 
 export default function AnimalDetail() {
@@ -11,6 +11,12 @@ export default function AnimalDetail() {
   const [animal, setAnimal] = useState(null)
   const [pesagens, setPesagens] = useState([])
   const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [novaPesagem, setNovaPesagem] = useState({
+    peso: '',
+    observacao: ''
+  })
 
   useEffect(() => {
     loadData()
@@ -28,6 +34,33 @@ export default function AnimalDetail() {
       addToast('Erro ao carregar dados', 'error')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleNovaPesagem(e) {
+    e.preventDefault()
+    setSubmitting(true)
+    
+    try {
+      const now = new Date()
+      const dataPesagem = now.toISOString().split('T')[0]
+      
+      await criarPesagem({
+        animal_id: parseInt(id),
+        data_pesagem,
+        peso: parseFloat(novaPesagem.peso),
+        tecnico: 'Sistema',
+        observacao: novaPesagem.observacao || null
+      })
+      
+      addToast('Pesagem registrada!', 'success')
+      setShowForm(false)
+      setNovaPesagem({ peso: '', observacao: '' })
+      await loadData()
+    } catch (err) {
+      addToast(err.message, 'error')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -60,15 +93,70 @@ export default function AnimalDetail() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <button onClick={() => navigate('/animais')} className="btn-secondary">
-          <ChevronLeft size={18} />
-        </button>
-        <div>
-          <h1 className="text-3xl font-serif text-sage">{animal.brinco}</h1>
-          <p className="text-white/60">{animal.raca} • {animal.sexo}</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <button onClick={() => navigate('/animais')} className="btn-secondary">
+            <ChevronLeft size={18} />
+          </button>
+          <div>
+            <h1 className="text-3xl font-serif text-sage">{animal.brinco}</h1>
+            <p className="text-white/60">{animal.raca} • {animal.sexo}</p>
+          </div>
         </div>
+        <button onClick={() => setShowForm(true)} className="btn-primary flex items-center gap-2">
+          <Plus size={18} />
+          Nova Pesagem
+        </button>
       </div>
+
+      {/* Form Nova Pesagem */}
+      {showForm && (
+        <div className="card border-green-500/30">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Nova Pesagem</h2>
+            <button onClick={() => setShowForm(false)} className="text-white/40">
+              <X size={18} />
+            </button>
+          </div>
+          <form onSubmit={handleNovaPesagem} className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-white/60 mb-1">Peso (kg)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={novaPesagem.peso}
+                  onChange={(e) => setNovaPesagem({ ...novaPesagem, peso: e.target.value })}
+                  className="input"
+                  placeholder={animal.peso_atual || animal.peso_entrada}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-white/60 mb-1">Observação</label>
+                <input
+                  type="text"
+                  value={novaPesagem.observacao}
+                  onChange={(e) => setNovaPesagem({ ...novaPesagem, observacao: e.target.value })}
+                  className="input"
+                  placeholder="Opcional"
+                />
+              </div>
+            </div>
+            <p className="text-sm text-white/40">
+              Data: {new Date().toLocaleDateString('pt-BR')} (automática do servidor)
+            </p>
+            <div className="flex gap-2">
+              <button type="submit" className="btn-primary" disabled={submitting}>
+                {submitting ? 'Salvando...' : 'Registrar'}
+              </button>
+              <button type="button" onClick={() => setShowForm(false)} className="btn-secondary">
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* Info Cards */}
       <div className="grid md:grid-cols-4 gap-4">
