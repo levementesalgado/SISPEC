@@ -61,7 +61,7 @@ animais.get("/:id", async (c) => {
 animais.post("/", async (c) => {
   const body = await c.req.json();
   
-  // Validações
+  // Validações obrigatórias
   if (!body.brinco) {
     return c.json({ error: "Brinco é obrigatório" }, 400);
   }
@@ -70,6 +70,19 @@ animais.post("/", async (c) => {
   }
   if (!body.peso_entrada || body.peso_entrada <= 0) {
     return c.json({ error: "Peso de entrada é obrigatório" }, 400);
+  }
+  
+  // Validação: data não pode ser futura
+  const dataEntrada = new Date(body.data_entrada);
+  const hoje = new Date();
+  hoje.setHours(23, 59, 59, 999);
+  if (dataEntrada > hoje) {
+    return c.json({ error: "Data de entrada não pode ser futura" }, 400);
+  }
+  
+  // Validação: peso não pode ser negativo
+  if (body.peso_entrada < 0) {
+    return c.json({ error: "Peso não pode ser negativo" }, 400);
   }
   
   const db = await readDB();

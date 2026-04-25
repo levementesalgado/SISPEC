@@ -40,7 +40,7 @@ pesagens.post("/", async (c) => {
   const body = await c.req.json();
   const db = await readDB();
   
-  // Validações
+  // Validações obrigatórias
   if (!body.animal_id) {
     return c.json({ error: "ID do animal é obrigatório" }, 400);
   }
@@ -49,6 +49,19 @@ pesagens.post("/", async (c) => {
   }
   if (!body.peso || body.peso <= 0) {
     return c.json({ error: "Peso é obrigatório" }, 400);
+  }
+  
+  // Validação: data não pode ser futura
+  const dataPesagem = new Date(body.data_pesagem);
+  const hoje = new Date();
+  hoje.setHours(23, 59, 59, 999);
+  if (dataPesagem > hoje) {
+    return c.json({ error: "Data da pesagem não pode ser futura" }, 400);
+  }
+  
+  // Validação: peso não pode ser negativo
+  if (body.peso < 0) {
+    return c.json({ error: "Peso não pode ser negativo" }, 400);
   }
   
   // Verifica se animal existe
