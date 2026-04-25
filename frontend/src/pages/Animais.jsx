@@ -94,7 +94,14 @@ export default function Animais() {
               animaisFiltrados.map((animal) => (
                 <tr key={animal.id}>
                   <td className="text-sage font-semibold">{animal.brinco}</td>
-                  <td>{animal.raca}</td>
+                  <td>
+                    {animal.raca}
+                    {animal.composicao && (
+                      <span className="block text-xs text-green-400">
+                        {animal.composicao.map(c => `${c.raca.substr(0,3)}/${c.porcentagem}%`).join(' + ')}
+                      </span>
+                    )}
+                  </td>
                   <td>{animal.peso_entrada} kg</td>
                   <td>{animal.peso_atual ? `${animal.peso_atual} kg` : '—'}</td>
                   <td className={animal.gmd ? (animal.gmd >= 1 ? 'text-green-400' : 'text-amber') : 'text-white/40'}>

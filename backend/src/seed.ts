@@ -2,6 +2,7 @@ import { readDB, writeDB, nextId } from "./db/json.ts";
 import { formatDate } from "./services/calculos.ts";
 
 const racas = ["Nelore", "Angus", "Brahman", "Senepol", "Girolando", "Cruzado"];
+const racasBase = ["Nelore", "Angus", "Brahman", "Senepol", "Girolando"];
 const tecnicos = ["José R.", "Ana L.", "Carlos M."];
 
 async function seed() {
@@ -41,11 +42,17 @@ async function seed() {
     const pesoEntrada = Math.floor(Math.random() * 70) + 350; // 350-420 kg
     const loteIdx = Math.floor(Math.random() * 3);
     
+    // 10% Cruzado
+    const racaEscolhida = Math.random() < 0.1 ? "Cruzado" : racasBase[Math.floor(Math.random() * racasBase.length)];
+    
     db.animais.push({
       id: await nextId("animalId"),
       brinco: `BR-${String(i).padStart(4, "0")}`,
-      raca: racas[Math.floor(Math.random() * racas.length)],
-      sexo: Math.random() > 0.3 ? "MACHO" : "FEMEA",
+      raca: racaEscolhida,
+      composicao: racaEscolhida === "Cruzado" ? [
+        { raca: racasBase[0], porcentagem: 50 },
+        { raca: racasBase[1], porcentagem: 50 }
+      ] : null,
       data_entrada: formatDate(dataEntrada),
       peso_entrada: pesoEntrada,
       lote_id: db.lotes[loteIdx].id,

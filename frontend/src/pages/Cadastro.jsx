@@ -19,6 +19,44 @@ export default function Cadastro() {
     observacao: ''
   })
 
+  const [composicao, setComposicao] = useState([
+    { raca: 'Nelore', porcentagem: 50 },
+    { raca: 'Angus', porcentagem: 50 }
+  ])
+
+  const racasBase = ['Nelore', 'Angus', 'Brahman', 'Senepol', 'Girolando']
+  const porcentagens = [25, 50, 75, 100]
+
+  const handleRacaChange = (e) => {
+    const novaRaca = e.target.value
+    setForm({ ...form, raca: novaRaca })
+    if (novaRaca === 'Cruzado') {
+      setComposicao([
+        { raca: 'Nelore', porcentagem: 50 },
+        { raca: 'Angus', porcentagem: 50 }
+      ])
+    }
+  }
+
+  const atualizaComposicao = (index, campo, valor) => {
+    const nova = [...composicao]
+    nova[index][campo] = valor
+    setComposicao(nova)
+  }
+
+  const adicionaRaca = () => {
+    if (composicao.length < 4) {
+      setComposicao([...composicao, { raca: '', porcentagem: 25 }])
+    }
+  }
+
+  const removeRaca = (index) => {
+    if (composicao.length > 2) {
+      const nova = composicao.filter((_, i) => i !== index)
+      setComposicao(nova)
+    }
+  }
+
   useEffect(() => {
     async function loadLotes() {
       try {
@@ -38,11 +76,15 @@ export default function Cadastro() {
     setSuccess(false)
 
     try {
-      await criarAnimal({
+      const animalData = {
         ...form,
         peso_entrada: parseFloat(form.peso_entrada),
         lote_id: form.lote_id ? parseInt(form.lote_id) : null
-      })
+      }
+      if (form.raca === 'Cruzado') {
+        animalData.composicao = composicao.filter(c => c.raca && c.porcentagem)
+      }
+      await criarAnimal(animalData)
       setSuccess(true)
       setForm({
         brinco: '',
@@ -102,17 +144,47 @@ export default function Cadastro() {
             <label className="block text-sm text-white/60 mb-1">Raça *</label>
             <select
               value={form.raca}
-              onChange={(e) => setForm({ ...form, raca: e.target.value })}
+              onChange={handleRacaChange}
               className="input"
             >
-              <option value="Nelore">Nelore</option>
-              <option value="Angus">Angus</option>
-              <option value="Brahman">Brahman</option>
-              <option value="Senepol">Senepol</option>
-              <option value="Girolando">Girolando</option>
+              {racasBase.map(r => <option key={r} value={r}>{r}</option>)}
               <option value="Cruzado">Cruzado</option>
             </select>
           </div>
+
+          {form.raca === 'Cruzado' && (
+            <div className="mt-4 p-4 bg-white/5 rounded-lg space-y-3">
+              <label className="block text-sm text-white/60 mb-2">Composição Racial (%)</label>
+              {composicao.map((item, index) => (
+                <div key={index} className="flex gap-2 items-center">
+                  <select
+                    value={item.raca}
+                    onChange={(e) => atualizaComposicao(index, 'raca', e.target.value)}
+                    className="input flex-1"
+                  >
+                    <option value="">Selecione</option>
+                    {racasBase.map(r => <option key={r} value={r}>{r}</option>)}
+                  </select>
+                  <select
+                    value={item.porcentagem}
+                    onChange={(e) => atualizaComposicao(index, 'porcentagem', parseInt(e.target.value))}
+                    className="input w-24"
+                  >
+                    {porcentagens.map(p => <option key={p} value={p}>{p}%</option>)}
+                  </select>
+                  {composicao.length > 2 && (
+                    <button type="button" onClick={() => removeRaca(index)} className="text-red-400 hover:text-red-300">✕</button>
+                  )}
+                </div>
+              ))}
+              {composicao.length < 4 && (
+                <button type="button" onClick={adicionaRaca} className="text-sm text-green-400 hover:text-green-300">
+                  + Adicionar raça
+                </button>
+              )}
+            </div>
+          )}
+        </div>
         </div>
 
         <div className="grid md:grid-cols-3 gap-4">

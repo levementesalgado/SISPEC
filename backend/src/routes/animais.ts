@@ -85,6 +85,7 @@ animais.post("/", async (c) => {
     id,
     brinco: body.brinco,
     raca: body.raca || "Nelore",
+    composicao: body.composicao || null,
     sexo: body.sexo || "MACHO",
     data_entrada: body.data_entrada,
     peso_entrada: body.peso_entrada,
