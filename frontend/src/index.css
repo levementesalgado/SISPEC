@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: #0a0f0b;
+  --paper: #f4f1eb;
+  --field: #1b4332;
+  --moss: #2d6a4f;
+  --sage: #52b788;
+  --dew: #b7e4c7;
+  --amber: #d4a017;
+  --rust: #c1440e;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background-color: var(--ink);
+  color: var(--paper);
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2 bg-sage text-ink font-semibold rounded-lg hover:bg-dew transition-colors;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 bg-transparent border border-sage/30 text-sage rounded-lg hover:bg-sage/10 transition-colors;
+  }
+
+  .card {
+    @apply bg-white/5 border border-sage/10 rounded-xl p-4 backdrop-blur-sm;
+  }
+
+  .input {
+    @apply w-full bg-white/5 border border-sage/20 rounded-lg px-4 py-2 text-paper placeholder:text-white/30 focus:border-sage/50 focus:outline-none transition-colors;
+  }
+
+  .table {
+    @apply w-full border-collapse;
+  }
+
+  .table th {
+    @apply text-left text-xs uppercase tracking-wider text-white/40 font-mono py-3 px-4 border-b border-sage/10;
+  }
+
+  .table td {
+    @apply py-3 px-4 border-b border-sage/5 font-mono text-sm;
+  }
+
+  .table tr:hover td {
+    @apply bg-sage/5;
+  }
+
+  .badge {
+    @apply inline-block px-2 py-0.5 text-xs font-mono uppercase rounded;
+  }
+
+  .badge-ok {
+    @apply bg-green-500/20 text-green-400;
+  }
+
+  .badge-warn {
+    @apply bg-amber/20 text-amber;
+  }
+
+  .badge-crit {
+    @apply bg-red-500/20 text-red-400;
+  }
+}
