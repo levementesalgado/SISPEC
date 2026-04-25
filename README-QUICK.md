@@ -9,18 +9,34 @@ Clique duas vezes em `start.bat` e escolha opção 1
 ```bash
 ./start.sh
 ```
-Escolha opção 1 para ambos
+Escolha opção 1 para rodar ambos
 
-## O que faz
-- **Backend**: API em http://localhost:3000
-- **Frontend**: Interface web em http://localhost:5173
+## Login de Teste
 
-## Menu
-1. Ambos (backend + frontend) - Para Uso normal
-2. Apenas Backend - Para testes de API
-3. Apenas Frontend - Para desarrollo
+| Usuário | Senha | Função |
+|---------|-------|--------|
+| admin | sispec123 | Administrador |
+| tecnico | tecnico123 | Operador |
+| vinberkuko | admin123 | Usuário |
+
+## Deploy (VPS/Server)
+
+### Linux (screen)
+```bash
+./deploy.sh
+```
+
+### Windows
+```bash
+deploy.bat
+```
+
+## Menu do start.sh
+1. Ambos (backend + frontend) - Para uso normal
+2. Apenas Backend
+3. Apenas Frontend
 4. Sair
 
 ## Problemas?
-- Acesse http://localhost:5173 no navegador
-- Mude a porta: edite `set PORT=3000` ou `PORT=3000`
+- Backend: http://localhost:3000
+- Frontend: http://localhost:5173
