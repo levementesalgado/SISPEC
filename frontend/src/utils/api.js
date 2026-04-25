@@ -34,6 +34,19 @@ export async function fetchAnimais(params = {}) {
   return res.json()
 }
 
+export async function fetchAnimal(id) {
+  const res = await fetch(`${API_BASE}/animais/${id}`, { headers: getHeaders() })
+  if (!res.ok) throw new Error('Erro ao buscar animal')
+  return res.json()
+}
+
+export async function fetchPesagens(params = {}) {
+  const query = new URLSearchParams(params)
+  const res = await fetch(`${API_BASE}/pesagens?${query}`, { headers: getHeaders() })
+  if (!res.ok) throw new Error('Erro ao buscar pesagens')
+  return res.json()
+}
+
 export async function fetchLotes() {
   const res = await fetch(`${API_BASE}/lotes`, { headers: getHeaders() })
   if (!res.ok) throw new Error('Erro ao buscar lotes')

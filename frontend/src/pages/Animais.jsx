@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { Search, AlertCircle } from 'lucide-react'
 import { fetchAnimais } from '../utils/api'
 
@@ -92,7 +93,7 @@ export default function Animais() {
               </tr>
             ) : (
               animaisFiltrados.map((animal) => (
-                <tr key={animal.id}>
+                <tr key={animal.id} className="hover:bg-white/5 cursor-pointer" onClick={() => window.location.href = `/animais/${animal.id}`}>
                   <td className="text-sage font-semibold">{animal.brinco}</td>
                   <td>
                     {animal.raca}

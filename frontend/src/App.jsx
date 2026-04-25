@@ -5,6 +5,7 @@ import Animais from './pages/Animais'
 import Lotes from './pages/Lotes'
 import Cadastro from './pages/Cadastro'
 import Login from './pages/Login'
+import AnimalDetail from './pages/AnimalDetail'
 import { Menu, X, LayoutDashboard, Users, FolderTree, PlusCircle, LogOut, Loader2 } from 'lucide-react'
 
 // Loading component
@@ -130,6 +131,7 @@ function App() {
         <Routes>
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/animais" element={<ProtectedRoute><Animais /></ProtectedRoute>} />
+          <Route path="/animais/:id" element={<ProtectedRoute><AnimalDetail /></ProtectedRoute>} />
           <Route path="/lotes" element={<ProtectedRoute><Lotes /></ProtectedRoute>} />
           <Route path="/cadastro" element={<ProtectedRoute><Cadastro /></ProtectedRoute>} />
         </Routes>
