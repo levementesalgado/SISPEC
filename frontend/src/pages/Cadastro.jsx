@@ -185,7 +185,6 @@ export default function Cadastro() {
             </div>
           )}
         </div>
-        </div>
 
         <div className="grid md:grid-cols-3 gap-4">
           <div>
