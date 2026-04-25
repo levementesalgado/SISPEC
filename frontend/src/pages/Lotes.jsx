@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Plus, Trash2 } from 'lucide-react'
-import { fetchLotes, criarLote } from '../utils/api'
+import { Plus, Trash2, Users, ChevronDown, ChevronRight } from 'lucide-react'
+import { fetchLotes, criarLote, fetchAnimais } from '../utils/api'
 
 export default function Lotes() {
   const [lotes, setLotes] = useState([])
@@ -8,20 +8,37 @@ export default function Lotes() {
   const [error, setError] = useState(null)
   const [showForm, setShowForm] = useState(false)
   const [novoLote, setNovoLote] = useState({ nome: '', descricao: '' })
+  const [loteExpandido, setLoteExpandido] = useState(null)
+  const [animaisLote, setAnimaisLote] = useState([])
 
   useEffect(() => {
-    async function loadLotes() {
-      try {
-        const data = await fetchLotes()
-        setLotes(data)
-      } catch (err) {
-        setError(err.message)
-      } finally {
-        setLoading(false)
-      }
-    }
     loadLotes()
   }, [])
+
+  async function loadLotes() {
+    try {
+      const data = await fetchLotes()
+      setLotes(data)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function loadAnimaisLote(loteId) {
+    if (loteExpandido === loteId) {
+      setLoteExpandido(null)
+      return
+    }
+    try {
+      const data = await fetchAnimais({ lote_id: loteId })
+      setAnimaisLote(data)
+      setLoteExpandido(loteId)
+    } catch (err) {
+      setError(err.message)
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -53,7 +70,6 @@ export default function Lotes() {
         </button>
       </div>
 
-      {/* Form */}
       {showForm && (
         <div className="card">
           <h2 className="text-lg font-semibold mb-4">Criar Novo Lote</h2>
@@ -88,28 +104,75 @@ export default function Lotes() {
         </div>
       )}
 
-      {/* Error */}
       {error && (
         <div className="card border-red-500/30 bg-red-500/10">
           <p className="text-red-400">{error}</p>
         </div>
       )}
 
-      {/* List */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="space-y-3">
         {lotes.map((lote) => (
           <div key={lote.id} className="card">
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="font-semibold text-sage">{lote.nome}</h3>
-                {lote.descricao && (
-                  <p className="text-sm text-white/60 mt-1">{lote.descricao}</p>
+            <div 
+              className="flex items-center justify-between cursor-pointer"
+              onClick={() => loadAnimaisLote(lote.id)}
+            >
+              <div className="flex items-center gap-3">
+                {loteExpandido === lote.id ? (
+                  <ChevronDown size={20} className="text-sage" />
+                ) : (
+                  <ChevronRight size={20} className="text-white/40" />
+                )}
+                <div>
+                  <h3 className="font-semibold text-sage">{lote.nome}</h3>
+                  {lote.descricao && (
+                    <p className="text-sm text-white/60">{lote.descricao}</p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <span className={`badge ${lote.ativo ? 'badge-ok' : 'badge-warn'}`}>
+                  {lote.ativo ? 'Ativo' : 'Inativo'}
+                </span>
+              </div>
+            </div>
+
+            {loteExpandido === lote.id && (
+              <div className="mt-4 pt-4 border-t border-white/10">
+                <h4 className="text-sm text-white/60 mb-2 flex items-center gap-2">
+                  <Users size={14} />
+                  Animais neste lote
+                </h4>
+                {animaisLote.length > 0 ? (
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Brinco</th>
+                        <th>Raça</th>
+                        <th>Peso Ent</th>
+                        <th>Peso Att</th>
+                        <th>GMD</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {animaisLote.map((animal) => (
+                        <tr key={animal.id}>
+                          <td className="text-sage font-semibold">{animal.brinco}</td>
+                          <td>{animal.raca}</td>
+                          <td>{animal.peso_entrada} kg</td>
+                          <td>{animal.peso_atual || animal.peso_entrada} kg</td>
+                          <td className={animal.gmd >= 1 ? 'text-green-400' : 'text-amber'}>
+                            {animal.gmd ? `${animal.gmd} kg/d` : '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p className="text-white/40 text-sm">Nenhum animal neste lote</p>
                 )}
               </div>
-              <span className={`badge ${lote.ativo ? 'badge-ok' : 'badge-warn'}`}>
-                {lote.ativo ? 'Ativo' : 'Inativo'}
-              </span>
-            </div>
+            )}
           </div>
         ))}
       </div>
