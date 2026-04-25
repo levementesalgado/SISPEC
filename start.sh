@@ -13,7 +13,7 @@ if ! command -v deno &> /dev/null && [ ! -x "$DENO_DIR/deno" ]; then
     echo "📦 Instalando Deno..."
     curl -fsSL https://deno.land/install.sh | sh
 fi
-if ! command -v deno &> /dev/null && [ -x "$DENO_DIR/deno" ]; then
+if [ -x "$DENO_DIR/deno" ]; then
     export PATH="$DENO_DIR:$PATH"
 fi
 
@@ -34,11 +34,12 @@ opcao=${opcao:-1}
 case $opcao in
     1)
         echo "🌐 Iniciando Backend em http://localhost:$PORT..."
+        cd "$SCRIPT_DIR/backend"
         deno run --allow-net --allow-read --allow-write --allow-env src/index.ts &
         sleep 2
         
         echo "🎨 Iniciando Frontend em http://localhost:5173..."
-        cd frontend
+        cd "$SCRIPT_DIR/frontend"
         npm run dev &
         sleep 2
         
@@ -52,11 +53,12 @@ case $opcao in
         ;;
     2)
         echo "🌐 Backend em http://localhost:$PORT..."
+        cd "$SCRIPT_DIR/backend"
         deno run --allow-net --allow-read --allow-write --allow-env src/index.ts
         ;;
     3)
         echo "🎨 Frontend em http://localhost:5173..."
-        cd frontend
+        cd "$SCRIPT_DIR/frontend"
         npm run dev
         ;;
     4)
