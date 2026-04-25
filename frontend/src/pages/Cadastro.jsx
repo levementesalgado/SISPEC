@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CheckCircle, AlertCircle, ChevronRight, ChevronLeft } from 'lucide-react'
 import { criarAnimal, fetchLotes } from '../utils/api'
+import { ToastContainer, useToasts } from '../components/Toast'
 
 export default function Cadastro() {
   const navigate = useNavigate()
+  const { toasts, addToast } = useToasts()
   const [lotes, setLotes] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -106,6 +108,7 @@ export default function Cadastro() {
         animalData.composicao = composicao.filter(c => c.raca && c.porcentagem)
       }
       await criarAnimal(animalData)
+      addToast('Animal cadastrado com sucesso!', 'success')
       setSuccess(true)
       setForm({
         brinco: '',
@@ -119,6 +122,7 @@ export default function Cadastro() {
       setTimeout(() => navigate('/animais'), 2000)
     } catch (err) {
       setError(err.message)
+      addToast(err.message, 'error')
     } finally {
       setLoading(false)
     }
@@ -337,6 +341,8 @@ export default function Cadastro() {
           </button>
         </div>
       </form>
+
+      <ToastContainer toasts={toasts} />
     </div>
   )
 }
