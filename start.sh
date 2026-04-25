@@ -33,10 +33,15 @@ opcao=${opcao:-1}
 
 case $opcao in
     1)
-        echo "🌐 Iniciando Backend em http://localhost:$PORT..."
-        cd "$SCRIPT_DIR/backend"
-        deno run --allow-net --allow-read --allow-write --allow-env src/index.ts &
-        sleep 2
+        # Verifica se já está rodando
+        if curl -s http://localhost:$PORT/api/v1/health > /dev/null 2>&1; then
+            echo "⚠️  Backend já rodando em http://localhost:$PORT"
+        else
+            echo "🌐 Iniciando Backend em http://localhost:$PORT..."
+            cd "$SCRIPT_DIR/backend"
+            deno run --allow-net --allow-read --allow-write --allow-env src/index.ts &
+            sleep 2
+        fi
         
         echo "🎨 Iniciando Frontend em http://localhost:5173..."
         cd "$SCRIPT_DIR/frontend"
@@ -52,9 +57,12 @@ case $opcao in
         wait
         ;;
     2)
-        echo "🌐 Backend em http://localhost:$PORT..."
-        cd "$SCRIPT_DIR/backend"
-        deno run --allow-net --allow-read --allow-write --allow-env src/index.ts
+        if curl -s http://localhost:$PORT/api/v1/health > /dev/null 2>&1; then
+            echo "⚠️  Backend já rodando em http://localhost:$PORT"
+        else
+            cd "$SCRIPT_DIR/backend"
+            deno run --allow-net --allow-read --allow-write --allow-env src/index.ts
+        fi
         ;;
     3)
         echo "🎨 Frontend em http://localhost:5173..."
