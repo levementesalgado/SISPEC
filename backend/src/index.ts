@@ -5,6 +5,7 @@ import { serve } from "@hono/node-server";
 import { env } from "./env.ts";
 import { initDB } from "./db/json.ts";
 
+import authRouter from "./routes/auth.ts";
 import lotesRouter from "./routes/lotes.ts";
 import animaisRouter from "./routes/animais.ts";
 import pesagensRouter from "./routes/pesagens.ts";
@@ -22,6 +23,7 @@ app.use("/*", cors({
 }));
 
 // Rotas
+app.route("/api/v1/auth", authRouter);
 app.route("/api/v1/lotes", lotesRouter);
 app.route("/api/v1/animais", animaisRouter);
 app.route("/api/v1/pesagens", pesagensRouter);

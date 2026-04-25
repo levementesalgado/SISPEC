@@ -1,32 +1,41 @@
 const API_BASE = '/api/v1'
 
+function getHeaders() {
+  const token = localStorage.getItem('token')
+  const headers = { 'Content-Type': 'application/json' }
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+  return headers
+}
+
 export async function fetchKPIs() {
-  const res = await fetch(`${API_BASE}/dashboard/kpis`)
+  const res = await fetch(`${API_BASE}/dashboard/kpis`, { headers: getHeaders() })
   if (!res.ok) throw new Error('Erro ao buscar KPIs')
   return res.json()
 }
 
 export async function fetchGMDData() {
-  const res = await fetch(`${API_BASE}/dashboard/gmd-semanas`)
+  const res = await fetch(`${API_BASE}/dashboard/gmd-semanas`, { headers: getHeaders() })
   if (!res.ok) throw new Error('Erro ao buscar dados de GMD')
   return res.json()
 }
 
 export async function fetchAlertas() {
-  const res = await fetch(`${API_BASE}/dashboard/alertas`)
+  const res = await fetch(`${API_BASE}/dashboard/alertas`, { headers: getHeaders() })
   if (!res.ok) throw new Error('Erro ao buscar alertas')
   return res.json()
 }
 
 export async function fetchAnimais(params = {}) {
   const query = new URLSearchParams(params)
-  const res = await fetch(`${API_BASE}/animais?${query}`)
+  const res = await fetch(`${API_BASE}/animais?${query}`, { headers: getHeaders() })
   if (!res.ok) throw new Error('Erro ao buscar animais')
   return res.json()
 }
 
 export async function fetchLotes() {
-  const res = await fetch(`${API_BASE}/lotes`)
+  const res = await fetch(`${API_BASE}/lotes`, { headers: getHeaders() })
   if (!res.ok) throw new Error('Erro ao buscar lotes')
   return res.json()
 }
@@ -34,12 +43,12 @@ export async function fetchLotes() {
 export async function criarAnimal(data) {
   const res = await fetch(`${API_BASE}/animais`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getHeaders(),
     body: JSON.stringify(data),
   })
   if (!res.ok) {
     const error = await res.json()
-    throw new Error(error.detail || 'Erro ao criar animal')
+    throw new Error(error.detail || error.error || 'Erro ao criar animal')
   }
   return res.json()
 }
@@ -47,12 +56,12 @@ export async function criarAnimal(data) {
 export async function criarLote(data) {
   const res = await fetch(`${API_BASE}/lotes`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getHeaders(),
     body: JSON.stringify(data),
   })
   if (!res.ok) {
     const error = await res.json()
-    throw new Error(error.detail || 'Erro ao criar lote')
+    throw new Error(error.detail || error.error || 'Erro ao criar lote')
   }
   return res.json()
 }
