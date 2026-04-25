@@ -6,6 +6,7 @@ import Lotes from './pages/Lotes'
 import Cadastro from './pages/Cadastro'
 import Login from './pages/Login'
 import AnimalDetail from './pages/AnimalDetail'
+import { ToastProvider } from './components/Toast'
 import { Menu, X, LayoutDashboard, Users, FolderTree, PlusCircle, LogOut, Loader2 } from 'lucide-react'
 
 // Loading component
@@ -142,11 +143,13 @@ function App() {
 
 export default function Root() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/*" element={<App />} />
-      </Routes>
-    </BrowserRouter>
+    <ToastProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/*" element={<App />} />
+        </Routes>
+      </BrowserRouter>
+    </ToastProvider>
   )
 }

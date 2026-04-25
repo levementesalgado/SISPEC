@@ -1,0 +1,143 @@
+ MATEUS (Tech Lead)
+├─ Backend completo (API REST)
+├─ Banco de dados e lógica de negócio
+├─ Integração geral do sistema
+└─ Suporte técnico geral
+
+PEDRO UTSUMI (Frontend Developer)
+├─ Interface web (React)
+├─ Design das telas
+├─ Responsividade desktop
+└─ Integração com API
+
+PEDRO LIMA (Relatórios Specialist)
+├─ Geração relatórios (PDF/Excel)
+├─ Dashboard métricas
+├─ Fórmulas financeiras/ganho peso
+└─ Exportações dados
+
+PATRICK (Mobile Developer)
+├─ PWA (Progressive Web App)
+├─ Interface mobile
+├─ Testes campo
+└─ Notificações básicas
+
+JOÃO (QA Tester)
+├─ Testes funcionais
+├─ Testes de usabilidade
+├─ Bug reports
+└─ Validação requisitos
+
+EDIL (DevOps + Design)
+├─ Deploy e hospedagem
+├─ Logo e identidade visual
+├─ Configuração ambiente
+└─ Documentação deploy
+
+
+=================DEPENDENCIAS=================
+
+ESSENCIAIS (todos estudam):
+├── Git + GitHub (1h)
+├── VSCode (30min)
+└── Discord para reuniões
+
+MATEUS:
+├── Python + FastAPI
+├── Prisma/PostgreSQL
+└── Docker básico
+
+PEDRO UTSUMI:
+├── React + Vite
+├── Tailwind CSS
+└── React Query
+
+PEDRO LIMA:
+├── Pandas (Python Excel)
+├── jsPDF/PDFMake
+└── Chart.js
+
+PATRICK:
+├── React Native/Expo ou PWA
+└── Service Workers
+
+JOÃO:
+├── Postman (testes API)
+└── Cypress (testes web)
+
+EDIL:
+├── Railway/Heroku
+├── Docker
+└── Inkscape avançado
+
+
+
+============METAS PRIMEIR0 MÊS=============
+
+TODOS:
+├─ Instalar VSCode + GitHub Desktop
+├─ Clonar repo e rodar local
+└─ Fazer 1º commit
+
+MATEUS:
+├─ Criar repo estrutura
+└─ Backend básico + banco SQLite
+
+EDIL:
+└─ Logo + ícones no repo
+
+CHECKPOINT: Site roda local 🎉
+
+
+=============METAS SEGUND0 MÊS==============
+
+MATEUS:
+├─ API autenticação JWT
+└─ Cadastro usuário
+
+PEDRO UTSUMI:
+├─ Tela login React
+└─ Tela dashboard vazia
+
+JOÃO:
+└─ Testar login (Postman)
+
+CHECKPOINT: Login funciona 🎉
+
+=============METAS TERCEIRO MÊS==============
+
+MATEUS:
+├─ API CRUD animais
+└─ Modelos banco (gado, lotes)
+
+PEDRO UTSUMI:
+├─ Tela listar gado
+└─ Form cadastro animal
+
+PEDRO LIMA:
+└─ Planilha modelo dados gado
+
+CHECKPOINT: Cadastrar gado OK 🎉
+
+==============METAS QUART0 MÊS===============
+
+MATEUS:
+└─ API métricas básicas
+
+PEDRO UTSUMI:
+├─ Dashboard com gráficos
+└─ Filtros data/lote
+
+PEDRO LIMA:
+├─ Fórmulas ganho peso
+└─ Mock dados dashboard
+
+CHECKPOINT: Gráficos funcionando 🎉
+
+==================CONSIDERAÇÕES===================
+
+❌ NÃO DEFINIDO DIAS/HORÁRIOS
+✅ VOCÊS ESCOLHEM quando trabalhar
+✅ Daily Discord (10min - horário livre)
+✅ Sexta: Demo + comemoração (20min)
+✅ Commits quando terminar tarefa

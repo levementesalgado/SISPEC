@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SISPEC — Sistema Inteligente de Pecuária de Confinamento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0a0f0b;
+  --paper: #f4f1eb;
+  --field: #1b4332;
+  --moss: #2d6a4f;
+  --sage: #52b788;
+  --dew: #b7e4c7;
+  --amber: #d4a017;
+  --rust: #c1440e;
+  --mist: #8a9e8f;
+  --line: rgba(27,67,50,.12);
+  --line-light: rgba(255,255,255,.1);
+  --mono: 'DM Mono', monospace;
+  --serif: 'DM Serif Display', Georgia, serif;
+  --sans: 'DM Sans', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: var(--ink); font-family: var(--sans); color: var(--ink); }
+
+#grain {
+  position: fixed; inset: 0; pointer-events: none; z-index: 9998; opacity: .03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+#cursor {
+  position: fixed; width: 8px; height: 8px;
+  background: var(--sage); border-radius: 50%;
+  pointer-events: none; z-index: 9999;
+  transform: translate(-50%,-50%);
+  transition: width .2s, height .2s, background .2s;
+  mix-blend-mode: exclusion;
+}
+#cursor.hover { width: 40px; height: 40px; background: rgba(82,183,136,.3); }
+
+#deck { width: 100%; height: 100%; position: relative; overflow: hidden; }
+
+.slide {
+  position: absolute; inset: 0;
+  opacity: 0; pointer-events: none;
+  transition: opacity .7s cubic-bezier(.4,0,.2,1), transform .7s cubic-bezier(.4,0,.2,1);
+  transform: translateY(24px) scale(.995);
+  will-change: transform, opacity;
+}
+.slide.active { opacity: 1; pointer-events: all; transform: translateY(0) scale(1); }
+.slide.out { opacity: 0; transform: translateY(-24px) scale(.995); }
+
+.appear { opacity: 0; transform: translateY(16px); transition: opacity .6s ease, transform .6s ease; }
+.appear.in { opacity: 1; transform: translateY(0); }
+
+#hud-zone {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 100px;
+  z-index: 999; pointer-events: none;
+}
+#hud {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 0;
+  z-index: 1000;
+  background: rgba(10,15,11,.92); backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid rgba(82,183,136,.2); border-radius: 999px;
+  padding: 6px; box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  opacity: 0; transition: opacity .35s ease;
+}
+#hud.visible { opacity: 1; }
+.hud-btn {
+  background: none; border: none; color: rgba(255,255,255,.4);
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  letter-spacing: .06em; text-transform: uppercase;
+  padding: 7px 16px; border-radius: 999px; cursor: pointer;
+  transition: all .2s; white-space: nowrap;
+}
+.hud-btn:hover { color: rgba(255,255,255,.9); background: rgba(255,255,255,.06); }
+.hud-btn.cur { background: var(--sage); color: var(--ink); font-weight: 600; }
+.hud-sep { width: 1px; height: 16px; background: rgba(82,183,136,.15); margin: 0 4px; }
+.hud-count { font-family: var(--mono); font-size: 10px; color: rgba(255,255,255,.25); padding: 7px 12px; letter-spacing: .08em; }
+
+.pip-row { display: flex; gap: 6px; align-items: center; }
+.pip { width: 5px; height: 5px; border-radius: 50%; background: rgba(82,183,136,.25); transition: background .3s, transform .3s; }
+.pip.on { background: var(--sage); transform: scale(1.4); }
+
+.key-hint { position: fixed; bottom: 84px; right: 40px; font-family: var(--mono); font-size: 10px; color: rgba(255,255,255,.18); letter-spacing: .06em; z-index: 900; opacity: 0; transition: opacity .35s ease; }
+
+
+/* ═══ SLIDE 0 — CAPA ═══════════════════════════════════════ */
+.s0 {
+  background: var(--ink);
+  display: grid; grid-template-columns: 1fr 1fr; overflow: hidden;
+}
+.s0-left {
+  padding: 80px 72px; display: flex; flex-direction: column; justify-content: space-between;
+  border-right: 1px solid rgba(82,183,136,.1);
+  position: relative;
+}
+.s0-left::before {
+  content: ''; position: absolute; top: 0; left: 0;
+  width: 3px; height: 100%; background: linear-gradient(to bottom, transparent, var(--sage) 30%, var(--sage) 70%, transparent);
+  opacity: .4;
+}
+.s0-top { display: flex; flex-direction: column; gap: 40px; }
+.eyebrow {
+  font-family: var(--mono); font-size: 12px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--sage);
+  display: flex; align-items: center; gap: 10px;
+}
+.eyebrow::before { content: ''; width: 24px; height: 1px; background: var(--sage); }
+.cover-logo {
+  font-family: var(--serif); font-size: clamp(64px, 8vw, 112px);
+  line-height: .88; letter-spacing: -.04em; color: var(--paper);
+  position: relative;
+}
+.cover-logo em {
+  font-style: italic; color: var(--sage);
+}
+.cover-desc {
+  font-family: var(--sans); font-size: 17px; font-weight: 300;
+  color: rgba(244,241,235,.45); line-height: 1.8; max-width: 380px;
+}
+.cover-meta {
+  display: flex; flex-direction: column; gap: 12px;
+}
+.meta-line {
+  font-family: var(--mono); font-size: 12px; color: rgba(255,255,255,.2);
+  letter-spacing: .08em; display: flex; align-items: center; gap: 8px;
+}
+.meta-line::before { content: '—'; color: var(--sage); opacity: .5; }
+.s0-right {
+  position: relative; overflow: hidden;
+  background: #1a2a1f; /* fallback */
+  display: flex; align-items: center; justify-content: center;
+}
+.s0-img-placeholder {
+  width: 100%; height: 100%;
+  background: linear-gradient(145deg, #2d4a33, #1b2f20);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 14px; color: rgba(255,255,255,.2);
+  text-transform: uppercase; letter-spacing: .2em;
+}
+.s0-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to right, var(--ink) 0%, transparent 40%, transparent 100%),
+              linear-gradient(to top, rgba(10,15,11,.6) 0%, transparent 50%);
+}
+.s0-caption {
+  position: absolute; bottom: 36px; right: 32px;
+  font-family: var(--mono); font-size: 9px; color: rgba(255,255,255,.2);
+  letter-spacing: .08em; text-transform: uppercase; text-align: right;
+  line-height: 1.8;
+}
+.s0-ticker {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  border-top: 1px solid rgba(82,183,136,.1);
+  padding: 12px 24px; background: rgba(10,15,11,.6); backdrop-filter: blur(8px);
+  display: flex; gap: 32px; overflow: hidden;
+}
+.ticker-item {
+  font-family: var(--mono); font-size: 12px; letter-spacing: .06em;
+  color: rgba(255,255,255,.25); white-space: nowrap;
+  display: flex; gap: 8px; align-items: center;
+}
+.ticker-item span { color: var(--sage); }
+
+
+/* ═══ SLIDE 1 — PROBLEMA ════════════════════════════════════ */
+.s1 {
+  background: var(--paper);
+  display: grid; grid-template-columns: 1fr 1fr; overflow: hidden;
+}
+.s1-left { padding: 72px 64px; display: flex; flex-direction: column; gap: 36px; justify-content: center; }
+.s1-right { display: grid; grid-template-rows: 1fr 1fr; overflow: hidden; }
+.img-cell {
+  position: relative; overflow: hidden;
+  background: #d9d0c0;
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(0,0,0,.2); font-family: var(--mono); font-size: 12px;
+}
+.img-cell .caption {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 12px 16px; background: linear-gradient(transparent, rgba(10,15,11,.75));
+  font-family: var(--mono); font-size: 9px; color: rgba(255,255,255,.5);
+  letter-spacing: .06em; text-transform: uppercase;
+}
+.section-tag {
+  font-family: var(--mono); font-size: 12px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--moss);
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.section-tag::before { content: ''; width: 20px; height: 1px; background: var(--moss); }
+.slide-title {
+  font-family: var(--serif); font-size: clamp(28px, 3.2vw, 44px);
+  line-height: 1.05; letter-spacing: -.02em; color: var(--ink);
+}
+.slide-title em { font-style: italic; color: var(--moss); }
+.stat-stack { display: flex; flex-direction: column; gap: 12px; }
+.stat-card {
+  display: grid; grid-template-columns: 72px 1fr; gap: 20px;
+  align-items: center; padding: 16px 20px;
+  border: 1px solid var(--line); border-radius: 8px;
+  background: rgba(255,255,255,.6); backdrop-filter: blur(4px);
+  transition: border-color .25s, box-shadow .25s;
+}
+.stat-card:hover { border-color: var(--sage); box-shadow: 0 4px 20px rgba(27,67,50,.08); }
+.stat-num {
+  font-family: var(--serif); font-size: 32px;
+  color: var(--field); line-height: 1; text-align: center;
+}
+.stat-text { font-size: 15px; color: rgba(10,15,11,.55); line-height: 1.6; }
+.stat-text strong { color: var(--ink); font-weight: 600; }
+
+
+/* ═══ SLIDE 2 — ARQUITETURA ══════════════════════════════════ */
+.s2 {
+  background: var(--field);
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 72px 80px; gap: 52px;
+  position: relative; overflow: hidden;
+}
+.s2::before {
+  content: ''; position: absolute; right: -200px; bottom: -200px;
+  width: 600px; height: 600px; border-radius: 50%;
+  border: 1px solid rgba(82,183,136,.06); pointer-events: none;
+}
+.s2::after {
+  content: ''; position: absolute; right: -80px; bottom: -80px;
+  width: 400px; height: 400px; border-radius: 50%;
+  border: 1px solid rgba(82,183,136,.1); pointer-events: none;
+}
+.s2 .section-tag { color: var(--dew); }
+.s2 .section-tag::before { background: var(--dew); }
+.s2 .slide-title { color: var(--paper); }
+.s2 .slide-title em { color: var(--sage); }
+.arch-timeline {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+  position: relative; z-index: 1;
+}
+.arch-timeline::before {
+  content: ''; position: absolute; top: 28px; left: 16%; right: 16%;
+  height: 1px; background: linear-gradient(to right, transparent, rgba(82,183,136,.3), transparent);
+}
+.arch-card {
+  padding: 28px 24px; border-radius: 12px;
+  border: 1px solid rgba(82,183,136,.15);
+  background: rgba(255,255,255,.03); backdrop-filter: blur(8px);
+  display: flex; flex-direction: column; gap: 16px;
+  transition: border-color .3s, background .3s, transform .3s;
+  position: relative;
+}
+.arch-card::before {
+  content: attr(data-year);
+  position: absolute; top: -9px; left: 24px;
+  background: var(--field); padding: 0 8px;
+  font-family: var(--mono); font-size: 9px; color: var(--sage);
+  letter-spacing: .1em; text-transform: uppercase;
+}
+.arch-card:hover { border-color: rgba(82,183,136,.4); background: rgba(255,255,255,.06); transform: translateY(-4px); }
+.arch-card.now { border-color: rgba(82,183,136,.35); background: rgba(82,183,136,.07); }
+.arch-card.now::before { color: var(--dew); }
+.arch-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.arch-title { font-family: var(--serif); font-size: 20px; color: var(--paper); line-height: 1.1; }
+.arch-badge {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 3px; background: rgba(82,183,136,.15); color: var(--sage);
+  white-space: nowrap; flex-shrink: 0;
+}
+.arch-badge.active { background: var(--sage); color: var(--field); }
+.arch-items { display: flex; flex-direction: column; gap: 8px; }
+.arch-item {
+  font-size: 15px; color: rgba(244,241,235,.5); line-height: 1.5;
+  display: grid; grid-template-columns: 12px 1fr; gap: 8px;
+}
+.arch-item::before { content: '—'; color: var(--sage); opacity: .6; font-family: var(--mono); font-size: 13px; margin-top: 2px; }
+
+
+/* ═══ SLIDE 3 — REFERÊNCIAS ══════════════════════════════════ */
+.s3 {
+  background: var(--paper);
+  display: grid; grid-template-columns: 58% 42%; overflow: hidden;
+}
+.s3-left { padding: 72px 64px; display: flex; flex-direction: column; gap: 32px; justify-content: center; }
+.s3-right { display: flex; flex-direction: column; overflow: hidden; border-left: 1px solid var(--line); }
+.s3-img {
+  flex: 1; overflow: hidden; position: relative;
+  background: #c7bba8;
+  display: flex; align-items: center; justify-content: center;
+}
+.s3-img .caption {
+  position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 14px;
+  background: linear-gradient(transparent, rgba(10,15,11,.7));
+  font-family: var(--mono); font-size: 9px; color: rgba(255,255,255,.4);
+  text-transform: uppercase; letter-spacing: .06em;
+}
+.s3-img + .s3-img { border-top: 2px solid var(--paper); }
+.quote-block {
+  padding: 20px 24px; border-left: 2px solid var(--moss);
+  background: rgba(27,67,50,.04); border-radius: 0 6px 6px 0;
+}
+.quote-text {
+  font-family: var(--serif); font-size: 16px; font-style: italic;
+  color: rgba(10,15,11,.75); line-height: 1.75;
+}
+.quote-src {
+  margin-top: 10px; font-family: var(--mono); font-size: 12px;
+  color: var(--mist); letter-spacing: .08em; text-transform: uppercase;
+}
+.inline-note {
+  font-size: 15px; color: rgba(10,15,11,.45); line-height: 1.7;
+  border-top: 1px solid var(--line); padding-top: 16px;
+}
+
+
+/* ═══ SLIDE 4a — COMO FUNCIONA ═══════════════════════════════ */
+.s4a {
+  background: var(--ink);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+}
+.s4a-left {
+  padding: 72px 56px 80px 72px;
+  display: flex; flex-direction: column; justify-content: center; gap: 32px;
+  border-right: 1px solid rgba(82,183,136,.1);
+}
+.s4a-right {
+  padding: 72px 72px 80px 56px;
+  display: flex; flex-direction: column; justify-content: center; gap: 16px;
+}
+.s4a .section-tag { color: var(--sage); }
+.s4a .section-tag::before { background: var(--sage); }
+.s4a .slide-title { color: var(--paper); }
+.s4a .slide-title em { color: var(--sage); }
+
+.flow-step {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(82,183,136,.07);
+}
+.flow-step:last-child { border-bottom: none; }
+.flow-num {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; border: 1px solid rgba(82,183,136,.2);
+  background: rgba(82,183,136,.06); flex-shrink: 0;
+}
+.flow-num.dim { border-color: rgba(255,255,255,.07); background: rgba(255,255,255,.02); }
+.flow-text {}
+.flow-title { font-family: var(--serif); font-size: 17px; color: var(--paper); line-height: 1.2; }
+.flow-title.dim { color: rgba(255,255,255,.3); }
+.flow-desc { font-family: var(--mono); font-size: 13px; color: rgba(255,255,255,.35); margin-top: 3px; line-height: 1.5; }
+.flow-desc.dim { color: rgba(255,255,255,.15); }
+
+.flow-card {
+  padding: 18px 20px; border-radius: 10px;
+  border: 1px solid rgba(82,183,136,.12); background: rgba(255,255,255,.02);
+  display: flex; flex-direction: column; gap: 6px;
+  transition: border-color .25s, background .25s;
+}
+.flow-card:hover { border-color: rgba(82,183,136,.35); background: rgba(82,183,136,.04); }
+.flow-card-head { display: flex; align-items: center; gap: 10px; }
+.flow-card-icon { font-size: 16px; }
+.flow-card-title { font-family: var(--sans); font-size: 15px; font-weight: 600; color: var(--paper); }
+.flow-card-body { font-family: var(--mono); font-size: 13px; color: rgba(255,255,255,.4); line-height: 1.6; }
+.flow-card-tag {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .07em; text-transform: uppercase;
+  padding: 2px 8px; border-radius: 3px; background: rgba(82,183,136,.1); color: var(--sage);
+  align-self: flex-start;
+}
+
+/* ═══ SLIDE 4b — POR QUE FIZEMOS ════════════════════════════ */
+.s4b {
+  background: var(--paper);
+  display: grid; grid-template-columns: 52% 48%; overflow: hidden;
+}
+.s4b-left {
+  padding: 72px 64px; display: flex; flex-direction: column; gap: 28px;
+  justify-content: center; border-right: 1px solid var(--line);
+}
+.s4b-right {
+  padding: 72px 56px; display: flex; flex-direction: column; gap: 24px;
+  justify-content: center; background: rgba(27,67,50,.03);
+}
+.origin-timeline { display: flex; flex-direction: column; gap: 0; }
+.origin-item {
+  display: grid; grid-template-columns: 48px 1fr; gap: 16px;
+  padding-bottom: 28px; position: relative;
+}
+.origin-item:last-child { padding-bottom: 0; }
+.origin-item:not(:last-child)::before {
+  content: ''; position: absolute;
+  left: 23px; top: 44px; bottom: 0; width: 1px;
+  background: linear-gradient(to bottom, var(--moss), transparent);
+  opacity: .25;
+}
+.origin-dot {
+  width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; border: 1px solid var(--line);
+  background: rgba(255,255,255,.7); position: relative; z-index: 1;
+}
+.origin-content { display: flex; flex-direction: column; gap: 5px; padding-top: 10px; }
+.origin-label {
+  font-family: var(--mono); font-size: 12px; color: var(--moss);
+  letter-spacing: .1em; text-transform: uppercase;
+}
+.origin-text { font-size: 15px; color: rgba(10,15,11,.65); line-height: 1.65; }
+.origin-text strong { color: var(--ink); }
+
+.insight-stack { display: flex; flex-direction: column; gap: 12px; }
+.insight-card {
+  padding: 16px 20px; border-radius: 8px;
+  border: 1px solid var(--line); background: rgba(255,255,255,.5);
+  display: flex; gap: 14px; align-items: flex-start;
+  transition: border-color .25s, box-shadow .25s;
+}
+.insight-card:hover { border-color: var(--sage); box-shadow: 0 4px 16px rgba(27,67,50,.07); }
+.insight-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.insight-body { display: flex; flex-direction: column; gap: 4px; }
+.insight-title { font-size: 15px; font-weight: 600; color: var(--ink); }
+.insight-desc { font-size: 14px; color: rgba(10,15,11,.5); line-height: 1.6; }
+.insight-tag {
+  display: inline-block; font-family: var(--mono); font-size: 8px;
+  letter-spacing: .07em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 3px;
+  background: rgba(27,67,50,.08); color: var(--moss); margin-top: 4px;
+}
+
+/* ═══ ATUALIZA data-idx dos slides antigos e CONCLUSÃO ══════ */
+.s5-old-idx { display: none; } /* placeholder, não usado */
+
+.s4 { background: #0d1610; display: flex; flex-direction: column; overflow: hidden; }
+.demo-topbar {
+  padding: 0 40px; height: 56px;
+  border-bottom: 1px solid rgba(82,183,136,.1);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0; background: rgba(10,15,11,.6); backdrop-filter: blur(8px);
+}
+.demo-logo { font-family: var(--serif); font-size: 20px; color: var(--paper); letter-spacing: -.02em; }
+.demo-logo em { font-style: italic; color: var(--sage); }
+.demo-tabs { display: flex; gap: 2px; }
+.demo-tab {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+  padding: 7px 16px; border-radius: 6px; border: none; background: none;
+  color: rgba(255,255,255,.3); cursor: pointer; transition: all .2s;
+}
+.demo-tab:hover { color: rgba(255,255,255,.7); background: rgba(255,255,255,.05); }
+.demo-tab.cur { background: rgba(82,183,136,.12); color: var(--sage); }
+.demo-actions { display: flex; gap: 8px; align-items: center; }
+.badge-live {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--sage); background: rgba(82,183,136,.1); border: 1px solid rgba(82,183,136,.2);
+  padding: 4px 10px; border-radius: 3px; display: flex; align-items: center; gap: 6px;
+}
+.badge-live::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--sage); animation: blink 1.8s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+.btn-edit {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
+  background: rgba(212,160,23,.1); border: 1px solid rgba(212,160,23,.25); color: var(--amber);
+  padding: 6px 14px; border-radius: 5px; cursor: pointer; transition: all .2s;
+}
+.btn-edit:hover { background: rgba(212,160,23,.2); }
+
+.demo-body { flex: 1; display: grid; grid-template-columns: 200px 1fr; overflow: hidden; }
+.demo-sidebar {
+  border-right: 1px solid rgba(82,183,136,.08);
+  padding: 16px 0; display: flex; flex-direction: column; gap: 2px;
+  background: rgba(10,15,11,.4);
+}
+.d-nav {
+  display: flex; align-items: center; gap: 10px; padding: 9px 20px;
+  font-family: var(--sans); font-size: 12px; font-weight: 500;
+  color: rgba(255,255,255,.3); cursor: pointer;
+  border-left: 2px solid transparent; transition: all .2s;
+}
+.d-nav:hover { color: rgba(255,255,255,.7); background: rgba(255,255,255,.03); }
+.d-nav.cur { color: var(--sage); border-left-color: var(--sage); background: rgba(82,183,136,.06); }
+.d-nav .ic { width: 16px; text-align: center; font-size: 13px; opacity: .7; }
+.sidebar-section { font-family: var(--mono); font-size: 9px; color: rgba(255,255,255,.15); letter-spacing: .1em; text-transform: uppercase; padding: 12px 20px 4px; }
+
+.demo-main {
+  overflow-y: auto; padding: 24px 32px;
+  scrollbar-width: thin; scrollbar-color: rgba(82,183,136,.2) transparent;
+}
+.panel { display: none; flex-direction: column; gap: 20px; }
+.panel.cur { display: flex; }
+
+/* filtro */
+.search-box {
+  margin-bottom: 16px;
+}
+.search-input {
+  width: 100%;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(82,183,136,.12);
+  border-radius: 30px;
+  padding: 10px 16px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--paper);
+  outline: none;
+  transition: border-color .2s;
+}
+.search-input:focus { border-color: rgba(82,183,136,.4); }
+.search-input::placeholder { color: rgba(255,255,255,.2); }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.kpi-card {
+  padding: 18px 20px; border-radius: 10px;
+  border: 1px solid rgba(82,183,136,.1); background: rgba(255,255,255,.02);
+  display: flex; flex-direction: column; gap: 8px;
+  transition: border-color .25s;
+}
+.kpi-card:hover { border-color: rgba(82,183,136,.25); }
+.kpi-label { font-family: var(--mono); font-size: 9px; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: .08em; }
+.kpi-value { font-family: var(--serif); font-size: 32px; color: var(--sage); line-height: 1; }
+.kpi-delta { font-family: var(--mono); font-size: 10px; }
+.kpi-delta.pos { color: #4ade80; }
+.kpi-delta.neg { color: #f87171; }
+.kpi-delta.neu { color: rgba(255,255,255,.4); }
+
+.chart-card { padding: 20px 24px; border-radius: 10px; border: 1px solid rgba(82,183,136,.1); background: rgba(255,255,255,.02); }
+.chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.chart-label { font-family: var(--mono); font-size: 10px; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: .08em; }
+.chart-legend { display: flex; gap: 14px; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 9px; color: rgba(255,255,255,.4); }
+.legend-dot { width: 6px; height: 6px; border-radius: 50%; }
+.bar-group { display: flex; align-items: flex-end; gap: 8px; height: 100px; }
+.bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.bar-fill { width: 100%; border-radius: 3px 3px 0 0; min-height: 3px; transition: height .9s cubic-bezier(.34,1.56,.64,1); position: relative; }
+.bar-fill::after { content: attr(data-val); position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-family: var(--mono); font-size: 8px; color: rgba(255,255,255,.4); white-space: nowrap; }
+.bar-lbl { font-family: var(--mono); font-size: 8px; color: rgba(255,255,255,.3); text-align: center; }
+.bar-gmd { background: linear-gradient(to top, var(--field), var(--sage)); }
+.bar-meta { background: rgba(82,183,136,.2); border: 1px dashed rgba(82,183,136,.3); }
+
+.table-wrap { border-radius: 10px; border: 1px solid rgba(82,183,136,.1); overflow: hidden; }
+table { width: 100%; border-collapse: collapse; }
+th {
+  font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .08em;
+  color: rgba(255,255,255,.35); padding: 10px 14px; text-align: left;
+  border-bottom: 1px solid rgba(82,183,136,.08); background: rgba(82,183,136,.03);
+}
+td { padding: 10px 14px; border-bottom: 1px solid rgba(82,183,136,.05); font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.65); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(82,183,136,.04); color: rgba(255,255,255,.9); }
+.chip { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 9px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.chip.ok { background: rgba(74,222,128,.1); color: #4ade80; }
+.chip.warn { background: rgba(251,191,36,.1); color: #fbbf24; }
+.chip.crit { background: rgba(248,113,113,.1); color: #f87171; }
+
+.form-section { display: flex; flex-direction: column; gap: 16px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-row.three { grid-template-columns: 1fr 1fr 1fr; }
+.f-group { display: flex; flex-direction: column; gap: 6px; }
+.f-label { font-family: var(--mono); font-size: 9px; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: .08em; }
+.f-input, .f-select {
+  background: rgba(255,255,255,.03); border: 1px solid rgba(82,183,136,.12);
+  border-radius: 6px; padding: 9px 12px;
+  font-family: var(--mono); font-size: 11px; color: var(--paper);
+  outline: none; transition: border-color .2s;
+}
+.f-input:focus, .f-select:focus { border-color: rgba(82,183,136,.4); }
+.f-select option { background: #0d1610; }
+.btn-action {
+  align-self: flex-start; padding: 10px 24px; border-radius: 6px; border: none;
+  background: var(--moss); color: var(--paper);
+  font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: .04em;
+  cursor: pointer; transition: all .2s;
+}
+.btn-action:hover { background: var(--sage); color: var(--field); transform: translateY(-1px); }
+.btn-action.secondary { background: rgba(82,183,136,.08); border: 1px solid rgba(82,183,136,.2); color: var(--sage); }
+.btn-action.danger { background: rgba(193,68,14,.1); border: 1px solid rgba(193,68,14,.25); color: var(--rust); }
+.btn-reset {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1);
+  color: rgba(255,255,255,.4);
+}
+.notify-bar {
+  padding: 10px 16px; border-radius: 6px; font-family: var(--mono); font-size: 11px;
+  display: flex; align-items: center; gap: 10px; animation: fadein .4s ease;
+}
+@keyframes fadein { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+.notify-bar.success { background: rgba(74,222,128,.08); border: 1px solid rgba(74,222,128,.2); color: #4ade80; }
+.notify-bar.warn { background: rgba(251,191,36,.08); border: 1px solid rgba(251,191,36,.2); color: #fbbf24; }
+.notify-bar.err { background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.2); color: #f87171; }
+.alert-item { padding: 12px 16px; border-radius: 7px; display: flex; align-items: flex-start; gap: 12px; border: 1px solid; margin-bottom: 8px; }
+.alert-item.crit { background: rgba(248,113,113,.06); border-color: rgba(248,113,113,.15); }
+.alert-item.warn { background: rgba(251,191,36,.06); border-color: rgba(251,191,36,.12); }
+.alert-item.ok { background: rgba(74,222,128,.06); border-color: rgba(74,222,128,.12); }
+.alert-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.alert-body { display: flex; flex-direction: column; gap: 4px; }
+.alert-title { font-family: var(--sans); font-size: 14px; font-weight: 600; color: rgba(255,255,255,.85); }
+.alert-desc { font-family: var(--mono); font-size: 13px; color: rgba(255,255,255,.45); line-height: 1.5; }
+
+/* sample note */
+.sample-note {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: rgba(255,255,255,.25);
+  margin-top: 4px;
+  text-align: right;
+}
+
+/* ═══ MODAL DE EDIÇÃO ════════════════════════════════════════ */
+#edit-modal {
+  display: none; position: fixed; inset: 0; z-index: 5000;
+  background: rgba(10,15,11,.85); backdrop-filter: blur(12px);
+  align-items: center; justify-content: center;
+}
+#edit-modal.open { display: flex; }
+.modal-box {
+  background: #111a13; border: 1px solid rgba(82,183,136,.2); border-radius: 16px;
+  width: 840px; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;
+  box-shadow: 0 32px 80px rgba(0,0,0,.5);
+}
+.modal-head {
+  padding: 20px 28px; border-bottom: 1px solid rgba(82,183,136,.1);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title { font-family: var(--serif); font-size: 20px; color: var(--paper); letter-spacing: -.02em; }
+.modal-close { background: none; border: none; color: rgba(255,255,255,.3); font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: color .2s; }
+.modal-close:hover { color: var(--paper); }
+.modal-tabs {
+  display: flex; gap: 2px; padding: 12px 28px 0;
+  border-bottom: 1px solid rgba(82,183,136,.08);
+  overflow-x: auto; scrollbar-width: thin;
+}
+.modal-tab {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+  padding: 7px 14px; border: none; background: none; color: rgba(255,255,255,.3);
+  cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: all .2s; white-space: nowrap;
+}
+.modal-tab:hover { color: rgba(255,255,255,.7); }
+.modal-tab.cur { color: var(--sage); border-bottom-color: var(--sage); }
+.modal-body { flex: 1; overflow-y: auto; padding: 24px 28px; scrollbar-width: thin; scrollbar-color: rgba(82,183,136,.2) transparent; }
+.modal-panel { display: none; flex-direction: column; gap: 12px; }
+.modal-panel.cur { display: flex; }
+.modal-foot {
+  padding: 16px 28px; border-top: 1px solid rgba(82,183,136,.1);
+  display: flex; gap: 10px; justify-content: flex-end;
+}
+.edit-row {
+  display: grid; grid-template-columns: 140px 1fr 1fr 1fr 80px 90px 80px;
+  gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(82,183,136,.06);
+}
+.edit-row:first-child {
+  font-family: var(--mono); font-size: 9px; color: rgba(255,255,255,.25);
+  text-transform: uppercase; letter-spacing: .06em; padding-bottom: 6px;
+}
+.edit-input {
+  background: rgba(255,255,255,.03); border: 1px solid rgba(82,183,136,.1);
+  border-radius: 4px; padding: 5px 8px; font-family: var(--mono); font-size: 10px;
+  color: var(--paper); outline: none; width: 100%; transition: border-color .2s;
+}
+.edit-input:focus { border-color: rgba(82,183,136,.4); }
+.edit-select {
+  background: #0d1610; border: 1px solid rgba(82,183,136,.1);
+  border-radius: 4px; padding: 5px 6px; font-family: var(--mono); font-size: 10px;
+  color: var(--paper); outline: none; width: 100%;
+}
+.edit-del {
+  background: rgba(193,68,14,.08); border: 1px solid rgba(193,68,14,.15);
+  color: #f87171; border-radius: 4px; padding: 4px 8px;
+  font-family: var(--mono); font-size: 9px; cursor: pointer; transition: all .2s;
+}
+.edit-del:hover { background: rgba(193,68,14,.2); }
+.edit-add {
+  display: flex; align-items: center; gap: 8px; padding: 10px 0;
+  font-family: var(--mono); font-size: 10px; color: var(--sage);
+  cursor: pointer; border: 1px dashed rgba(82,183,136,.2);
+  border-radius: 6px; padding: 8px 14px; transition: all .2s;
+}
+.edit-add:hover { background: rgba(82,183,136,.05); }
+.kpi-edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.kpi-edit-card {
+  padding: 16px; border: 1px solid rgba(82,183,136,.1); border-radius: 8px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.kpi-edit-title { font-family: var(--mono); font-size: 9px; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: .06em; }
+.kpi-edit-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* ═══ SLIDE 5 — CONCLUSÃO ════════════════════════════════════ */
+.s5 {
+  background: var(--paper); overflow: hidden;
+  display: grid; grid-template-columns: 1fr 1fr;
+}
+.s5-left {
+  padding: 80px 72px; display: flex; flex-direction: column; gap: 40px;
+  justify-content: center; position: relative;
+}
+.s5-left::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(to bottom, transparent, var(--field) 30%, var(--field) 70%, transparent); opacity: .2; }
+.s5-right {
+  background: var(--field); padding: 80px 64px;
+  display: flex; flex-direction: column; justify-content: center; gap: 32px;
+  position: relative; overflow: hidden;
+}
+.s5-right::before { content: ''; position: absolute; right: -100px; top: -100px; width: 400px; height: 400px; border-radius: 50%; border: 1px solid rgba(82,183,136,.08); }
+.conc-number { font-family: var(--serif); font-size: clamp(80px, 10vw, 140px); line-height: .85; letter-spacing: -.05em; color: rgba(27,67,50,.12); position: absolute; right: 64px; top: 50%; transform: translateY(-60%); }
+.conc-title { font-family: var(--serif); font-size: clamp(32px, 4vw, 52px); line-height: 1.0; letter-spacing: -.03em; color: var(--ink); }
+.conc-title em { font-style: italic; color: var(--field); }
+.conc-body { font-size: 15px; color: rgba(10,15,11,.55); line-height: 1.8; max-width: 440px; }
+.conc-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.conc-tag { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; padding: 6px 12px; border-radius: 3px; border: 1px solid var(--line); color: var(--field); }
+.big-quote { font-family: var(--serif); font-size: clamp(18px, 2.2vw, 28px); font-style: italic; color: var(--dew); line-height: 1.4; position: relative; z-index: 1; }
+.big-quote em { font-style: normal; color: var(--sage); }
+.conc-links { display: flex; flex-direction: column; gap: 10px; position: relative; z-index: 1; }
+.conc-link { font-family: var(--mono); font-size: 13px; color: rgba(244,241,235,.45); display: flex; align-items: center; gap: 10px; }
+.conc-link::before { content: '→'; color: var(--sage); }
+/* Container responsivo para vídeo */
+.s5-right .video-container {
+  position: relative;
+  width: 100%;
+  max-width: 480px;       /* limita tamanho máximo */
+  margin: 20px auto 10px;  /* espaçamento vertical e centraliza */
+  padding-top: 56.25%;     /* proporção 16:9 (altura = 56.25% da largura) */
+  border-radius: 12px;     /* canto arredondado (opcional) */
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.s5-right .video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 1px solid rgba(82,183,136,.3);
+}
+</style>
+</head>
+<body>
+<div id="grain" aria-hidden="true"></div>
+<div id="cursor" aria-hidden="true"></div>
+
+<div id="deck">
+
+<!-- ══ SLIDE 0 — CAPA ═══════════════════════════════════════ -->
+<div class="slide s0 active" data-idx="0">
+  <div class="s0-left">
+    <div class="s0-top">
+      <div class="eyebrow appear">Tecnologia em Sistemas Inteligentes · Projeto Integrador</div>
+      <div class="appear" style="transition-delay:.1s">
+        <div class="cover-logo">SIS<em>PEC</em></div>
+      </div>
+      <p class="cover-desc appear" style="transition-delay:.18s">
+        Sistema Inteligente de Pecuária de Confinamento.<br>
+        Da caderneta de campo ao Agro 4.0 — em etapas reais, ano a ano.
+      </p>
+    </div>
+    <div class="cover-meta appear" style="transition-delay:.28s">
+      <div class="meta-line">Mateus Iuri · Pedro Utsumi · Patrick Alguma Coisa · O Outro Pedro · Mais alguem 2025</div>
+      <div class="meta-line">FATEC · TSI — 1º Ano</div>
+      <div class="meta-line">Dados: Embrapa CiCarne Nº 32 &amp; 64</div>
+    </div>
+    <div class="s0-ticker appear" style="transition-delay:.38s">
+      <div class="ticker-item">Brasil exportador <span>#1</span></div>
+      <div class="ticker-item">Embrapa CiCarne <span>Boletim 64</span></div>
+      <div class="ticker-item">API BovTrace <span>AgroAPI</span></div>
+      <div class="ticker-item">GMD, ICA, Conversão <span>Alimentar</span></div>
+      <div class="ticker-item">SISBOV · GTA · CONAB <span>→ integração</span></div>
+    </div>
+  </div>
+  <div class="s0-right">
+    <div class="s0-img-placeholder">
+      <img src="https://static.vecteezy.com/system/resources/previews/068/620/417/non_2x/retro-computer-with-green-screen-monitor-vintage-keyboard-classic-desktop-nostalgic-technology-old-electronics-isolated-on-transparency-background-png.png" alt="Melhor FaTec do Brasiu">
+    </div>
+    <div class="s0-overlay"></div>
+    <div class="s0-caption appear" style="transition-delay:.35s">
+      Registro manual típico<br>em propriedades brasileiras<br>© ilustração SISPEC
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 1 — PROBLEMA ════════════════════════════════════ -->
+<div class="slide s1" data-idx="1">
+  <div class="s1-left">
+    <div class="section-tag appear">O Problema</div>
+    <h2 class="slide-title appear" style="transition-delay:.08s">
+      A fazenda mais moderna<br>ainda usa <em>planilha</em> —<br>quando muito.
+    </h2>
+    <div class="stat-stack appear" style="transition-delay:.16s">
+      <div class="stat-card">
+        <div class="stat-num">≈70<small style="font-size:14px">%</small></div>
+        <div class="stat-text">dos pecuaristas operam com <strong>anotações em papel ou nenhum controle formal</strong>, segundo projeções Embrapa / CiCarne (Visão 2040)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">#1</div>
+        <div class="stat-text">O Brasil é o <strong>maior exportador mundial de carne bovina</strong> — e o setor ainda carece de gestão digital integrada</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" style="font-size:22px">GTA</div>
+        <div class="stat-text">Os sistemas existentes (SDA, MAPA, CONAB) são <strong>obrigações legais</strong> — burocráticos, sem foco no produtor, sem análise de desempenho</div>
+      </div>
+    </div>
+  </div>
+  <div class="s1-right">
+    <div class="img-cell appear" style="transition-delay:.1s">
+      <img src="https://premix.com.br/blog/wp-content/uploads/2020/08/Confinamento-de-gado-conheca-os-tres-tipos-thumbnail.png" alt="Confinamento bovino">
+      <div class="caption">Confinamento bovino — escala industrial, controle analógico</div>
+    </div>
+    <div class="img-cell appear" style="transition-delay:.2s">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHMZPzSP3Ah-hjzGVDQA5WJaAyXfnuZSMeAg&s" alt="Sistemas legais: foco em obrigação">
+      <div class="caption">Sistemas legais: foco em obrigação, não em gestão</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 2 — ARQUITETURA ═════════════════════════════════ -->
+<div class="slide s2" data-idx="2">
+  <div style="display:flex;flex-direction:column;gap:10px;max-width:680px">
+    <div class="section-tag appear" style="color:var(--dew)">A Solução</div>
+    <h2 class="slide-title appear" style="transition-delay:.08s;color:var(--paper)">
+      Arquitetura <em>gradual</em>.<br>Valor real desde o 1º semestre.
+    </h2>
+    <p class="appear" style="transition-delay:.14s;font-size:13px;color:rgba(244,241,235,.4);line-height:1.8">
+      Cada ano do curso adiciona uma camada de inteligência sobre a base já funcionando — sem refatoração, sem descontinuidade.
+    </p>
+  </div>
+  <div class="arch-timeline appear" style="transition-delay:.22s">
+    <div class="arch-card now" data-year="Ano 1 — Agora">
+      <div class="arch-head">
+        <div class="arch-title">Fundação<br>&amp; Dados</div>
+        <div class="arch-badge active">em curso</div>
+      </div>
+      <div class="arch-items">
+        <div class="arch-item">Banco relacional — MySQL / PostgreSQL</div>
+        <div class="arch-item">Cadastro de animais, lotes, pesagens</div>
+        <div class="arch-item">GMD, conversão alimentar, desvio padrão</div>
+        <div class="arch-item">Relatórios: animais abaixo da meta</div>
+        <div class="arch-item">Entregável: software desktop ou web</div>
+      </div>
+    </div>
+    <div class="arch-card" data-year="Ano 2 — Evolução">
+      <div class="arch-head">
+        <div class="arch-title">Análise<br>&amp; Automação</div>
+        <div class="arch-badge">planejado</div>
+      </div>
+      <div class="arch-items">
+        <div class="arch-item">Machine Learning básico — predição de peso</div>
+        <div class="arch-item">Dashboard em tempo real</div>
+        <div class="arch-item">Alertas automáticos de saúde</div>
+        <div class="arch-item">Integração GTA / SISBOV</div>
+        <div class="arch-item">API BovTrace — AgroAPI</div>
+      </div>
+    </div>
+    <div class="arch-card" data-year="Ano 3 — Agro 4.0">
+      <div class="arch-head">
+        <div class="arch-title">IA, IoT<br>&amp; Visão</div>
+        <div class="arch-badge">roadmap</div>
+      </div>
+      <div class="arch-items">
+        <div class="arch-item">IoT: balanças e sensores conectados</div>
+        <div class="arch-item">Visão computacional — ID do animal</div>
+        <div class="arch-item">Modelos preditivos de saúde</div>
+        <div class="arch-item">SaaS para grandes players</div>
+        <div class="arch-item">FEBRACE / MOSTRATEC / Santander</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 3 — REFERÊNCIAS ═════════════════════════════════ -->
+<div class="slide s3" data-idx="3">
+  <div class="s3-left">
+    <div class="section-tag appear">Embasamento</div>
+    <h2 class="slide-title appear" style="transition-delay:.08s">
+      O mercado <em>pede</em>.<br>A Embrapa <em>confirma</em>.
+    </h2>
+    <div class="quote-block appear" style="transition-delay:.16s">
+      <div class="quote-text">"A API BovTrace tem a capacidade de padronizar terminologias, tipos e formatos de dados para a criação de uma base única para o MAPA e CNA/Senar. Espera-se avanços em reconhecimento de animais por visão computacional."</div>
+      <div class="quote-src">CiCarne Boletim Nº 64 · 22/12/2023 · Embrapa</div>
+    </div>
+    <div class="quote-block appear" style="transition-delay:.24s">
+      <div class="quote-text">"A gestão da maioria dos pecuaristas ainda se limita a anotações em papel ou nenhum controle. Com o aumento de custos, o pecuarista precisará de controle financeiro melhor do que tem hoje."</div>
+      <div class="quote-src">CiCarne Boletim Nº 32 · Visão 2040 · Embrapa</div>
+    </div>
+    <p class="inline-note appear" style="transition-delay:.32s">
+      O SISPEC ocupa o vazio entre obrigações legais (GTA, SISBOV) e a gestão real do produtor — com dados, estatística e, futuramente, IA.
+    </p>
+  </div>
+  <div class="s3-right">
+    <div class="s3-img appear" style="transition-delay:.1s">
+      <img src="https://img.dhost.cloud/HhAdso5F0r_4Qc2lVghdGB3itao=/770x480/smart/https://tdan.nyc3.digitaloceanspaces.com/images/77278/6839673ce474d03f557467477f7e057c57c.jpg" alt="Brasil — líder mundial em exportação de carne bovina">
+      
+      <div class="caption">Brasil — líder mundial em exportação de carne bovina</div>
+    </div>
+    <div class="s3-img appear" style="transition-delay:.2s">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-_h9XxDlWWVOOgAJi3WVCZnUofGofkx1qsg&s" alt="Fichas manuais — realidade predominante no campo">
+      <div class="caption">Fichas manuais — realidade predominante no campo</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 4 — COMO FUNCIONA ════════════════════════════════ -->
+<div class="slide s4a" data-idx="4">
+  <div class="s4a-left">
+    <div class="section-tag appear">Como Funciona</div>
+    <h2 class="slide-title appear" style="transition-delay:.08s">
+      Do campo ao<br><em>relatório</em> —<br>cinco etapas.
+    </h2>
+    <p class="appear" style="transition-delay:.14s;font-size:13px;color:rgba(255,255,255,.35);line-height:1.7;font-family:var(--sans)">
+      O SISPEC transforma o ciclo manual de anotações em um fluxo digital com cálculos automáticos, alertas e relatórios — sem mudar a rotina do produtor.
+    </p>
+  </div>
+  <div class="s4a-right">
+    <div class="flow-step appear" style="transition-delay:.1s">
+      <div class="flow-num">🐄</div>
+      <div class="flow-text">
+        <div class="flow-title">Entrada do Animal</div>
+        <div class="flow-desc">Brinco, raça, peso de entrada, lote e data registrados no sistema</div>
+      </div>
+    </div>
+    <div class="flow-step appear" style="transition-delay:.16s">
+      <div class="flow-num">⚖️</div>
+      <div class="flow-text">
+        <div class="flow-title">Pesagens Periódicas</div>
+        <div class="flow-desc">Peso atualizado a cada pesagem pelo técnico ou sensor IoT (ano 3)</div>
+      </div>
+    </div>
+    <div class="flow-step appear" style="transition-delay:.22s">
+      <div class="flow-num">📐</div>
+      <div class="flow-text">
+        <div class="flow-title">Cálculo Automático</div>
+        <div class="flow-desc">GMD, ICA e desvio padrão calculados instantaneamente a cada registro</div>
+      </div>
+    </div>
+    <div class="flow-step appear" style="transition-delay:.28s">
+      <div class="flow-num dim">🔔</div>
+      <div class="flow-text">
+        <div class="flow-title dim">Alertas Inteligentes</div>
+        <div class="flow-desc dim">Animais fora da meta sinalizados com prioridade — automático</div>
+      </div>
+    </div>
+    <div class="flow-step appear" style="transition-delay:.34s">
+      <div class="flow-num dim">🤖</div>
+      <div class="flow-text">
+        <div class="flow-title dim">IA & Relatórios</div>
+        <div class="flow-desc dim">Predições de peso, saúde e recomendações de dieta (anos 2–3)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 5 — POR QUE FIZEMOS ══════════════════════════════ -->
+<div class="slide s4b" data-idx="5">
+  <div class="s4b-left">
+    <div class="section-tag appear">A Origem</div>
+    <h2 class="slide-title appear" style="transition-delay:.08s">
+      Por que <em>construímos</em><br>o SISPEC?
+    </h2>
+    <div class="origin-timeline appear" style="transition-delay:.18s">
+      <div class="origin-item">
+        <div class="origin-dot">🌾</div>
+        <div class="origin-content">
+          <div class="origin-label">Experiência própria</div>
+          <div class="origin-text">Mateus geriu um rebanho leiteiro na prática e sentiu o problema na pele — <strong>toda gestão era feita em caderneta ou de cabeça.</strong> Não havia forma de cruzar dados, rastrear tendências ou antecipar problemas.</div>
+        </div>
+      </div>
+      <div class="origin-item">
+        <div class="origin-dot">📋</div>
+        <div class="origin-content">
+          <div class="origin-label">Confirmação científica</div>
+          <div class="origin-text">Os boletins CiCarne 32 e 64 da Embrapa confirmaram: <strong>o problema é generalizado</strong>, não é caso isolado. A Visão 2040 aponta que a maioria dos pecuaristas ainda não tem controle formal nenhum.</div>
+        </div>
+      </div>
+      <div class="origin-item">
+        <div class="origin-dot">🎓</div>
+        <div class="origin-content">
+          <div class="origin-label">Oportunidade acadêmica</div>
+          <div class="origin-text">O curso de TSI cobre exatamente as ferramentas para resolver isso — <strong>banco de dados, estatística, ML, IoT, visão computacional</strong>. O SISPEC usa o próprio currículo como roadmap de desenvolvimento.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="s4b-right">
+    <div class="section-tag appear" style="margin-bottom:4px">O gap que preenchemos</div>
+    <div class="insight-stack appear" style="transition-delay:.1s">
+      <div class="insight-card">
+        <div class="insight-icon">⚡</div>
+        <div class="insight-body">
+          <div class="insight-title">Sistemas legais não resolvem gestão</div>
+          <div class="insight-desc">GTA, SISBOV e CONAB são obrigações burocráticas. Nenhum deles calcula GMD, gera alertas de saúde ou aponta animais abaixo da meta. O SISPEC preenche esse espaço.</div>
+          <div class="insight-tag">gap identificado</div>
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">📉</div>
+        <div class="insight-body">
+          <div class="insight-title">Escala do impacto é enorme</div>
+          <div class="insight-desc">Brasil é o maior exportador de carne bovina do mundo. Qualquer ganho de eficiência no confinamento — mesmo de 5% — representa bilhões em valor agregado ao setor.</div>
+          <div class="insight-tag">mercado</div>
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">🔧</div>
+        <div class="insight-body">
+          <div class="insight-title">Solução que começa simples</div>
+          <div class="insight-desc">Não precisamos de IA no ano 1. Um cadastro funcional com estatísticas básicas já representa um salto enorme para quem usa caderneta. A complexidade cresce com a maturidade do projeto.</div>
+          <div class="insight-tag">estratégia</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="slide s4" data-idx="6">
+  <div class="demo-topbar">
+    <div class="demo-logo">SIS<em>PEC</em></div>
+    <div class="demo-tabs">
+      <button class="demo-tab cur" onclick="switchTab('dash',this)">Dashboard</button>
+      <button class="demo-tab" onclick="switchTab('rebanho',this)">Rebanho</button>
+      <button class="demo-tab" onclick="switchTab('pesagens',this)">Pesagens</button>
+      <button class="demo-tab" onclick="switchTab('cadastro',this)">Novo Animal</button>
+      <button class="demo-tab" onclick="switchTab('alertas',this)">Alertas</button>
+    </div>
+    <div class="demo-actions">
+      <div class="badge-live">Sistema ativo</div>
+      <button class="btn-edit" onclick="openEdit()">✎ Editar Dados</button>
+      <button class="btn-action secondary btn-reset" onclick="resetToDefault()" style="padding:6px 12px; font-size:10px;">↺ Padrão</button>
+    </div>
+  </div>
+  <div class="demo-body">
+    <div class="demo-sidebar">
+      <div class="sidebar-section">Gestão</div>
+      <div class="d-nav cur" onclick="switchTab('dash',null,this)"><span class="ic">◈</span>Dashboard</div>
+      <div class="d-nav" onclick="switchTab('rebanho',null,this)"><span class="ic">♜</span>Rebanho</div>
+      <div class="d-nav" onclick="switchTab('pesagens',null,this)"><span class="ic">◎</span>Pesagens</div>
+      <div class="sidebar-section">Cadastro</div>
+      <div class="d-nav" onclick="switchTab('cadastro',null,this)"><span class="ic">＋</span>Novo Animal</div>
+      <div class="sidebar-section">Monitoramento</div>
+      <div class="d-nav" onclick="switchTab('alertas',null,this)"><span class="ic">⚑</span>Alertas</div>
+    </div>
+    <div class="demo-main" id="demo-main">
+
+      <!-- DASHBOARD -->
+      <div class="panel cur" id="p-dash">
+        <div class="kpi-grid" id="kpi-grid"></div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-label">Ganho Médio Diário por Semana (kg/dia)</div>
+            <div class="chart-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--sage)"></div>GMD Real</div>
+              <div class="legend-item"><div class="legend-dot" style="background:rgba(82,183,136,.2);border:1px dashed rgba(82,183,136,.5)"></div>Meta</div>
+            </div>
+          </div>
+          <div class="bar-group" id="gmd-chart"></div>
+        </div>
+        <div class="sample-note">* Mostrando 8 de 48 animais (amostra representativa)</div>
+      </div>
+
+      <!-- REBANHO -->
+      <div class="panel" id="p-rebanho">
+        <div class="search-box">
+          <input type="text" class="search-input" id="filter-rebanho" placeholder="Filtrar por brinco, raça, lote...">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Brinco</th><th>Raça</th><th>Entrada</th><th>Peso Atual</th><th>GMD</th><th>Lote</th><th>Status</th></tr></thead>
+            <tbody id="tb-rebanho"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PESAGENS -->
+      <div class="panel" id="p-pesagens">
+        <div class="chart-card">
+          <div class="chart-label" style="margin-bottom:16px">Evolução de Peso — Lote A · Amostra (kg)</div>
+          <div class="bar-group" id="peso-chart" style="height:110px"></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Data</th><th>Brinco</th><th>Peso (kg)</th><th>GMD acum.</th><th>Técnico</th></tr></thead>
+            <tbody id="tb-pesagens"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CADASTRO -->
+      <div class="panel" id="p-cadastro">
+        <div class="form-section">
+          <div class="form-row">
+            <div class="f-group"><label class="f-label">Nº do Brinco *</label><input class="f-input" id="fn-brinco" placeholder="BR-0049"></div>
+            <div class="f-group"><label class="f-label">Raça *</label>
+              <select class="f-select" id="fn-raca">
+                <option>Nelore</option><option>Angus</option><option>Brahman</option><option>Girolando</option><option>Senepol</option><option>Cruzado</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row three">
+            <div class="f-group"><label class="f-label">Data de Entrada *</label><input class="f-input" id="fn-data" type="date"></div>
+            <div class="f-group"><label class="f-label">Peso de Entrada (kg) *</label><input class="f-input" id="fn-peso" type="number" placeholder="380"></div>
+            <div class="f-group"><label class="f-label">Sexo</label>
+              <select class="f-select" id="fn-sexo"><option>Macho</option><option>Fêmea</option></select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="f-group"><label class="f-label">Lote</label>
+              <select class="f-select" id="fn-lote"><option>Lote A — Confinamento</option><option>Lote B — Recria</option><option>Lote C — Terminação</option></select>
+            </div>
+            <div class="f-group"><label class="f-label">Observação</label><input class="f-input" id="fn-obs" placeholder="Opcional"></div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:4px">
+            <button class="btn-action" onclick="cadastrar()">Registrar Animal</button>
+            <button class="btn-action secondary" onclick="limparForm()">Limpar</button>
+          </div>
+          <div id="cadastro-msg"></div>
+        </div>
+      </div>
+
+      <!-- ALERTAS -->
+      <div class="panel" id="p-alertas">
+        <div id="alertas-container"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 7 — CONCLUSÃO ════════════════════════════════════ -->
+<div class="slide s5" data-idx="7">
+  <div class="s5-left">
+    <div class="section-tag appear">Conclusão</div>
+    <h2 class="conc-title appear" style="transition-delay:.08s">
+      Problema real.<br>Solução <em>gradual</em>.<br>Impacto <em>mensurável</em>.
+    </h2>
+    <p class="conc-body appear" style="transition-delay:.16s">
+      O SISPEC endereça um gap validado pela Embrapa em um mercado onde o Brasil é líder mundial. A arquitetura cresce com o curso, entregando valor no 1º ano e evoluindo até IoT e visão computacional no 3º.
+    </p>
+    <div class="conc-tags appear" style="transition-delay:.24s">
+      <div class="conc-tag">FEBRACE</div>
+      <div class="conc-tag">MOSTRATEC</div>
+      <div class="conc-tag">Santander Inova</div>
+      <div class="conc-tag">Publicação Acadêmica</div>
+      <div class="conc-tag">SaaS Agro</div>
+    </div>
+  </div>
+  <div class="s5-right">
+    <div class="conc-number">01</div>
+    <div class="big-quote appear" style="transition-delay:.1s">
+      E como disse minha noiva uma vez:<br>"<em>a gente pode até tentar depois, mas por enquanto acabou :3</em>"
+    </div>
+    <div class="conc-links appear" style="transition-delay:.2s">
+      <div class="conc-link">github.com/levementesalgado</div>
+      <div class="conc-link">Embrapa CiCarne Boletins 32 e 64</div>
+      <div class="conc-link">AgroAPI — BovTrace · MAPA · CNA/Senar</div>
+    </div>
+    <div class="conc-body" style="transition-delay: var(--ink);">
+      <p>Volta pra mim coelhinha t-t</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<!-- ══ HUD ═══════════════════════════════════════════════════ -->
+<div id="hud-zone"></div>
+
+<nav id="hud" aria-label="Navegação de slides">
+  <button class="hud-btn cur" onclick="goTo(0)" id="hb0" aria-current="true">Capa</button>
+  <div class="hud-sep"></div>
+  <button class="hud-btn" onclick="goTo(1)" id="hb1">Problema</button>
+  <button class="hud-btn" onclick="goTo(2)" id="hb2">Arquitetura</button>
+  <button class="hud-btn" onclick="goTo(3)" id="hb3">Referências</button>
+  <button class="hud-btn" onclick="goTo(4)" id="hb4">Como Funciona</button>
+  <button class="hud-btn" onclick="goTo(5)" id="hb5">A Origem</button>
+  <button class="hud-btn" onclick="goTo(6)" id="hb6">Demo</button>
+  <button class="hud-btn" onclick="goTo(7)" id="hb7">Conclusão</button>
+  <div class="hud-sep"></div>
+  <div class="hud-count" id="hud-count">1 / 8</div>
+</nav>
+
+<div class="key-hint">← → para navegar</div>
+
+<!-- ══ MODAL DE EDIÇÃO ════════════════════════════════════════ -->
+<div id="edit-modal" role="dialog" aria-modal="true" aria-label="Editar dados">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title">Editar Dados Mockados</div>
+      <button class="modal-close" onclick="closeEdit()" aria-label="Fechar">✕</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab cur" onclick="switchModalTab('kpis',this)">KPIs</button>
+      <button class="modal-tab" onclick="switchModalTab('animais',this)">Animais</button>
+      <button class="modal-tab" onclick="switchModalTab('gmd',this)">Gráfico GMD</button>
+      <button class="modal-tab" onclick="switchModalTab('alertas_edit',this)">Alertas</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="modal-panel cur" id="mp-kpis">
+        <div class="kpi-edit-grid" id="kpi-edit-grid"></div>
+      </div>
+
+      <div class="modal-panel" id="mp-animais">
+        <div class="edit-row" style="font-weight:600">
+          <div>Brinco</div><div>Raça</div><div>Entrada</div><div>Peso</div><div>GMD</div><div>Status</div><div></div>
+        </div>
+        <div id="animais-edit-rows"></div>
+        <div class="edit-add" onclick="addAnimal()" role="button" tabindex="0">＋ Adicionar animal</div>
+      </div>
+
+      <div class="modal-panel" id="mp-gmd">
+        <div id="gmd-edit-rows"></div>
+        <div class="edit-add" onclick="addGmdSemana()" role="button" tabindex="0">＋ Adicionar semana</div>
+      </div>
+
+      <div class="modal-panel" id="mp-alertas_edit">
+        <div id="alertas-edit-rows"></div>
+        <div class="edit-add" onclick="addAlerta()" role="button" tabindex="0">＋ Adicionar alerta</div>
+      </div>
+
+    </div>
+    <div class="modal-foot">
+      <button class="btn-action secondary" onclick="closeEdit()">Cancelar</button>
+      <button class="btn-action" onclick="applyEdit()">Aplicar Alterações</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const TOTAL = 8;
+  let current = 0;
+
+  // ---------- DADOS (com localStorage) ----------
+  const DEFAULT_DATA = {
+    kpis: [
+      { label: 'Animais no lote', value: '8', unit: '', delta: '↑ Mostrando 8 de 48', sign: 'pos' },
+      { label: 'GMD médio', value: '0,92', unit: 'kg/dia', delta: '↑ Meta: 1,0', sign: 'pos' },
+      { label: 'Peso médio', value: '412', unit: 'kg', delta: '↑ +18 kg vs entrada', sign: 'pos' },
+      { label: 'Conversão alimentar', value: '6,4', unit: ':1', delta: '↑ Acima do ideal (6,0)', sign: 'neg' },
+    ],
+    animais: [
+      { brinco: 'BR-0001', raca: 'Nelore', entrada: '2025-01-10', peso: 428, gmd: 1.08, status: 'ok' },
+      { brinco: 'BR-0002', raca: 'Angus', entrada: '2025-01-10', peso: 395, gmd: 0.94, status: 'ok' },
+      { brinco: 'BR-0003', raca: 'Brahman', entrada: '2025-01-12', peso: 371, gmd: 0.72, status: 'warn' },
+      { brinco: 'BR-0004', raca: 'Nelore', entrada: '2025-01-12', peso: 442, gmd: 1.15, status: 'ok' },
+      { brinco: 'BR-0005', raca: 'Cruzado', entrada: '2025-01-15', peso: 310, gmd: 0.51, status: 'crit' },
+      { brinco: 'BR-0006', raca: 'Senepol', entrada: '2025-01-18', peso: 398, gmd: 0.88, status: 'ok' },
+      { brinco: 'BR-0007', raca: 'Angus', entrada: '2025-01-20', peso: 361, gmd: 0.79, status: 'warn' },
+      { brinco: 'BR-0008', raca: 'Girolando', entrada: '2025-01-22', peso: 415, gmd: 1.02, status: 'ok' },
+    ],
+    gmd: [
+      { semana: 'S1', val: 0.71, meta: 1.0 },
+      { semana: 'S2', val: 0.84, meta: 1.0 },
+      { semana: 'S3', val: 0.92, meta: 1.0 },
+      { semana: 'S4', val: 1.01, meta: 1.0 },
+      { semana: 'S5', val: 0.88, meta: 1.0 },
+      { semana: 'S6', val: 0.96, meta: 1.0 },
+      { semana: 'S7', val: 1.10, meta: 1.0 },
+    ],
+    pesagens: [
+      { data: '2025-01-10', brinco: 'BR-0001', peso: 390, gmd: '—', tec: 'José R.' },
+      { data: '2025-01-24', brinco: 'BR-0001', peso: 405, gmd: '1,07', tec: 'José R.' },
+      { data: '2025-02-07', brinco: 'BR-0001', peso: 416, gmd: '0,79', tec: 'Ana L.' },
+      { data: '2025-02-21', brinco: 'BR-0001', peso: 428, gmd: '0,86', tec: 'Ana L.' },
+      { data: '2025-01-10', brinco: 'BR-0003', peso: 348, gmd: '—', tec: 'José R.' },
+      { data: '2025-01-24', brinco: 'BR-0003', peso: 360, gmd: '0,86', tec: 'Ana L.' },
+    ],
+    alertas: [
+      { tipo: 'crit', icon: '⚠', title: 'BR-0005 — GMD Crítico', desc: 'Ganho médio diário de 0,51 kg/dia por 3 semanas consecutivas. Recomendado avaliação veterinária imediata e revisão da dieta.' },
+      { tipo: 'warn', icon: '⏱', title: 'BR-0007 — Pesagem pendente', desc: 'Última pesagem registrada há 18 dias. Protocolo recomenda intervalo máximo de 14 dias.' },
+      { tipo: 'warn', icon: '⚖', title: 'Lote A — Conversão alimentar elevada', desc: 'ICA médio de 6,4:1. Limite de eficiência: 6,0:1. Revisar formulação da ração e consumo de matéria seca.' },
+      { tipo: 'ok', icon: '✓', title: '4 animais próximos ao peso de abate', desc: 'BR-0001, BR-0004, BR-0006 e BR-0008 devem atingir peso de abate (480kg) em menos de 30 dias.' },
+      { tipo: 'ok', icon: '↑', title: 'GMD acima da meta — Semana 7', desc: 'Ganho médio de 1,10 kg/dia na última semana, superando a meta de 1,0 kg/dia.' },
+    ],
+  };
+
+  // carregar ou usar padrão
+  let DB;
+  function loadFromStorage() {
+    const stored = localStorage.getItem('sispec_data');
+    if (stored) {
+      try { DB = JSON.parse(stored); }
+      catch { DB = JSON.parse(JSON.stringify(DEFAULT_DATA)); }
+    } else {
+      DB = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    }
+  }
+  function saveToStorage() {
+    localStorage.setItem('sispec_data', JSON.stringify(DB));
+  }
+  loadFromStorage();
+
+  window.resetToDefault = function() {
+    DB = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    saveToStorage();
+    renderEverything();
+    closeEdit();
+  };
+
+  // ---------- Navegação slides ----------
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const hbts = Array.from({length: TOTAL}, (_, i) => document.getElementById('hb' + i));
+
+  window.goTo = function(n) {
+    if (n === current) return;
+    slides[current].classList.remove('active');
+    slides[current].classList.add('out');
+    const prev = current;
+    setTimeout(() => slides[prev].classList.remove('out'), 700);
+    current = n;
+    slides[current].classList.add('active');
+    hbts.forEach((b, i) => {
+      const isCur = i === current;
+      b.classList.toggle('cur', isCur);
+      if (isCur) b.setAttribute('aria-current', 'true');
+      else b.removeAttribute('aria-current');
+    });
+    document.getElementById('hud-count').textContent = (current + 1) + ' / ' + TOTAL;
+    revealSlide(current);
+    if (current === 6) setTimeout(renderEverything, 100);
+  };
+
+  function revealSlide(n) {
+    const els = slides[n].querySelectorAll('.appear');
+    els.forEach((el, i) => {
+      el.classList.remove('in');
+      setTimeout(() => el.classList.add('in'), 60 + i * 80);
+    });
+  }
+  revealSlide(0);
+
+  // Evento de teclado
+  document.addEventListener('keydown', e => {
+    if (e.target.closest('#edit-modal')) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+      e.preventDefault();
+      if (current === 6 && document.getElementById('edit-modal').classList.contains('open')) return;
+      goTo(Math.min(current + 1, TOTAL - 1));
+    }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (current === 6 && document.getElementById('edit-modal').classList.contains('open')) return;
+      goTo(Math.max(current - 1, 0));
+    }
+    if (e.key === 'Escape') closeEdit();
+  });
+
+
+
+  // Cursor personalizado
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+  });
+  document.querySelectorAll('button, [onclick], a, input, select, .arch-card, .stat-card, .img-cell').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+  });
+
+  // ---------- Renderização da demo ----------
+  window.renderEverything = function() {
+    renderKPIs();
+    renderRebanho();
+    renderPesagens();
+    renderAlertas();
+    renderGMDChart();
+    renderPesoChart();
+  };
+
+  function renderKPIs() {
+    const g = document.getElementById('kpi-grid');
+    if (!g) return;
+    g.innerHTML = DB.kpis.map(k => `
+      <div class="kpi-card">
+        <div class="kpi-label">${k.label}</div>
+        <div class="kpi-value">${k.value}<span style="font-family:var(--mono);font-size:14px;color:rgba(82,183,136,.5);margin-left:4px">${k.unit}</span></div>
+        <div class="kpi-delta ${k.sign}">${k.delta}</div>
+      </div>`).join('');
+  }
+
+  function renderRebanho() {
+    const tbody = document.getElementById('tb-rebanho');
+    if (!tbody) return;
+    const lotes = ['Lote A', 'Lote B', 'Lote A', 'Lote A', 'Lote B', 'Lote C', 'Lote A', 'Lote C'];
+    const filtro = document.getElementById('filter-rebanho')?.value.toLowerCase() || '';
+    const animaisFiltrados = DB.animais.filter((a, i) => {
+      const texto = `${a.brinco} ${a.raca} ${lotes[i]}`.toLowerCase();
+      return texto.includes(filtro);
+    });
+    const statusMap = { ok: 'Normal', warn: 'Atenção', crit: 'Crítico' };
+    tbody.innerHTML = animaisFiltrados.map((a, idx) => {
+      const i = DB.animais.indexOf(a);
+      return `<tr>
+        <td>${a.brinco}</td><td>${a.raca}</td><td>${a.entrada}</td>
+        <td>${a.peso} kg</td><td>${a.gmd.toFixed(2)} kg/d</td>
+        <td>${lotes[i] || 'Lote A'}</td>
+        <td><span class="chip ${a.status}">${statusMap[a.status]}</span></td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.getElementById('filter-rebanho')?.addEventListener('input', renderRebanho);
+
+  function renderPesagens() {
+    const tbody = document.getElementById('tb-pesagens');
+    if (!tbody) return;
+    tbody.innerHTML = DB.pesagens.map(p => `
+      <tr><td>${p.data}</td><td>${p.brinco}</td><td>${p.peso} kg</td><td>${p.gmd}</td><td>${p.tec}</td></tr>`).join('');
+  }
+
+  function renderAlertas() {
+    const cont = document.getElementById('alertas-container');
+    if (!cont) return;
+    cont.innerHTML = DB.alertas.map(a => `
+      <div class="alert-item ${a.tipo}">
+        <div class="alert-icon">${a.icon}</div>
+        <div class="alert-body"><div class="alert-title">${a.title}</div><div class="alert-desc">${a.desc}</div></div>
+      </div>`).join('');
+  }
+
+  function renderGMDChart() {
+    const c = document.getElementById('gmd-chart');
+    if (!c) return;
+    c.innerHTML = '';
+    const maxV = Math.max(...DB.gmd.map(x => Math.max(x.val, x.meta)));
+    DB.gmd.forEach(d => {
+      const pct = Math.round((d.val / maxV) * 92);
+      const col = document.createElement('div');
+      col.className = 'bar-col';
+      col.innerHTML = `
+        <div class="bar-fill bar-gmd" data-val="${d.val}" style="height:0"></div>
+        <div class="bar-lbl">${d.semana}</div>`;
+      c.appendChild(col);
+      setTimeout(() => { col.querySelector('.bar-fill').style.height = pct + 'px'; }, 300);
+    });
+  }
+
+  function renderPesoChart() {
+    const c = document.getElementById('peso-chart');
+    if (!c) return;
+    c.innerHTML = '';
+    const pts = DB.pesagens.filter(p => p.brinco === 'BR-0001');
+    if (pts.length === 0) return;
+    const maxP = Math.max(...pts.map(x => x.peso));
+    pts.forEach(p => {
+      const pct = Math.round((p.peso / maxP) * 96);
+      const col = document.createElement('div');
+      col.className = 'bar-col';
+      col.innerHTML = `
+        <div class="bar-fill" data-val="${p.peso}kg" style="height:0;background:linear-gradient(to top,#d4a017,rgba(212,160,23,.4));border-radius:3px 3px 0 0"></div>
+        <div class="bar-lbl">${p.data.slice(5)}</div>`;
+      c.appendChild(col);
+      setTimeout(() => { col.querySelector('.bar-fill').style.height = pct + 'px'; }, 300);
+    });
+  }
+
+  window.switchTab = function(id, tabEl, sideEl) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('cur'));
+    document.getElementById('p-' + id).classList.add('cur');
+    if (tabEl) {
+      document.querySelectorAll('.demo-tab').forEach(t => t.classList.remove('cur'));
+      tabEl.classList.add('cur');
+    }
+    if (sideEl) {
+      document.querySelectorAll('.d-nav').forEach(n => n.classList.remove('cur'));
+      sideEl.classList.add('cur');
+    }
+    if (!tabEl && !sideEl) return;
+    const tabMatch = document.querySelector(`.demo-tab[onclick*="${id}"]`);
+    const sideMatch = document.querySelector(`.d-nav[onclick*="${id}"]`);
+    if (tabMatch && !tabEl) {
+      document.querySelectorAll('.demo-tab').forEach(t => t.classList.remove('cur'));
+      tabMatch.classList.add('cur');
+    }
+    if (sideMatch && !sideEl) {
+      document.querySelectorAll('.d-nav').forEach(n => n.classList.remove('cur'));
+      sideMatch.classList.add('cur');
+    }
+    setTimeout(() => { renderGMDChart(); renderPesoChart(); }, 100);
+  };
+
+  window.cadastrar = function() {
+    const b = document.getElementById('fn-brinco').value.trim();
+    const r = document.getElementById('fn-raca').value;
+    const d = document.getElementById('fn-data').value;
+    const p = document.getElementById('fn-peso').value;
+    const msg = document.getElementById('cadastro-msg');
+    if (!b || !d || !p) {
+      msg.innerHTML = '<div class="notify-bar warn">⚠ Preencha os campos obrigatórios: Brinco, Data e Peso.</div>';
+      return;
+    }
+    DB.animais.push({ brinco: b, raca: r, entrada: d, peso: parseInt(p), gmd: 0, status: 'ok' });
+    DB.kpis[0].value = DB.animais.length.toString();
+    saveToStorage();
+    renderRebanho(); renderKPIs();
+    msg.innerHTML = `<div class="notify-bar success">✓ Animal ${b} cadastrado com sucesso.</div>`;
+    limparForm();
+    setTimeout(() => msg.innerHTML = '', 4000);
+  };
+
+  window.limparForm = function() {
+    ['fn-brinco','fn-data','fn-peso','fn-obs'].forEach(id => document.getElementById(id).value = '');
+  };
+
+  // ---------- MODAL DE EDIÇÃO ----------
+  window.openEdit = function() {
+    buildEditUI();
+    document.getElementById('edit-modal').classList.add('open');
+  };
+  window.closeEdit = function() {
+    document.getElementById('edit-modal').classList.remove('open');
+  };
+
+  function buildEditUI() {
+    buildKPIEdit();
+    buildAnimaisEdit();
+    buildGMDEdit();
+    buildAlertasEdit();
+  }
+
+  function buildKPIEdit() {
+    const container = document.getElementById('kpi-edit-grid');
+    if (!container) return;
+    container.innerHTML = DB.kpis.map((k, i) => `
+      <div class="kpi-edit-card">
+        <div class="kpi-edit-title">${k.label}</div>
+        <div class="kpi-edit-row">
+          <div class="f-group"><label class="f-label">Valor</label><input class="edit-input" data-kpi="${i}" data-field="value" value="${k.value}"></div>
+          <div class="f-group"><label class="f-label">Unidade</label><input class="edit-input" data-kpi="${i}" data-field="unit" value="${k.unit}"></div>
+        </div>
+        <div class="f-group" style="margin-top:6px"><label class="f-label">Delta / Nota</label><input class="edit-input" data-kpi="${i}" data-field="delta" value="${k.delta}"></div>
+        <div class="f-group" style="margin-top:6px"><label class="f-label">Sinal</label>
+          <select class="edit-select" data-kpi="${i}" data-field="sign">
+            <option value="pos" ${k.sign==='pos'?'selected':''}>Positivo (verde)</option>
+            <option value="neg" ${k.sign==='neg'?'selected':''}>Negativo (vermelho)</option>
+            <option value="neu" ${k.sign==='neu'?'selected':''}>Neutro</option>
+          </select>
+        </div>
+      </div>`).join('');
+  }
+
+  function buildAnimaisEdit() {
+    const container = document.getElementById('animais-edit-rows');
+    if (!container) return;
+    const statusOpts = ['ok','warn','crit'].map(s => `<option value="${s}">`+{ok:'Normal',warn:'Atenção',crit:'Crítico'}[s]+'</option>').join('');
+    container.innerHTML = DB.animais.map((a, i) => `
+      <div class="edit-row" id="arow-${i}">
+        <input class="edit-input" data-ai="${i}" data-f="brinco" value="${a.brinco}">
+        <input class="edit-input" data-ai="${i}" data-f="raca" value="${a.raca}">
+        <input class="edit-input" data-ai="${i}" data-f="entrada" value="${a.entrada}" type="date">
+        <input class="edit-input" data-ai="${i}" data-f="peso" value="${a.peso}" type="number">
+        <input class="edit-input" data-ai="${i}" data-f="gmd" value="${a.gmd}" type="number" step="0.01">
+        <select class="edit-select" data-ai="${i}" data-f="status">${statusOpts.replace(`value="${a.status}"`, `value="${a.status}" selected`)}</select>
+        <button class="edit-del" onclick="removeAnimal(${i})">×</button>
+      </div>`).join('');
+  }
+
+  function buildGMDEdit() {
+    const container = document.getElementById('gmd-edit-rows');
+    if (!container) return;
+    container.innerHTML = DB.gmd.map((g, i) => `
+      <div style="display:grid;grid-template-columns:80px 100px 100px 50px;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid rgba(82,183,136,.06)">
+        <input class="edit-input" data-gi="${i}" data-gf="semana" value="${g.semana}">
+        <input class="edit-input" data-gi="${i}" data-gf="val" value="${g.val}" type="number" step="0.01" placeholder="GMD real">
+        <input class="edit-input" data-gi="${i}" data-gf="meta" value="${g.meta}" type="number" step="0.01" placeholder="Meta">
+        <button class="edit-del" onclick="removeGmd(${i})">×</button>
+      </div>`).join('') + '<div style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.2);padding:4px 0">Semana · GMD real (kg/dia) · Meta (kg/dia)</div>';
+  }
+
+  function buildAlertasEdit() {
+    const container = document.getElementById('alertas-edit-rows');
+    if (!container) return;
+    const tipoOpts = (tipo) => ['crit','warn','ok'].map(t => `<option value="${t}" ${t===tipo?'selected':''}>${{crit:'Crítico',warn:'Atenção',ok:'OK'}[t]}</option>`).join('');
+    container.innerHTML = DB.alertas.map((a, i) => `
+      <div style="display:flex;flex-direction:column;gap:6px;padding:10px 0;border-bottom:1px solid rgba(82,183,136,.06)">
+        <div style="display:grid;grid-template-columns:80px 40px 1fr auto;gap:8px;align-items:center">
+          <select class="edit-select" data-ali="${i}" data-alf="tipo">${tipoOpts(a.tipo)}</select>
+          <input class="edit-input" data-ali="${i}" data-alf="icon" value="${a.icon}">
+          <input class="edit-input" data-ali="${i}" data-alf="title" value="${a.title}">
+          <button class="edit-del" onclick="removeAlerta(${i})">×</button>
+        </div>
+        <textarea class="edit-input" data-ali="${i}" data-alf="desc" rows="2" style="resize:vertical">${a.desc}</textarea>
+      </div>`).join('');
+  }
+
+  window.applyEdit = function() {
+    document.querySelectorAll('[data-kpi]').forEach(el => {
+      const i = +el.dataset.kpi, f = el.dataset.field;
+      DB.kpis[i][f] = el.value;
+    });
+    document.querySelectorAll('[data-ai]').forEach(el => {
+      const i = +el.dataset.ai, f = el.dataset.f;
+      DB.animais[i][f] = (f === 'peso') ? parseInt(el.value) : (f === 'gmd') ? parseFloat(el.value) : el.value;
+    });
+    document.querySelectorAll('[data-gi]').forEach(el => {
+      const i = +el.dataset.gi, f = el.dataset.gf;
+      DB.gmd[i][f] = (f === 'val' || f === 'meta') ? parseFloat(el.value) : el.value;
+    });
+    document.querySelectorAll('[data-ali]').forEach(el => {
+      const i = +el.dataset.ali, f = el.dataset.alf;
+      DB.alertas[i][f] = el.value;
+    });
+    DB.kpis[0].value = DB.animais.length.toString(); // atualiza contador
+    saveToStorage();
+    renderEverything();
+    closeEdit();
+  };
+
+  window.removeAnimal = function(i) { DB.animais.splice(i, 1); DB.kpis[0].value = DB.animais.length.toString(); buildAnimaisEdit(); };
+  window.removeGmd = function(i) { DB.gmd.splice(i, 1); buildGMDEdit(); };
+  window.removeAlerta = function(i) { DB.alertas.splice(i, 1); buildAlertasEdit(); };
+
+  window.addAnimal = function() {
+    DB.animais.push({ brinco: 'BR-NEW', raca: 'Nelore', entrada: new Date().toISOString().slice(0,10), peso: 380, gmd: 0, status: 'ok' });
+    DB.kpis[0].value = DB.animais.length.toString();
+    buildAnimaisEdit();
+    setTimeout(() => { const rows = document.querySelectorAll('#animais-edit-rows .edit-row'); if (rows.length) rows[rows.length-1].scrollIntoView({behavior:'smooth'}); }, 100);
+  };
+
+  window.addGmdSemana = function() {
+    const n = DB.gmd.length + 1;
+    DB.gmd.push({ semana: 'S' + n, val: 0.9, meta: 1.0 });
+    buildGMDEdit();
+  };
+
+  window.addAlerta = function() {
+    DB.alertas.push({ tipo: 'warn', icon: '⚠', title: 'Novo Alerta', desc: 'Descrição do alerta.' });
+    buildAlertasEdit();
+  };
+
+  window.switchModalTab = function(id, el) {
+    document.querySelectorAll('.modal-panel').forEach(p => p.classList.remove('cur'));
+    document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('cur'));
+    document.getElementById('mp-' + id).classList.add('cur');
+    el.classList.add('cur');
+  };
+
+  document.getElementById('edit-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('edit-modal')) closeEdit();
+  });
+
+  // HUD aparece só quando cursor está na zona inferior
+  const hud = document.getElementById('hud');
+  const keyHint = document.querySelector('.key-hint');
+  const THRESHOLD = 100; // px do fundo
+
+  document.addEventListener('mousemove', e => {
+    const nearBottom = (window.innerHeight - e.clientY) <= THRESHOLD;
+    hud.classList.toggle('visible', nearBottom);
+    if (keyHint) keyHint.style.opacity = nearBottom ? '1' : '0';
+  });
+
+  // Some quando o mouse sai da janela
+  document.addEventListener('mouseleave', () => {
+    hud.classList.remove('visible');
+    if (keyHint) keyHint.style.opacity = '0';
+  });
+  if (current === 6) setTimeout(renderEverything, 100);
+})();
+</script>
+</body>
+</html>
