@@ -38,6 +38,13 @@ sispec/
 
 ## 🚀 Quick Start
 
+### Login de Teste
+
+| Usuário | Senha | Função |
+|---------|-------|--------|
+| admin | sispec123 | Administrador |
+| tecnico | tecnico123 | Operador |
+
 ### Backend
 
 ```bash
