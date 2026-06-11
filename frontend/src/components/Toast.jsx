@@ -38,3 +38,7 @@ export function ToastProvider({ children }) {
 export function useToasts() {
   return useContext(ToastContext)
 }
+
+export function ToastContainer() {
+  return null
+}

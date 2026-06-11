@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CheckCircle, AlertCircle, ChevronRight, ChevronLeft } from 'lucide-react'
 import { criarAnimal, fetchLotes } from '../utils/api'
-import { ToastContainer, useToasts } from '../components/Toast'
+import { useToasts } from '../components/Toast'
 
 export default function Cadastro() {
   const navigate = useNavigate()
-  const { toasts, addToast } = useToasts()
+  const { addToast } = useToasts()
   const [lotes, setLotes] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -98,7 +98,6 @@ export default function Cadastro() {
     setError(null)
     setSuccess(false)
 
-    // Validação: porcentagem total não pode passar de 100%
     if (form.raca === 'Cruzado') {
       const totalPorcentagem = composicao.reduce((sum, c) => sum + (c.porcentagem || 0), 0)
       if (totalPorcentagem > 100) {
@@ -149,7 +148,6 @@ export default function Cadastro() {
     <div className="max-w-2xl mx-auto space-y-6">
       <h1 className="text-3xl font-serif text-paper">Cadastrar Animal</h1>
 
-      {/* Stepper */}
       <div className="flex items-center justify-center gap-2 mb-6">
         {steps.map((s, i) => (
           <div key={s.num} className="flex items-center">
@@ -170,7 +168,6 @@ export default function Cadastro() {
         ))}
       </div>
 
-      {/* Success */}
       {success && (
         <div className="card border-green-500/30 bg-green-500/10 flex items-center gap-3">
           <CheckCircle className="text-green-400" size={24} />
@@ -181,7 +178,6 @@ export default function Cadastro() {
         </div>
       )}
 
-      {/* Error */}
       {error && (
         <div className="card border-red-500/30 bg-red-500/10 flex items-center gap-3">
           <AlertCircle className="text-red-400" size={24} />
@@ -189,9 +185,7 @@ export default function Cadastro() {
         </div>
       )}
 
-      {/* Form Steps */}
       <form onSubmit={handleSubmit} className="card space-y-4">
-        {/* Step 1: Identificação */}
         {step === 1 && (
           <>
             <div className="grid md:grid-cols-2 gap-4">
@@ -254,7 +248,6 @@ export default function Cadastro() {
           </>
         )}
 
-        {/* Step 2: Dados */}
         {step === 2 && (
           <>
             <div className="grid md:grid-cols-3 gap-4">
@@ -296,7 +289,6 @@ export default function Cadastro() {
           </>
         )}
 
-        {/* Step 3: Lote */}
         {step === 3 && (
           <>
             <div className="grid md:grid-cols-2 gap-4">
@@ -327,7 +319,6 @@ export default function Cadastro() {
           </>
         )}
 
-        {/* Navigation */}
         <div className="flex gap-3 pt-4">
           {step > 1 && (
             <button type="button" onClick={prevStep} className="btn-secondary flex items-center gap-2">
@@ -352,8 +343,6 @@ export default function Cadastro() {
           </button>
         </div>
       </form>
-
-      <ToastContainer toasts={toasts} />
     </div>
   )
 }
