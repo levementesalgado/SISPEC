@@ -80,11 +80,6 @@ animais.post("/", async (c) => {
     return c.json({ error: "Data de entrada não pode ser futura" }, 400);
   }
   
-  // Validação: peso não pode ser negativo
-  if (body.peso_entrada < 0) {
-    return c.json({ error: "Peso não pode ser negativo" }, 400);
-  }
-  
   // Validação: composição cruzado não pode passar de 100%
   if (body.raca === 'Cruzado' && body.composicao) {
     const total = body.composicao.reduce((sum: number, c: any) => sum + (c.porcentagem || 0), 0);

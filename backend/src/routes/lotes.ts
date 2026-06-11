@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { readDB, nextId } from "../db/json.ts";
+import { readDB, writeDB, nextId } from "../db/json.ts";
 
 const lotes = new Hono();
 
@@ -48,9 +48,8 @@ lotes.post("/", async (c) => {
   
   db.lotes.push(novoLote);
   
-  const dbModule = await import("../db/json.ts");
-  await dbModule.writeDB(db);
-  
+  await writeDB(db);
+
   return c.json(novoLote, 201);
 });
 
@@ -71,9 +70,8 @@ lotes.put("/:id", async (c) => {
     updated_at: new Date().toISOString()
   };
   
-  const dbModule = await import("../db/json.ts");
-  await dbModule.writeDB(db);
-  
+  await writeDB(db);
+
   return c.json(db.lotes[index]);
 });
 
@@ -89,9 +87,8 @@ lotes.delete("/:id", async (c) => {
   
   db.lotes[index].ativo = 0;
   
-  const dbModule = await import("../db/json.ts");
-  await dbModule.writeDB(db);
-  
+  await writeDB(db);
+
   return c.body(null, 204);
 });
 

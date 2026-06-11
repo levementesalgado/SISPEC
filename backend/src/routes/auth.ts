@@ -3,7 +3,10 @@ import { readDB } from "../db/json.ts";
 
 const auth = new Hono();
 
-// Login simples (HARDCODED para demo)
+// TODO: 🔴 CRÍTICO — Substituir por autenticação real com bcrypt + JWT
+// Senhas hardcoded em plaintext + token é só base64(user:timestamp) = falsificação total
+// Este endpoint NÃO DEVE ser usado em produção
+
 auth.post("/login", async (c) => {
   const body = await c.req.json();
   

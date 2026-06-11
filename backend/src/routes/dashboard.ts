@@ -11,7 +11,7 @@ dashboard.get("/kpis", async (c) => {
   return c.json(kpis);
 });
 
-// GMD por semana (mock - após implementar histórico real)
+// GMD por semana — 🟡 retorna dados mockados (Math.random), não dados reais
 dashboard.get("/gmd-semanas", async (c) => {
   const semanas = [];
   for (let i = 8; i >= 1; i--) {

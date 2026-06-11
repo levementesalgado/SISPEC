@@ -39,6 +39,7 @@ export function useToasts() {
   return useContext(ToastContext)
 }
 
+// 🔵 Componente morto — ToastContainer retorna null (não é usado em lugar nenhum)
 export function ToastContainer() {
   return null
 }
