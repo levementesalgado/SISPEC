@@ -49,9 +49,11 @@ animais.get("/:id", async (c) => {
   }
 
   const metrics = await getMetricsAnimal(animal.id, db);
+  const lote = db.lotes.find((l: any) => l.id === animal.lote_id);
 
   return c.json({
     ...animal,
+    lote_nome: lote?.nome || null,
     metrics
   });
 });
@@ -133,10 +135,12 @@ animais.post("/", async (c) => {
   
   await writeDB(db);
   
+  const lote = db.lotes.find((l: any) => l.id === novoAnimal.lote_id);
   const metrics = await getMetricsAnimal(id, db);
 
   return c.json({
     ...novoAnimal,
+    lote_nome: lote?.nome || null,
     metrics
   }, 201);
 });
@@ -177,8 +181,11 @@ animais.put("/:id", async (c) => {
 
   const metrics = await getMetricsAnimal(id, db);
 
+  const lote = db.lotes.find((l: any) => l.id === db.animais[index].lote_id);
+
   return c.json({
     ...db.animais[index],
+    lote_nome: lote?.nome || null,
     metrics
   });
 });
