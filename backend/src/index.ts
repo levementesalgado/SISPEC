@@ -17,8 +17,19 @@ await initDB();
 const app = new Hono();
 
 // CORS
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://127.0.0.1:5173",
+  "https://sispec.vercel.app",
+  "https://sispec-4wyz6lqag-levementesalgados-projects.vercel.app",
+];
+
 app.use("/*", cors({
-  origin: ["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"],
+  origin: (origin) => {
+    if (!origin || allowedOrigins.includes(origin)) return origin;
+    return allowedOrigins[0];
+  },
   credentials: true
 }));
 

@@ -3,6 +3,15 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      react: 'preact/compat',
+      'react-dom': 'preact/compat',
+      'react-dom/test-utils': 'preact/test-utils',
+      'react/jsx-runtime': 'preact/jsx-runtime',
+      'react/jsx-dev-runtime': 'preact/jsx-runtime',
+    },
+  },
   server: {
     port: 5173,
     proxy: {
@@ -18,7 +27,6 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom'],
           recharts: ['recharts'],
         },
       },

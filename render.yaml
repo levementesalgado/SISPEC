@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: sispec-api
+    runtime: deno
+    repo: https://github.com/levementesalgado/SISPEC.git
+    branch: main
+    rootDir: backend
+    buildCommand: deno cache src/index.ts
+    startCommand: deno run --allow-net --allow-read --allow-write --allow-env --allow-sys src/index.ts
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: REDIS_URL
+        value: redis://default:SUA_SENHA_AQUI@red-d8oh15v7f7vs73eo96f0:6379
+      - key: PORT
+        value: 10000
+      - key: HOST
+        value: 0.0.0.0

@@ -30,7 +30,7 @@ animais.get("/", async (c) => {
     result.push({
       ...animal,
       peso_atual: metrics?.peso_atual || animal.peso_entrada,
-      gmd: metrics?.gmd > 0 ? metrics.gmd : null,
+      gmd: metrics?.gmd && metrics.gmd > 0 ? metrics.gmd : null,
       gmd_status: metrics?.gmd_status || null,
       lote_nome: lote?.nome || null
     });

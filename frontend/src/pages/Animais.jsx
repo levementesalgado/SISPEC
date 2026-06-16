@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Search, AlertCircle } from 'lucide-react'
 import { fetchAnimais } from '../utils/api'
 
 export default function Animais() {
+  const navigate = useNavigate()
   const [animais, setAnimais] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -93,16 +94,9 @@ export default function Animais() {
               </tr>
             ) : (
               animaisFiltrados.map((animal) => (
-                <tr key={animal.id} className="hover:bg-white/5 cursor-pointer" onClick={() => window.location.href = `/animais/${animal.id}`}>
+                <tr key={animal.id} className="hover:bg-white/5 cursor-pointer" onClick={() => navigate(`/animais/${animal.id}`)}>
                   <td className="text-sage font-semibold">{animal.brinco}</td>
-                  <td>
-                    {animal.raca}
-                    {animal.composicao && (
-                      <span className="block text-xs text-green-400">
-                        {animal.composicao.map(c => `${c.raca.substr(0,3)}/${c.porcentagem}%`).join(' + ')}
-                      </span>
-                    )}
-                  </td>
+                  <td>{animal.raca}</td>
                   <td>{animal.peso_entrada} kg</td>
                   <td>{animal.peso_atual ? `${animal.peso_atual} kg` : '—'}</td>
                   <td className={animal.gmd ? (animal.gmd >= 1 ? 'text-green-400' : 'text-amber') : 'text-white/40'}>

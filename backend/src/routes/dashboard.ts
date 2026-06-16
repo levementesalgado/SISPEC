@@ -34,6 +34,7 @@ dashboard.get("/alertas", async (c) => {
   
   for (const animal of animais) {
     const metrics = await getMetricsAnimal(animal.id);
+    if (!metrics) continue;
     
     if (metrics.gmd_status === "crit") {
       alertas.push({
