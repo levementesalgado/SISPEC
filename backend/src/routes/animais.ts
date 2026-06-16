@@ -10,32 +10,31 @@ const animais = new Hono();
 animais.get("/", async (c) => {
   const db = await readDB();
   const { status, lote_id } = c.req.query();
-  
+
   let filtered = db.animais;
-  
+
   if (status) {
     filtered = filtered.filter((a: any) => a.status === status);
   }
-  
+
   if (lote_id) {
     filtered = filtered.filter((a: any) => a.lote_id === parseInt(lote_id));
   }
-  
-  // Adicionar métricas
+
   const result = [];
   for (const animal of filtered) {
-    const metrics = await getMetricsAnimal(animal.id);
+    const metrics = await getMetricsAnimal(animal.id, db);
     const lote = db.lotes.find((l: any) => l.id === animal.lote_id);
-    
+
     result.push({
       ...animal,
       peso_atual: metrics?.peso_atual || animal.peso_entrada,
       gmd: metrics?.gmd && metrics.gmd > 0 ? metrics.gmd : null,
       gmd_status: metrics?.gmd_status || null,
-      lote_nome: lote?.nome || null
+      lote_nome: lote?.nome || null,
     });
   }
-  
+
   return c.json(result);
 });
 
@@ -44,13 +43,13 @@ animais.get("/:id", async (c) => {
   const id = parseInt(c.req.param("id"));
   const db = await readDB();
   const animal = db.animais.find((a: any) => a.id === id);
-  
+
   if (!animal) {
     return c.json({ error: "Animal não encontrado" }, 404);
   }
-  
-  const metrics = await getMetricsAnimal(animal.id);
-  
+
+  const metrics = await getMetricsAnimal(animal.id, db);
+
   return c.json({
     ...animal,
     metrics
@@ -89,7 +88,15 @@ animais.post("/", async (c) => {
   }
   
   const db = await readDB();
-  
+
+  // Valida lote se foi enviado
+  if (body.lote_id !== undefined && body.lote_id !== null) {
+    const loteExiste = db.lotes.find((l: any) => l.id === body.lote_id);
+    if (!loteExiste) {
+      return c.json({ error: "Lote não encontrado" }, 400);
+    }
+  }
+
   // Verifica brinco duplicado
   if (db.animais.find((a: any) => a.brinco === body.brinco)) {
     return c.json({ error: "Brinco já cadastrado" }, 400);
@@ -126,8 +133,8 @@ animais.post("/", async (c) => {
   
   await writeDB(db);
   
-  const metrics = await getMetricsAnimal(id);
-  
+  const metrics = await getMetricsAnimal(id, db);
+
   return c.json({
     ...novoAnimal,
     metrics
@@ -139,29 +146,37 @@ animais.put("/:id", async (c) => {
   const id = parseInt(c.req.param("id"));
   const body = await c.req.json();
   const db = await readDB();
-  
+
   const index = db.animais.findIndex((a: any) => a.id === id);
   if (index === -1) {
     return c.json({ error: "Animal não encontrado" }, 404);
   }
-  
+
+  // Valida lote se foi enviado
+  if (body.lote_id !== undefined && body.lote_id !== null) {
+    const loteExiste = db.lotes.find((l: any) => l.id === body.lote_id);
+    if (!loteExiste) {
+      return c.json({ error: "Lote não encontrado" }, 400);
+    }
+  }
+
   // Verifica brinco duplicado se mudou
   if (body.brinco && body.brinco !== db.animais[index].brinco) {
     if (db.animais.find((a: any) => a.brinco === body.brinco && a.id !== id)) {
       return c.json({ error: "Brinco já cadastrado" }, 400);
     }
   }
-  
+
   db.animais[index] = {
     ...db.animais[index],
     ...body,
     updated_at: new Date().toISOString()
   };
-  
+
   await writeDB(db);
-  
-  const metrics = await getMetricsAnimal(id);
-  
+
+  const metrics = await getMetricsAnimal(id, db);
+
   return c.json({
     ...db.animais[index],
     metrics

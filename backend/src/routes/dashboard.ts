@@ -29,13 +29,13 @@ dashboard.get("/gmd-semanas", async (c) => {
 dashboard.get("/alertas", async (c) => {
   const db = await readDB();
   const alertas: any[] = [];
-  
+
   const animais = db.animais.filter((a: any) => a.status === "ATIVO");
-  
+
   for (const animal of animais) {
-    const metrics = await getMetricsAnimal(animal.id);
+    const metrics = await getMetricsAnimal(animal.id, db);
     if (!metrics) continue;
-    
+
     if (metrics.gmd_status === "crit") {
       alertas.push({
         tipo: "crit",
@@ -49,7 +49,7 @@ dashboard.get("/alertas", async (c) => {
         descricao: `GMD de ${metrics.gmd} kg/dia está abaixo do ideal de ${env.GMD_META} kg/dia.`
       });
     }
-    
+
     if (metrics.dias_para_abate && metrics.dias_para_abate <= 14) {
       alertas.push({
         tipo: "ok",
@@ -58,7 +58,7 @@ dashboard.get("/alertas", async (c) => {
       });
     }
   }
-  
+
   return c.json(alertas);
 });
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Scale, TrendingUp, Calendar, Plus, X } from 'lucide-react'
-import { fetchAnimal, fetchPesagens, criarPesagem } from '../utils/api'
+import { ChevronLeft, Scale, TrendingUp, Calendar, Plus, X, Edit3 } from 'lucide-react'
+import { fetchAnimal, fetchPesagens, criarPesagem, fetchLotes, atualizarAnimal } from '../utils/api'
 import { useToasts } from '../components/Toast'
 
 export default function AnimalDetail() {
@@ -10,9 +10,12 @@ export default function AnimalDetail() {
   const { addToast } = useToasts()
   const [animal, setAnimal] = useState(null)
   const [pesagens, setPesagens] = useState([])
+  const [lotes, setLotes] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [editingLote, setEditingLote] = useState(false)
+  const [selectedLoteId, setSelectedLoteId] = useState(null)
   const [novaPesagem, setNovaPesagem] = useState({
     peso: '',
     observacao: ''
@@ -24,16 +27,36 @@ export default function AnimalDetail() {
 
   async function loadData() {
     try {
-      const [animalData, pesagensData] = await Promise.all([
+      const [animalData, pesagensData, lotesData] = await Promise.all([
         fetchAnimal(id),
-        fetchPesagens({ animal_id: id })
+        fetchPesagens({ animal_id: id }),
+        fetchLotes()
       ])
       setAnimal(animalData)
       setPesagens(pesagensData)
+      setLotes(lotesData)
     } catch (err) {
       addToast('Erro ao carregar dados', 'error')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleTrocarLote() {
+    if (selectedLoteId === (animal.lote_id || null)) {
+      setEditingLote(false)
+      return
+    }
+    setSubmitting(true)
+    try {
+      const updated = await atualizarAnimal(id, { lote_id: selectedLoteId })
+      setAnimal(updated)
+      setEditingLote(false)
+      addToast('Lote atualizado!', 'success')
+    } catch (err) {
+      addToast(err.message, 'error')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -282,7 +305,33 @@ export default function AnimalDetail() {
           </div>
           <div>
             <p className="text-white/40">Lote</p>
-            <p>{animal.lote_nome || 'Sem lote'}</p>
+            {editingLote ? (
+              <div className="flex items-center gap-2 mt-1">
+                <select
+                  value={selectedLoteId ?? ''}
+                  onChange={(e) => setSelectedLoteId(e.target.value ? parseInt(e.target.value) : null)}
+                  className="input text-sm py-1"
+                >
+                  <option value="">Sem lote</option>
+                  {lotes.map((l) => (
+                    <option key={l.id} value={l.id}>{l.nome}</option>
+                  ))}
+                </select>
+                <button onClick={handleTrocarLote} disabled={submitting} className="btn-primary !py-1 !px-3 text-xs">
+                  {submitting ? '…' : 'Salvar'}
+                </button>
+                <button onClick={() => setEditingLote(false)} className="btn-secondary !py-1 !px-3 text-xs">
+                  Cancelar
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <p>{animal.lote_nome || 'Sem lote'}</p>
+                <button onClick={() => { setSelectedLoteId(animal.lote_id); setEditingLote(true) }} className="text-white/40 hover:text-sage transition-colors">
+                  <Edit3 size={14} />
+                </button>
+              </div>
+            )}
           </div>
           <div>
             <p className="text-white/40">Status</p>

@@ -91,3 +91,16 @@ export async function criarLote(data) {
   }
   return res.json()
 }
+
+export async function atualizarAnimal(id, data) {
+  const res = await fetch(`${API_BASE}/animais/${id}`, {
+    method: 'PUT',
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.error || 'Erro ao atualizar animal')
+  }
+  return res.json()
+}
