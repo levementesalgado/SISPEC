@@ -1,12 +1,11 @@
 services:
   - type: web
     name: sispec-api
-    runtime: deno
+    runtime: docker
     repo: https://github.com/levementesalgado/SISPEC.git
     branch: main
     rootDir: backend
-    buildCommand: deno cache src/index.ts
-    startCommand: deno run --allow-net --allow-read --allow-write --allow-env --allow-sys src/index.ts
+    dockerfilePath: Dockerfile
     healthCheckPath: /api/v1/health
     envVars:
       - key: REDIS_URL
