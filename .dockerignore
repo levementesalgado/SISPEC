@@ -1,0 +1,17 @@
+node_modules/
+frontend/
+.git/
+README.md
+deploy.sh
+deploy.bat
+start.sh
+start.bat
+start-frontend.sh
+start-frontend.bat
+apresentacao_sispec(5).html
+venv/
+__pycache__/
+*.pyc
+.venv/
+LICENSE
+planejamento-sispec/
