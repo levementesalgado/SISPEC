@@ -1,8 +1,50 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ChevronLeft, Scale, TrendingUp, Calendar, Plus, X, Edit3 } from 'lucide-react'
 import { fetchAnimal, fetchPesagens, criarPesagem, fetchLotes, atualizarAnimal } from '../utils/api'
 import { useToasts } from '../components/Toast'
+
+function PesagemItem({ pesagem, anterior, pesoEntrada }) {
+  const pesoAnt = anterior ? anterior.peso : pesoEntrada
+  const gmd = anterior
+    ? ((pesagem.peso - anterior.peso) / ((new Date(pesagem.data_pesagem) - new Date(anterior.data_pesagem)) / (1000 * 60 * 60 * 24))).toFixed(2)
+    : null
+  const daysDiff = anterior
+    ? Math.floor((new Date(pesagem.data_pesagem) - new Date(anterior.data_pesagem)) / (1000 * 60 * 60 * 24))
+    : 0
+
+  return (
+    <div className="relative flex items-start gap-4 pl-8">
+      <div className={`absolute left-2 w-4 h-4 rounded-full border-2 border-ink ${
+        gmd && parseFloat(gmd) >= 1 ? 'bg-green-500' :
+        gmd && parseFloat(gmd) < 0.5 ? 'bg-red-500' : 'bg-sage'
+      }`} />
+      <div className="flex-1 card !p-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-semibold text-sage">
+              {new Date(pesagem.data_pesagem).toLocaleDateString('pt-BR')}
+            </p>
+            <p className="text-sm text-white/60">{pesagem.tecnico}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-xl font-semibold">{pesagem.peso} kg</p>
+            {gmd && (
+              <p className={`text-sm ${parseFloat(gmd) >= 1 ? 'text-green-400' : 'text-amber'}`}>
+                {gmd} kg/dia ({daysDiff} dias)
+              </p>
+            )}
+          </div>
+        </div>
+        {pesagem.observacao && (
+          <p className="text-sm text-white/40 mt-2">{pesagem.observacao}</p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+const PesagemItemMemo = useMemo ? undefined : PesagemItem
 
 export default function AnimalDetail() {
   const { id } = useParams()

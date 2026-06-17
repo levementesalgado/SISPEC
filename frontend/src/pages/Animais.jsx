@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, AlertCircle } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { fetchAnimais } from '../utils/api'
 
 export default function Animais() {
@@ -9,32 +9,44 @@ export default function Animais() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [filtro, setFiltro] = useState('')
+  const [debouncedFiltro, setDebouncedFiltro] = useState('')
 
   useEffect(() => {
+    const timer = setTimeout(() => setDebouncedFiltro(filtro), 200)
+    return () => clearTimeout(timer)
+  }, [filtro])
+
+  useEffect(() => {
+    let cancelled = false
     async function loadAnimais() {
       try {
         const data = await fetchAnimais()
-        setAnimais(data)
+        if (!cancelled) setAnimais(data)
       } catch (err) {
-        setError(err.message)
+        if (!cancelled) setError(err.message)
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
     }
     loadAnimais()
+    return () => { cancelled = true }
   }, [])
 
-  const animaisFiltrados = animais.filter(animal =>
-    animal.brinco.toLowerCase().includes(filtro.toLowerCase()) ||
-    animal.raca.toLowerCase().includes(filtro.toLowerCase()) ||
-    (animal.lote_nome && animal.lote_nome.toLowerCase().includes(filtro.toLowerCase()))
-  )
+  const animaisFiltrados = useMemo(() => {
+    const q = debouncedFiltro.toLowerCase()
+    if (!q) return animais
+    return animais.filter(animal =>
+      animal.brinco.toLowerCase().includes(q) ||
+      animal.raca.toLowerCase().includes(q) ||
+      (animal.lote_nome && animal.lote_nome.toLowerCase().includes(q))
+    )
+  }, [animais, debouncedFiltro])
 
-  const getStatusBadge = (status, gmd_status) => {
+  const getStatusBadge = useCallback((status, gmd_status) => {
     if (gmd_status === 'crit') return <span className="badge badge-crit">Crítico</span>
     if (gmd_status === 'warn') return <span className="badge badge-warn">Atenção</span>
     return <span className="badge badge-ok">Normal</span>
-  }
+  }, [])
 
   if (loading) {
     return (

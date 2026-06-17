@@ -1,15 +1,15 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom'
-import Dashboard from './pages/Dashboard'
-import Animais from './pages/Animais'
-import Lotes from './pages/Lotes'
-import Cadastro from './pages/Cadastro'
-import Login from './pages/Login'
-import AnimalDetail from './pages/AnimalDetail'
 import { ToastProvider } from './components/Toast'
 import { Menu, X, LayoutDashboard, Users, FolderTree, PlusCircle, LogOut, Loader2 } from 'lucide-react'
 
-// Loading component
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const Animais = lazy(() => import('./pages/Animais'))
+const Lotes = lazy(() => import('./pages/Lotes'))
+const Cadastro = lazy(() => import('./pages/Cadastro'))
+const Login = lazy(() => import('./pages/Login'))
+const AnimalDetail = lazy(() => import('./pages/AnimalDetail'))
+
 function Loading() {
   return (
     <div className="flex items-center justify-center h-64">
@@ -129,13 +129,15 @@ function App() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-6">
-        <Routes>
-          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/animais" element={<ProtectedRoute><Animais /></ProtectedRoute>} />
-          <Route path="/animais/:id" element={<ProtectedRoute><AnimalDetail /></ProtectedRoute>} />
-          <Route path="/lotes" element={<ProtectedRoute><Lotes /></ProtectedRoute>} />
-          <Route path="/cadastro" element={<ProtectedRoute><Cadastro /></ProtectedRoute>} />
-        </Routes>
+        <Suspense fallback={<Loading />}>
+          <Routes>
+            <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/animais" element={<ProtectedRoute><Animais /></ProtectedRoute>} />
+            <Route path="/animais/:id" element={<ProtectedRoute><AnimalDetail /></ProtectedRoute>} />
+            <Route path="/lotes" element={<ProtectedRoute><Lotes /></ProtectedRoute>} />
+            <Route path="/cadastro" element={<ProtectedRoute><Cadastro /></ProtectedRoute>} />
+          </Routes>
+        </Suspense>
       </main>
     </div>
   )
@@ -145,10 +147,12 @@ export default function Root() {
   return (
     <ToastProvider>
       <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/*" element={<App />} />
-        </Routes>
+        <Suspense fallback={<Loading />}>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/*" element={<App />} />
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </ToastProvider>
   )

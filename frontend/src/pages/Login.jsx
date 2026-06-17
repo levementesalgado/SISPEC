@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { LogIn, AlertCircle } from 'lucide-react'
-import axios from 'axios'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+const API_URL = import.meta.env.VITE_API_URL || '/api/v1'
 
 export default function Login() {
   const [loading, setLoading] = useState(false)
@@ -18,16 +17,20 @@ export default function Login() {
     setError(null)
 
     try {
-      const res = await axios.post(`${API_URL}/api/v1/auth/login`, form)
-      
-      // Salva token e usuário
-      localStorage.setItem('token', res.data.token)
-      localStorage.setItem('user', JSON.stringify(res.data.user))
-      
-      // Força reload para App ler o user
+      const res = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Erro ao fazer login')
+
+      localStorage.setItem('token', data.token)
+      localStorage.setItem('user', JSON.stringify(data.user))
+
       window.location.href = '/'
     } catch (err) {
-      setError(err.response?.data?.error || 'Erro ao fazer login')
+      setError(err.message)
     } finally {
       setLoading(false)
     }
