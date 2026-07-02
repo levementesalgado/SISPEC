@@ -10,6 +10,8 @@ services:
     envVars:
       - key: REDIS_URL
         value: redis://default:1YwhXj7sUnRSsqgzYq1MqEJa8EQJNFKs@red-d8oh15v7f7vs73eo96f0:6379
+      - key: DATABASE_URL
+        sync: false
       - key: ML_SERVICE_URL
         value: http://sispec-ml:8001
       - key: PORT
