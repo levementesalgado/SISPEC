@@ -11,6 +11,7 @@ import animaisRouter from "./routes/animais.ts";
 import pesagensRouter from "./routes/pesagens.ts";
 import dashboardRouter from "./routes/dashboard.ts";
 import mlRouter from "./routes/ml.ts";
+import producoesRouter from "./routes/producoes.ts";
 
 // Inicializa banco
 await initDB();
@@ -44,6 +45,7 @@ app.route("/api/v1/animais", animaisRouter);
 app.route("/api/v1/pesagens", pesagensRouter);
 app.route("/api/v1/dashboard", dashboardRouter);
 app.route("/api/v1/ml", mlRouter);
+app.route("/api/v1/producoes", producoesRouter);
 
 // Health check
 app.get("/api/v1/health", (c) => c.json({

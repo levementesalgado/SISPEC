@@ -68,6 +68,10 @@ body {
     @apply bg-red-500/20 text-red-400;
   }
 
+  .badge-info {
+    @apply bg-blue-500/20 text-blue-400;
+  }
+
   /* Toast animation */
   @keyframes slide-in {
     from {

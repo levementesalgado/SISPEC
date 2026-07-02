@@ -301,9 +301,16 @@ export default function Cadastro() {
                 >
                   <option value="">Selecione um lote</option>
                   {lotes.map((lote) => (
-                    <option key={lote.id} value={lote.id}>{lote.nome}</option>
+                    <option key={lote.id} value={lote.id}>
+                      {lote.nome} {lote.modalidade ? `(${lote.modalidade === 'CORTE' ? 'Corte' : 'Leite'})` : ''}
+                    </option>
                   ))}
                 </select>
+                {form.lote_id && (
+                  <p className="text-xs text-white/40 mt-1">
+                    Modalidade: {lotes.find(l => l.id === parseInt(form.lote_id))?.modalidade === 'CORTE' ? '🐂 Corte' : '🐄 Leite'}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-sm text-white/60 mb-1">Observação</label>

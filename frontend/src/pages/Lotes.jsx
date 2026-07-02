@@ -7,7 +7,7 @@ export default function Lotes() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [showForm, setShowForm] = useState(false)
-  const [novoLote, setNovoLote] = useState({ nome: '', descricao: '' })
+  const [novoLote, setNovoLote] = useState({ nome: '', descricao: '', modalidade: 'CORTE' })
   const [loteExpandido, setLoteExpandido] = useState(null)
   const [animaisLote, setAnimaisLote] = useState([])
 
@@ -85,14 +85,27 @@ export default function Lotes() {
                 required
               />
             </div>
-            <div>
-              <label className="block text-sm text-white/60 mb-1">Descrição</label>
-              <textarea
-                value={novoLote.descricao}
-                onChange={(e) => setNovoLote({ ...novoLote, descricao: e.target.value })}
-                className="input min-h-[80px]"
-                placeholder="Descrição opcional do lote"
-              />
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-white/60 mb-1">Descrição</label>
+                <textarea
+                  value={novoLote.descricao}
+                  onChange={(e) => setNovoLote({ ...novoLote, descricao: e.target.value })}
+                  className="input min-h-[80px]"
+                  placeholder="Descrição opcional do lote"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-white/60 mb-1">Modalidade</label>
+                <select
+                  value={novoLote.modalidade}
+                  onChange={(e) => setNovoLote({ ...novoLote, modalidade: e.target.value })}
+                  className="input"
+                >
+                  <option value="CORTE">🐂 Corte</option>
+                  <option value="LEITE">🐄 Leite</option>
+                </select>
+              </div>
             </div>
             <div className="flex gap-2">
               <button type="submit" className="btn-primary">Salvar</button>
@@ -130,7 +143,10 @@ export default function Lotes() {
                   )}
                 </div>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className={`badge ${lote.modalidade === 'CORTE' ? 'badge-ok' : 'badge-info'}`}>
+                  {lote.modalidade === 'CORTE' ? '🐂 Corte' : '🐄 Leite'}
+                </span>
                 <span className={`badge ${lote.ativo ? 'badge-ok' : 'badge-warn'}`}>
                   {lote.ativo ? 'Ativo' : 'Inativo'}
                 </span>

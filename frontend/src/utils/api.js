@@ -9,8 +9,8 @@ function getHeaders() {
   return headers
 }
 
-export async function fetchKPIs() {
-  const res = await fetch(`${API_BASE}/dashboard/kpis`, { headers: getHeaders() })
+export async function fetchKPIs(params = '') {
+  const res = await fetch(`${API_BASE}/dashboard/kpis${params}`, { headers: getHeaders() })
   if (!res.ok) throw new Error('Erro ao buscar KPIs')
   return res.json()
 }
@@ -21,14 +21,14 @@ export async function fetchGMDData() {
   return res.json()
 }
 
-export async function fetchAlertas() {
-  const res = await fetch(`${API_BASE}/dashboard/alertas`, { headers: getHeaders() })
+export async function fetchAlertas(params = '') {
+  const res = await fetch(`${API_BASE}/dashboard/alertas${params}`, { headers: getHeaders() })
   if (!res.ok) throw new Error('Erro ao buscar alertas')
   return res.json()
 }
 
-export async function fetchDashboardOperacional() {
-  const res = await fetch(`${API_BASE}/dashboard/operacional`, { headers: getHeaders() })
+export async function fetchDashboardOperacional(params = '') {
+  const res = await fetch(`${API_BASE}/dashboard/operacional${params}`, { headers: getHeaders() })
   if (!res.ok) throw new Error('Erro ao buscar dashboard operacional')
   return res.json()
 }
@@ -105,7 +105,27 @@ export async function criarLote(data) {
   })
   if (!res.ok) {
     const error = await res.json()
-    throw new Error(error.detail || error.error || 'Erro ao criar lote')
+    throw new Error(error.error || 'Erro ao criar lote')
+  }
+  return res.json()
+}
+
+export async function fetchProducoes(params = {}) {
+  const query = new URLSearchParams(params)
+  const res = await fetch(`${API_BASE}/producoes?${query}`, { headers: getHeaders() })
+  if (!res.ok) throw new Error('Erro ao buscar produções')
+  return res.json()
+}
+
+export async function criarProducao(data) {
+  const res = await fetch(`${API_BASE}/producoes`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.error || 'Erro ao registrar produção')
   }
   return res.json()
 }

@@ -6,7 +6,10 @@ const lotes = new Hono();
 // Listar lotes
 lotes.get("/", async (c) => {
   const db = await readDB();
-  return c.json(db.lotes);
+  const { modalidade } = c.req.query();
+  let resultado = db.lotes;
+  if (modalidade) resultado = resultado.filter((l: any) => (l.modalidade || "CORTE") === modalidade);
+  return c.json(resultado);
 });
 
 // Buscar lote por ID
@@ -38,10 +41,13 @@ lotes.post("/", async (c) => {
   }
   
   const id = await nextId("loteId");
+  const modalidade = ["CORTE", "LEITE"].includes(body.modalidade) ? body.modalidade : "CORTE";
+
   const novoLote = {
     id,
     nome: body.nome,
     descricao: body.descricao || null,
+    modalidade,
     ativo: 1,
     created_at: new Date().toISOString()
   };

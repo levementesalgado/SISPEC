@@ -7,7 +7,8 @@ const dashboard = new Hono();
 
 // KPIs base
 dashboard.get("/kpis", async (c) => {
-  const kpis = await getDashboardKPIs();
+  const modalidade = c.req.query("modalidade") || undefined;
+  const kpis = await getDashboardKPIs(modalidade);
   return c.json(kpis);
 });
 
@@ -20,8 +21,12 @@ dashboard.get("/gmd-semanas", async (c) => {
 // Alertas
 dashboard.get("/alertas", async (c) => {
   const db = await readDB();
+  const modalidade = c.req.query("modalidade") || undefined;
+  const animais = modalidade
+    ? db.animais.filter((a: any) => a.status === "ATIVO" && (db.lotes.find((l: any) => l.id === a.lote_id)?.modalidade || "CORTE") === modalidade)
+    : db.animais.filter((a: any) => a.status === "ATIVO");
   const alertas: any[] = [];
-  for (const animal of db.animais.filter((a: any) => a.status === "ATIVO")) {
+  for (const animal of animais) {
     const metrics = await getMetricsAnimal(animal.id, db);
     if (!metrics) continue;
     if (metrics.gmd_status === "crit") {
@@ -38,7 +43,8 @@ dashboard.get("/alertas", async (c) => {
 
 // Dashboard Operacional — 12 KPIs + timeline + alertas
 dashboard.get("/operacional", async (c) => {
-  const data = await getDashboardOperacional();
+  const modalidade = c.req.query("modalidade") || undefined;
+  const data = await getDashboardOperacional(modalidade);
   return c.json(data);
 });
 

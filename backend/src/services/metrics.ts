@@ -23,36 +23,101 @@ export async function getMetricsAnimal(animalId: number, db?: any) {
   };
 }
 
-export async function getDashboardKPIs() {
+function getModalidadeAnimal(animal: any, db: any): string {
+  const lote = db.lotes.find((l: any) => l.id === animal.lote_id);
+  return lote?.modalidade || "CORTE";
+}
+
+export async function getMetricsAnimalLeite(animalId: number, db?: any) {
+  if (!db) db = await readDB();
+  const animal = db.animais.find((a: any) => a.id === animalId);
+  if (!animal) return null;
+
+  const producoes = (db.producoes || [])
+    .filter((p: any) => p.animal_id === animalId)
+    .sort((a: any, b: any) => new Date(b.data).getTime() - new Date(a.data).getTime());
+
+  const litrosList = producoes.map((p: any) => p.litros);
+  const ccsList = producoes.filter((p: any) => p.ccs).map((p: any) => p.ccs);
+  const gorduraList = producoes.filter((p: any) => p.gordura).map((p: any) => p.gordura);
+  const proteinaList = producoes.filter((p: any) => p.proteina).map((p: any) => p.proteina);
+
+  const producaoMedia = litrosList.length
+    ? Math.round((litrosList.reduce((a: number, b: number) => a + b, 0) / litrosList.length) * 10) / 10
+    : 0;
+
+  const ccsMedio = ccsList.length
+    ? Math.round(ccsList.reduce((a: number, b: number) => a + b, 0) / ccsList.length)
+    : 0;
+
+  const ultimaProducao = producoes.length > 0 ? producoes[0] : null;
+  const diasLactacao = calcularDiasConfinamento(animal.data_entrada);
+
+  return {
+    producao_media: producaoMedia,
+    producao_atual: ultimaProducao?.litros || 0,
+    ccs_medio: ccsMedio,
+    gordura_media: gorduraList.length
+      ? Math.round((gorduraList.reduce((a: number, b: number) => a + b, 0) / gorduraList.length) * 10) / 10
+      : 0,
+    proteina_media: proteinaList.length
+      ? Math.round((proteinaList.reduce((a: number, b: number) => a + b, 0) / proteinaList.length) * 10) / 10
+      : 0,
+    dias_lactacao: diasLactacao,
+    status_lactacao: diasLactacao > 305 ? "seca" : diasLactacao > 240 ? "final" : diasLactacao > 120 ? "meio" : "inicio",
+    total_registros: producoes.length,
+  };
+}
+
+export async function getDashboardKPIs(modalidade?: string) {
   const db = await readDB();
   const animais = db.animais.filter((a: any) => a.status === "ATIVO");
+  const filtrados = modalidade
+    ? animais.filter((a: any) => getModalidadeAnimal(a, db) === modalidade)
+    : animais;
 
-  if (animais.length === 0) {
+  if (filtrados.length === 0) {
     return {
       total_animais: 0, gmd_medio: 0, peso_medio: 0,
       conversao_alimentar: env.ICA_IDEAL, animais_abaixo_meta: 0, animais_proximo_abate: 0,
+      producao_media: 0, ccs_medio: 0, dias_lactacao_medio: 0,
     };
   }
 
+  const isCorte = !modalidade || modalidade === "CORTE";
   let gmds: number[] = []; let pesos: number[] = [];
   let abaixoMeta = 0; let proximoAbate = 0;
+  let litrosList: number[] = []; let ccsList: number[] = []; let lactList: number[] = [];
 
-  for (const animal of animais) {
-    const metrics = await getMetricsAnimal(animal.id, db);
-    if (metrics && metrics.gmd > 0) {
-      gmds.push(metrics.gmd); pesos.push(metrics.peso_atual);
-      if (metrics.gmd_status === "warn" || metrics.gmd_status === "crit") abaixoMeta++;
-      if (metrics.dias_para_abate && metrics.dias_para_abate <= 30) proximoAbate++;
+  for (const animal of filtrados) {
+    if (isCorte) {
+      const metrics = await getMetricsAnimal(animal.id, db);
+      if (metrics && metrics.gmd > 0) {
+        gmds.push(metrics.gmd); pesos.push(metrics.peso_atual);
+        if (metrics.gmd_status === "warn" || metrics.gmd_status === "crit") abaixoMeta++;
+        if (metrics.dias_para_abate && metrics.dias_para_abate <= 30) proximoAbate++;
+      }
+    } else {
+      const metrics = await getMetricsAnimalLeite(animal.id, db);
+      if (metrics) {
+        litrosList.push(metrics.producao_media);
+        ccsList.push(metrics.ccs_medio);
+        lactList.push(metrics.dias_lactacao);
+        if (metrics.status_lactacao === "seca") abaixoMeta++;
+      }
     }
   }
 
   return {
-    total_animais: animais.length,
+    total_animais: filtrados.length,
     gmd_medio: gmds.length ? Math.round((gmds.reduce((a, b) => a + b, 0) / gmds.length) * 100) / 100 : 0,
     peso_medio: pesos.length ? Math.round(pesos.reduce((a, b) => a + b, 0) / pesos.length * 10) / 10 : 0,
     conversao_alimentar: env.ICA_IDEAL,
     animais_abaixo_meta: abaixoMeta,
     animais_proximo_abate: proximoAbate,
+    producao_media: litrosList.length ? Math.round((litrosList.reduce((a, b) => a + b, 0) / litrosList.length) * 10) / 10 : 0,
+    ccs_medio: ccsList.length ? Math.round(ccsList.reduce((a, b) => a + b, 0) / ccsList.length) : 0,
+    dias_lactacao_medio: lactList.length ? Math.round(lactList.reduce((a, b) => a + b, 0) / lactList.length) : 0,
   };
 }
 
@@ -84,52 +149,90 @@ export async function getGMDTimeline(db?: any) {
   }));
 }
 
-export async function getDashboardOperacional() {
+export async function getDashboardOperacional(modalidade?: string) {
   const db = await readDB();
-  const kpis = await getDashboardKPIs();
-  const alertas = await getDashboardAlertas(db);
-  const timeline = await getGMDTimeline(db);
+  const isCorte = !modalidade || modalidade === "CORTE";
+  const kpis = await getDashboardKPIs(modalidade);
+  const alertas = isCorte ? await getDashboardAlertas(db) : await getDashboardAlertasLeite(db);
+  const timeline = isCorte ? await getGMDTimeline(db) : [];
 
-  const animaisAtivos = db.animais.filter((a: any) => a.status === "ATIVO");
-  const todasMetricas = (await Promise.all(
-    animaisAtivos.map((a: any) => getMetricsAnimal(a.id, db))
+  const animaisAtivos = (modalidade
+    ? db.animais.filter((a: any) => a.status === "ATIVO" && getModalidadeAnimal(a, db) === modalidade)
+    : db.animais.filter((a: any) => a.status === "ATIVO"));
+
+  if (isCorte) {
+    const todasMetricas = (await Promise.all(
+      animaisAtivos.map((a: any) => getMetricsAnimal(a.id, db))
+    )).filter(Boolean) as any[];
+
+    const diasConfMedio = todasMetricas.length
+      ? Math.round(todasMetricas.reduce((s: number, m: any) => s + m.dias_confinamento, 0) / todasMetricas.length)
+      : 0;
+
+    const abates = todasMetricas
+      .map((m: any) => m.dias_para_abate)
+      .filter((d: number | null): d is number => d !== null && d > 0);
+
+    const projAbate = abates.length
+      ? Math.round(abates.reduce((a: number, b: number) => a + b, 0) / abates.length)
+      : 45;
+
+    const pesos = todasMetricas.map((m: any) => m.peso_atual);
+    const desvio = pesos.length
+      ? Math.round(Math.sqrt(
+          pesos.reduce((sq: number, p: number) => sq + (p - kpis.peso_medio) ** 2, 0) / pesos.length
+        ))
+      : 0;
+
+    return {
+      kpis: {
+        gmd_hoje: kpis.gmd_medio,
+        gmd_lote: kpis.gmd_medio,
+        peso_medio: kpis.peso_medio,
+        desvio_peso: desvio,
+        dias_conf: diasConfMedio,
+        proj_abate: projAbate,
+        temp: 28.5,
+        itu: 72,
+        consumo: 9.8,
+        eficiencia: 0.11,
+        total_animais: kpis.total_animais,
+        alertas_ativos: alertas.length,
+      },
+      timeline,
+      alertas,
+    };
+  }
+
+  const todasLeite = (await Promise.all(
+    animaisAtivos.map((a: any) => getMetricsAnimalLeite(a.id, db))
   )).filter(Boolean) as any[];
 
-  const diasConfMedio = todasMetricas.length
-    ? Math.round(todasMetricas.reduce((s: number, m: any) => s + m.dias_confinamento, 0) / todasMetricas.length)
+  const prodMedia = todasLeite.length
+    ? Math.round(todasLeite.reduce((s: number, m: any) => s + m.producao_media, 0) / todasLeite.length * 10) / 10
     : 0;
 
-  const abates = todasMetricas
-    .map((m: any) => m.dias_para_abate)
-    .filter((d: number | null): d is number => d !== null && d > 0);
+  const ccsMedia = todasLeite.length
+    ? Math.round(todasLeite.reduce((s: number, m: any) => s + m.ccs_medio, 0) / todasLeite.length)
+    : 0;
 
-  const projAbate = abates.length
-    ? Math.round(abates.reduce((a: number, b: number) => a + b, 0) / abates.length)
-    : 45;
-
-  const pesos = todasMetricas.map((m: any) => m.peso_atual);
-  const desvio = pesos.length
-    ? Math.round(Math.sqrt(
-        pesos.reduce((sq: number, p: number) => sq + (p - kpis.peso_medio) ** 2, 0) / pesos.length
-      ))
+  const lactMedia = todasLeite.length
+    ? Math.round(todasLeite.reduce((s: number, m: any) => s + m.dias_lactacao, 0) / todasLeite.length)
     : 0;
 
   return {
+    modalidade: "LEITE",
     kpis: {
-      gmd_hoje: kpis.gmd_medio,
-      gmd_lote: kpis.gmd_medio,
-      peso_medio: kpis.peso_medio,
-      desvio_peso: desvio,
-      dias_conf: diasConfMedio,
-      proj_abate: projAbate,
-      temp: 28.5,
-      itu: 72,
-      consumo: 9.8,
-      eficiencia: 0.11,
+      producao_media: prodMedia,
+      ccs_medio: ccsMedia,
+      dias_lactacao_medio: lactMedia,
+      gordura_media: Math.round(todasLeite.reduce((s: number, m: any) => s + m.gordura_media, 0) / todasLeite.length * 10) / 10,
+      proteina_media: Math.round(todasLeite.reduce((s: number, m: any) => s + m.proteina_media, 0) / todasLeite.length * 10) / 10,
+      vacas_em_lactacao: todasLeite.filter((m: any) => m.status_lactacao !== "seca").length,
+      vacas_secas: todasLeite.filter((m: any) => m.status_lactacao === "seca").length,
       total_animais: kpis.total_animais,
       alertas_ativos: alertas.length,
     },
-    timeline,
     alertas,
   };
 }
@@ -230,6 +333,29 @@ export async function getDashboardEstrategico() {
     correlacao,
     esg,
   };
+}
+
+async function getDashboardAlertasLeite(db: any) {
+  const alertas: any[] = [];
+  for (const animal of db.animais.filter((a: any) => a.status === "ATIVO" && getModalidadeAnimal(a, db) === "LEITE")) {
+    const metrics = await getMetricsAnimalLeite(animal.id, db);
+    if (!metrics) continue;
+    if (metrics.status_lactacao === "seca") {
+      alertas.push({ tipo: "warn", titulo: `${animal.brinco} — Vaca Seca`, descricao: `Lactação encerrada (${metrics.dias_lactacao} dias).` });
+    }
+    if (metrics.ccs_medio > 400) {
+      alertas.push({ tipo: "crit", titulo: `${animal.brinco} — CCS Alto`, descricao: `CCS médio de ${metrics.ccs_medio} mil/mL. Risco de mastite.` });
+    } else if (metrics.ccs_medio > 200) {
+      alertas.push({ tipo: "warn", titulo: `${animal.brinco} — CCS Elevado`, descricao: `CCS médio de ${metrics.ccs_medio} mil/mL. Monitorar.` });
+    }
+    if (metrics.producao_media > 0 && metrics.producao_media < 10) {
+      alertas.push({ tipo: "crit", titulo: `${animal.brinco} — Baixa Produção`, descricao: `Média de ${metrics.producao_media} L/dia. Avaliar nutrição.` });
+    }
+    if (metrics.gordura_media > 0 && metrics.gordura_media < 3.0) {
+      alertas.push({ tipo: "warn", titulo: `${animal.brinco} — Gordura Baixa`, descricao: `Gordura média ${metrics.gordura_media}%.` });
+    }
+  }
+  return alertas;
 }
 
 async function getDashboardAlertas(db: any) {

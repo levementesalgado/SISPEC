@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
-import { TrendingUp, AlertTriangle, CheckCircle, Scale, Activity, Eye, BarChart3, Target } from 'lucide-react'
+import { TrendingUp, AlertTriangle, CheckCircle, Scale, Activity, Eye, BarChart3, Target, Milk } from 'lucide-react'
 import { fetchKPIs, fetchGMDData, fetchAlertas } from '../utils/api'
+import { useModalidade } from '../App'
 
 export default function Dashboard() {
+  const modalidade = useModalidade()
+  const isCorte = modalidade === 'CORTE'
   const [kpis, setKpis] = useState(null)
   const [gmdData, setGmdData] = useState([])
   const [alertas, setAlertas] = useState([])
@@ -14,10 +17,11 @@ export default function Dashboard() {
   useEffect(() => {
     async function loadData() {
       try {
+        const params = `?modalidade=${modalidade}`
         const [kpisData, gmd, alertasData] = await Promise.all([
-          fetchKPIs(),
-          fetchGMDData(),
-          fetchAlertas()
+          fetchKPIs(params),
+          isCorte ? fetchGMDData() : Promise.resolve([]),
+          fetchAlertas(params)
         ])
         setKpis(kpisData)
         setGmdData(gmd)
@@ -29,7 +33,7 @@ export default function Dashboard() {
       }
     }
     loadData()
-  }, [])
+  }, [modalidade])
 
   if (loading) {
     return (
@@ -48,11 +52,16 @@ export default function Dashboard() {
     )
   }
 
-  const kpiCards = [
+  const kpiCards = isCorte ? [
     { label: 'Total de Animais', value: kpis?.total_animais || 0, unit: 'cabeças', icon: Activity, color: 'text-sage' },
     { label: 'GMD Médio', value: kpis?.gmd_medio || 0, unit: 'kg/dia', icon: TrendingUp, color: kpis?.gmd_medio >= 1 ? 'text-green-400' : 'text-amber' },
     { label: 'Peso Médio', value: kpis?.peso_medio || 0, unit: 'kg', icon: Scale, color: 'text-sage' },
     { label: 'ICA', value: kpis?.conversao_alimentar || 0, unit: ':1', icon: Scale, color: kpis?.conversao_alimentar <= 6 ? 'text-green-400' : 'text-amber' },
+  ] : [
+    { label: 'Total de Vacas', value: kpis?.total_animais || 0, unit: 'cabeças', icon: Milk, color: 'text-sage' },
+    { label: 'Prod. Média', value: kpis?.producao_media || 0, unit: 'L/dia', icon: TrendingUp, color: kpis?.producao_media >= 20 ? 'text-green-400' : 'text-amber' },
+    { label: 'CCS Médio', value: kpis?.ccs_medio || 0, unit: 'mil/mL', icon: Scale, color: kpis?.ccs_medio <= 200 ? 'text-green-400' : 'text-amber' },
+    { label: 'Dias Lactação', value: kpis?.dias_lactacao_medio || 0, unit: 'dias', icon: Activity, color: 'text-sage' },
   ]
 
   return (
@@ -139,7 +148,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* GMD Chart */}
+      {isCorte && (
       <div className="card">
         <h2 className="text-lg font-semibold mb-4">Ganho Médio Diário por Semana</h2>
         <div className="h-64">
@@ -157,6 +166,7 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </div>
       </div>
+      )}
 
       {/* Info */}
       <div className="text-center text-white/40 text-sm">

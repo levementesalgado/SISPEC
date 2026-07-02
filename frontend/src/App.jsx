@@ -1,7 +1,10 @@
-import { useState, lazy, Suspense } from 'react'
+import { useState, lazy, Suspense, createContext, useContext } from 'react'
 import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom'
 import { ToastProvider } from './components/Toast'
-import { Menu, X, LayoutDashboard, Users, FolderTree, PlusCircle, LogOut, Loader2 } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Users, FolderTree, PlusCircle, LogOut, Loader2, Beef, Milk } from 'lucide-react'
+
+export const ModalidadeContext = createContext()
+export function useModalidade() { return useContext(ModalidadeContext) }
 
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const DashboardOperacional = lazy(() => import('./pages/DashboardOperacional'))
@@ -32,6 +35,7 @@ function ProtectedRoute({ children }) {
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [modalidade, setModalidade] = useState(() => localStorage.getItem('modalidade') || 'CORTE')
   const [user, setUser] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('user')) || null
@@ -41,6 +45,11 @@ function App() {
   })
   const location = useLocation()
   const navigate = useNavigate()
+
+  const toggleModalidade = (mod) => {
+    setModalidade(mod)
+    localStorage.setItem('modalidade', mod)
+  }
 
   const handleLogout = () => {
     localStorage.removeItem('token')
@@ -87,6 +96,24 @@ function App() {
                 {label}
               </Link>
             ))}
+            <div className="flex items-center gap-1 mx-2 px-2 py-1 bg-white/5 rounded-lg">
+              <button
+                onClick={() => toggleModalidade('CORTE')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                  modalidade === 'CORTE' ? 'bg-sage text-ink' : 'text-white/50 hover:text-white'
+                }`}
+              >
+                <Beef size={14} /> Corte
+              </button>
+              <button
+                onClick={() => toggleModalidade('LEITE')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                  modalidade === 'LEITE' ? 'bg-sage text-ink' : 'text-white/50 hover:text-white'
+                }`}
+              >
+                <Milk size={14} /> Leite
+              </button>
+            </div>
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-white/40 hover:text-white hover:bg-white/5 transition-colors"
@@ -136,6 +163,7 @@ function App() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-6">
         <Suspense fallback={<Loading />}>
+          <ModalidadeContext.Provider value={modalidade}>
           <Routes>
             <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/dashboard/operacional" element={<ProtectedRoute><DashboardOperacional /></ProtectedRoute>} />
@@ -146,6 +174,7 @@ function App() {
             <Route path="/lotes" element={<ProtectedRoute><Lotes /></ProtectedRoute>} />
             <Route path="/cadastro" element={<ProtectedRoute><Cadastro /></ProtectedRoute>} />
           </Routes>
+          </ModalidadeContext.Provider>
         </Suspense>
       </main>
     </div>
