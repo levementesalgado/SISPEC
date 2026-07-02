@@ -1,0 +1,2600 @@
+{
+  "lotes": [
+    {
+      "id": 1,
+      "nome": "Lote A — Confinamento",
+      "descricao": "Animais em confinamento principal",
+      "ativo": 1,
+      "created_at": "2026-07-02T02:29:40.412Z"
+    },
+    {
+      "id": 2,
+      "nome": "Lote B — Recria",
+      "descricao": "Animais em fase de recria",
+      "ativo": 1,
+      "created_at": "2026-07-02T02:29:40.425Z"
+    },
+    {
+      "id": 3,
+      "nome": "Lote C — Terminação",
+      "descricao": "Animais em terminação para abate",
+      "ativo": 1,
+      "created_at": "2026-07-02T02:29:40.426Z"
+    }
+  ],
+  "animais": [
+    {
+      "id": 1,
+      "brinco": "BR-0001",
+      "raca": "Girolando",
+      "sexo": "FEMEA",
+      "composicao": null,
+      "data_entrada": "2026-03-25",
+      "peso_entrada": 277,
+      "lote_id": 1,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-03-25T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 2,
+      "brinco": "BR-0002",
+      "raca": "Nelore",
+      "sexo": "MACHO",
+      "composicao": null,
+      "data_entrada": "2026-05-04",
+      "peso_entrada": 280,
+      "lote_id": 3,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-05-04T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 3,
+      "brinco": "BR-0003",
+      "raca": "Brahman",
+      "sexo": "MACHO",
+      "composicao": null,
+      "data_entrada": "2026-05-03",
+      "peso_entrada": 217,
+      "lote_id": 1,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-05-03T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 4,
+      "brinco": "BR-0004",
+      "raca": "Girolando",
+      "sexo": "MACHO",
+      "composicao": null,
+      "data_entrada": "2026-04-14",
+      "peso_entrada": 287,
+      "lote_id": 2,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-04-14T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 5,
+      "brinco": "BR-0005",
+      "raca": "Nelore",
+      "sexo": "MACHO",
+      "composicao": null,
+      "data_entrada": "2026-04-10",
+      "peso_entrada": 240,
+      "lote_id": 3,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-04-10T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 6,
+      "brinco": "BR-0006",
+      "raca": "Senepol",
+      "sexo": "MACHO",
+      "composicao": null,
+      "data_entrada": "2026-04-14",
+      "peso_entrada": 257,
+      "lote_id": 2,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-04-14T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 7,
+      "brinco": "BR-0007",
+      "raca": "Angus",
+      "sexo": "FEMEA",
+      "composicao": null,
+      "data_entrada": "2026-04-20",
+      "peso_entrada": 289,
+      "lote_id": 1,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-04-20T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 8,
+      "brinco": "BR-0008",
+      "raca": "Angus",
+      "sexo": "MACHO",
+      "composicao": null,
+      "data_entrada": "2026-04-05",
+      "peso_entrada": 242,
+      "lote_id": 2,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-04-05T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 9,
+      "brinco": "BR-0009",
+      "raca": "Angus",
+      "sexo": "FEMEA",
+      "composicao": null,
+      "data_entrada": "2026-04-06",
+      "peso_entrada": 269,
+      "lote_id": 2,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-04-06T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 10,
+      "brinco": "BR-0010",
+      "raca": "Cruzado",
+      "sexo": "MACHO",
+      "composicao": [
+        {
+          "raca": "Nelore",
+          "porcentagem": 50
+        },
+        {
+          "raca": "Angus",
+          "porcentagem": 50
+        }
+      ],
+      "data_entrada": "2026-05-05",
+      "peso_entrada": 265,
+      "lote_id": 1,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-05-05T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 11,
+      "brinco": "BR-0011",
+      "raca": "Nelore",
+      "sexo": "FEMEA",
+      "composicao": null,
+      "data_entrada": "2026-04-28",
+      "peso_entrada": 217,
+      "lote_id": 3,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-04-28T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 12,
+      "brinco": "BR-0012",
+      "raca": "Girolando",
+      "sexo": "MACHO",
+      "composicao": null,
+      "data_entrada": "2026-03-13",
+      "peso_entrada": 234,
+      "lote_id": 3,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-03-13T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 13,
+      "brinco": "BR-0013",
+      "raca": "Senepol",
+      "sexo": "FEMEA",
+      "composicao": null,
+      "data_entrada": "2026-05-16",
+      "peso_entrada": 272,
+      "lote_id": 3,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-05-16T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 14,
+      "brinco": "BR-0014",
+      "raca": "Nelore",
+      "sexo": "MACHO",
+      "composicao": null,
+      "data_entrada": "2026-03-17",
+      "peso_entrada": 291,
+      "lote_id": 3,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-03-17T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 15,
+      "brinco": "BR-0015",
+      "raca": "Angus",
+      "sexo": "FEMEA",
+      "composicao": null,
+      "data_entrada": "2026-03-11",
+      "peso_entrada": 225,
+      "lote_id": 1,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-03-11T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 16,
+      "brinco": "BR-0016",
+      "raca": "Brahman",
+      "sexo": "FEMEA",
+      "composicao": null,
+      "data_entrada": "2026-05-06",
+      "peso_entrada": 204,
+      "lote_id": 2,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-05-06T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 17,
+      "brinco": "BR-0017",
+      "raca": "Senepol",
+      "sexo": "MACHO",
+      "composicao": null,
+      "data_entrada": "2026-05-22",
+      "peso_entrada": 276,
+      "lote_id": 1,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-05-22T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 18,
+      "brinco": "BR-0018",
+      "raca": "Girolando",
+      "sexo": "MACHO",
+      "composicao": null,
+      "data_entrada": "2026-05-06",
+      "peso_entrada": 240,
+      "lote_id": 3,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-05-06T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 19,
+      "brinco": "BR-0019",
+      "raca": "Angus",
+      "sexo": "MACHO",
+      "composicao": null,
+      "data_entrada": "2026-04-24",
+      "peso_entrada": 230,
+      "lote_id": 3,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-04-24T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 20,
+      "brinco": "BR-0020",
+      "raca": "Angus",
+      "sexo": "FEMEA",
+      "composicao": null,
+      "data_entrada": "2026-05-13",
+      "peso_entrada": 212,
+      "lote_id": 1,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-05-13T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 21,
+      "brinco": "BR-0021",
+      "raca": "Brahman",
+      "sexo": "MACHO",
+      "composicao": null,
+      "data_entrada": "2026-03-24",
+      "peso_entrada": 233,
+      "lote_id": 3,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-03-24T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 22,
+      "brinco": "BR-0022",
+      "raca": "Cruzado",
+      "sexo": "MACHO",
+      "composicao": [
+        {
+          "raca": "Nelore",
+          "porcentagem": 50
+        },
+        {
+          "raca": "Angus",
+          "porcentagem": 50
+        }
+      ],
+      "data_entrada": "2026-04-20",
+      "peso_entrada": 254,
+      "lote_id": 1,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-04-20T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 23,
+      "brinco": "BR-0023",
+      "raca": "Girolando",
+      "sexo": "FEMEA",
+      "composicao": null,
+      "data_entrada": "2026-03-18",
+      "peso_entrada": 241,
+      "lote_id": 1,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-03-18T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 24,
+      "brinco": "BR-0024",
+      "raca": "Brahman",
+      "sexo": "FEMEA",
+      "composicao": null,
+      "data_entrada": "2026-04-16",
+      "peso_entrada": 202,
+      "lote_id": 2,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-04-16T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 25,
+      "brinco": "BR-0025",
+      "raca": "Angus",
+      "sexo": "FEMEA",
+      "composicao": null,
+      "data_entrada": "2026-03-10",
+      "peso_entrada": 280,
+      "lote_id": 2,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-03-10T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 26,
+      "brinco": "BR-0026",
+      "raca": "Nelore",
+      "sexo": "FEMEA",
+      "composicao": null,
+      "data_entrada": "2026-05-09",
+      "peso_entrada": 275,
+      "lote_id": 2,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-05-09T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 27,
+      "brinco": "BR-0027",
+      "raca": "Senepol",
+      "sexo": "MACHO",
+      "composicao": null,
+      "data_entrada": "2026-03-16",
+      "peso_entrada": 260,
+      "lote_id": 2,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-03-16T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 28,
+      "brinco": "BR-0028",
+      "raca": "Brahman",
+      "sexo": "FEMEA",
+      "composicao": null,
+      "data_entrada": "2026-03-15",
+      "peso_entrada": 204,
+      "lote_id": 2,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-03-15T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 29,
+      "brinco": "BR-0029",
+      "raca": "Senepol",
+      "sexo": "MACHO",
+      "composicao": null,
+      "data_entrada": "2026-04-18",
+      "peso_entrada": 257,
+      "lote_id": 3,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-04-18T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 30,
+      "brinco": "BR-0030",
+      "raca": "Senepol",
+      "sexo": "MACHO",
+      "composicao": null,
+      "data_entrada": "2026-04-25",
+      "peso_entrada": 230,
+      "lote_id": 3,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-04-25T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 31,
+      "brinco": "BR-0031",
+      "raca": "Angus",
+      "sexo": "FEMEA",
+      "composicao": null,
+      "data_entrada": "2026-04-29",
+      "peso_entrada": 209,
+      "lote_id": 1,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-04-29T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 32,
+      "brinco": "BR-0032",
+      "raca": "Senepol",
+      "sexo": "FEMEA",
+      "composicao": null,
+      "data_entrada": "2026-03-17",
+      "peso_entrada": 218,
+      "lote_id": 1,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-03-17T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 33,
+      "brinco": "BR-0033",
+      "raca": "Senepol",
+      "sexo": "FEMEA",
+      "composicao": null,
+      "data_entrada": "2026-05-06",
+      "peso_entrada": 230,
+      "lote_id": 1,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-05-06T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 34,
+      "brinco": "BR-0034",
+      "raca": "Senepol",
+      "sexo": "MACHO",
+      "composicao": null,
+      "data_entrada": "2026-03-18",
+      "peso_entrada": 241,
+      "lote_id": 2,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-03-18T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 35,
+      "brinco": "BR-0035",
+      "raca": "Senepol",
+      "sexo": "FEMEA",
+      "composicao": null,
+      "data_entrada": "2026-05-20",
+      "peso_entrada": 266,
+      "lote_id": 2,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-05-20T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 36,
+      "brinco": "BR-0036",
+      "raca": "Angus",
+      "sexo": "FEMEA",
+      "composicao": null,
+      "data_entrada": "2026-04-01",
+      "peso_entrada": 221,
+      "lote_id": 2,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-04-01T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 37,
+      "brinco": "BR-0037",
+      "raca": "Brahman",
+      "sexo": "FEMEA",
+      "composicao": null,
+      "data_entrada": "2026-03-13",
+      "peso_entrada": 232,
+      "lote_id": 2,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-03-13T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 38,
+      "brinco": "BR-0038",
+      "raca": "Brahman",
+      "sexo": "FEMEA",
+      "composicao": null,
+      "data_entrada": "2026-05-21",
+      "peso_entrada": 239,
+      "lote_id": 2,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-05-21T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 39,
+      "brinco": "BR-0039",
+      "raca": "Angus",
+      "sexo": "MACHO",
+      "composicao": null,
+      "data_entrada": "2026-03-08",
+      "peso_entrada": 278,
+      "lote_id": 1,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-03-08T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 40,
+      "brinco": "BR-0040",
+      "raca": "Senepol",
+      "sexo": "FEMEA",
+      "composicao": null,
+      "data_entrada": "2026-04-26",
+      "peso_entrada": 224,
+      "lote_id": 2,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-04-26T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 41,
+      "brinco": "BR-0041",
+      "raca": "Senepol",
+      "sexo": "MACHO",
+      "composicao": null,
+      "data_entrada": "2026-04-29",
+      "peso_entrada": 255,
+      "lote_id": 1,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-04-29T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 42,
+      "brinco": "BR-0042",
+      "raca": "Girolando",
+      "sexo": "MACHO",
+      "composicao": null,
+      "data_entrada": "2026-03-27",
+      "peso_entrada": 298,
+      "lote_id": 1,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-03-27T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 43,
+      "brinco": "BR-0043",
+      "raca": "Angus",
+      "sexo": "MACHO",
+      "composicao": null,
+      "data_entrada": "2026-03-16",
+      "peso_entrada": 257,
+      "lote_id": 2,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-03-16T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 44,
+      "brinco": "BR-0044",
+      "raca": "Cruzado",
+      "sexo": "FEMEA",
+      "composicao": [
+        {
+          "raca": "Nelore",
+          "porcentagem": 50
+        },
+        {
+          "raca": "Angus",
+          "porcentagem": 50
+        }
+      ],
+      "data_entrada": "2026-04-07",
+      "peso_entrada": 223,
+      "lote_id": 3,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-04-07T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 45,
+      "brinco": "BR-0045",
+      "raca": "Nelore",
+      "sexo": "FEMEA",
+      "composicao": null,
+      "data_entrada": "2026-04-01",
+      "peso_entrada": 206,
+      "lote_id": 1,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-04-01T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 46,
+      "brinco": "BR-0046",
+      "raca": "Brahman",
+      "sexo": "MACHO",
+      "composicao": null,
+      "data_entrada": "2026-04-21",
+      "peso_entrada": 298,
+      "lote_id": 1,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-04-21T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 47,
+      "brinco": "BR-0047",
+      "raca": "Nelore",
+      "sexo": "MACHO",
+      "composicao": null,
+      "data_entrada": "2026-04-07",
+      "peso_entrada": 276,
+      "lote_id": 1,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-04-07T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    },
+    {
+      "id": 48,
+      "brinco": "BR-0048",
+      "raca": "Brahman",
+      "sexo": "MACHO",
+      "composicao": null,
+      "data_entrada": "2026-04-02",
+      "peso_entrada": 246,
+      "lote_id": 2,
+      "observacao": null,
+      "status": "ATIVO",
+      "created_at": "2026-04-02T02:29:40.426Z",
+      "updated_at": "2026-07-02T02:29:40.426Z"
+    }
+  ],
+  "pesagens": [
+    {
+      "id": 1,
+      "animal_id": 1,
+      "data_pesagem": "2026-04-09",
+      "peso": 286.6,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-04-09T00:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "animal_id": 1,
+      "data_pesagem": "2026-04-24",
+      "peso": 300.7,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-04-24T00:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "animal_id": 1,
+      "data_pesagem": "2026-05-09",
+      "peso": 311.4,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-09T00:00:00.000Z"
+    },
+    {
+      "id": 4,
+      "animal_id": 1,
+      "data_pesagem": "2026-05-24",
+      "peso": 327.2,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-24T00:00:00.000Z"
+    },
+    {
+      "id": 5,
+      "animal_id": 1,
+      "data_pesagem": "2026-06-08",
+      "peso": 320.3,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-08T00:00:00.000Z"
+    },
+    {
+      "id": 6,
+      "animal_id": 1,
+      "data_pesagem": "2026-06-23",
+      "peso": 347.9,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-23T00:00:00.000Z"
+    },
+    {
+      "id": 7,
+      "animal_id": 2,
+      "data_pesagem": "2026-06-03",
+      "peso": 305.2,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-03T00:00:00.000Z"
+    },
+    {
+      "id": 8,
+      "animal_id": 3,
+      "data_pesagem": "2026-05-26",
+      "peso": 245.5,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-26T00:00:00.000Z"
+    },
+    {
+      "id": 9,
+      "animal_id": 3,
+      "data_pesagem": "2026-06-17",
+      "peso": 278.8,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-17T00:00:00.000Z"
+    },
+    {
+      "id": 10,
+      "animal_id": 4,
+      "data_pesagem": "2026-05-14",
+      "peso": 320.6,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-14T00:00:00.000Z"
+    },
+    {
+      "id": 11,
+      "animal_id": 4,
+      "data_pesagem": "2026-06-13",
+      "peso": 361.4,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-13T00:00:00.000Z"
+    },
+    {
+      "id": 12,
+      "animal_id": 5,
+      "data_pesagem": "2026-05-03",
+      "peso": 270.1,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-03T00:00:00.000Z"
+    },
+    {
+      "id": 13,
+      "animal_id": 5,
+      "data_pesagem": "2026-05-25",
+      "peso": 286.5,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-25T00:00:00.000Z"
+    },
+    {
+      "id": 14,
+      "animal_id": 5,
+      "data_pesagem": "2026-06-17",
+      "peso": 324.7,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-17T00:00:00.000Z"
+    },
+    {
+      "id": 15,
+      "animal_id": 6,
+      "data_pesagem": "2026-04-27",
+      "peso": 266,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-04-27T00:00:00.000Z"
+    },
+    {
+      "id": 16,
+      "animal_id": 6,
+      "data_pesagem": "2026-05-10",
+      "peso": 280.5,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-10T00:00:00.000Z"
+    },
+    {
+      "id": 17,
+      "animal_id": 6,
+      "data_pesagem": "2026-05-23",
+      "peso": 289.3,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-23T00:00:00.000Z"
+    },
+    {
+      "id": 18,
+      "animal_id": 6,
+      "data_pesagem": "2026-06-04",
+      "peso": 303.9,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-04T00:00:00.000Z"
+    },
+    {
+      "id": 19,
+      "animal_id": 6,
+      "data_pesagem": "2026-06-17",
+      "peso": 323.5,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-17T00:00:00.000Z"
+    },
+    {
+      "id": 20,
+      "animal_id": 6,
+      "data_pesagem": "2026-06-30",
+      "peso": 335.1,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-30T00:00:00.000Z"
+    },
+    {
+      "id": 21,
+      "animal_id": 7,
+      "data_pesagem": "2026-05-01",
+      "peso": 296.5,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-01T00:00:00.000Z"
+    },
+    {
+      "id": 22,
+      "animal_id": 7,
+      "data_pesagem": "2026-05-13",
+      "peso": 307,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-05-13T00:00:00.000Z"
+    },
+    {
+      "id": 23,
+      "animal_id": 7,
+      "data_pesagem": "2026-05-24",
+      "peso": 321.4,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-24T00:00:00.000Z"
+    },
+    {
+      "id": 24,
+      "animal_id": 7,
+      "data_pesagem": "2026-06-04",
+      "peso": 321.6,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-04T00:00:00.000Z"
+    },
+    {
+      "id": 25,
+      "animal_id": 7,
+      "data_pesagem": "2026-06-15",
+      "peso": 342.3,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-15T00:00:00.000Z"
+    },
+    {
+      "id": 26,
+      "animal_id": 7,
+      "data_pesagem": "2026-06-27",
+      "peso": 353.5,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-27T00:00:00.000Z"
+    },
+    {
+      "id": 27,
+      "animal_id": 8,
+      "data_pesagem": "2026-04-20",
+      "peso": 256.2,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-04-20T00:00:00.000Z"
+    },
+    {
+      "id": 28,
+      "animal_id": 8,
+      "data_pesagem": "2026-05-05",
+      "peso": 273.2,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-05T00:00:00.000Z"
+    },
+    {
+      "id": 29,
+      "animal_id": 8,
+      "data_pesagem": "2026-05-20",
+      "peso": 288,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-20T00:00:00.000Z"
+    },
+    {
+      "id": 30,
+      "animal_id": 8,
+      "data_pesagem": "2026-06-04",
+      "peso": 292.2,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-04T00:00:00.000Z"
+    },
+    {
+      "id": 31,
+      "animal_id": 8,
+      "data_pesagem": "2026-06-19",
+      "peso": 307.6,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-19T00:00:00.000Z"
+    },
+    {
+      "id": 32,
+      "animal_id": 9,
+      "data_pesagem": "2026-04-21",
+      "peso": 283.5,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-04-21T00:00:00.000Z"
+    },
+    {
+      "id": 33,
+      "animal_id": 9,
+      "data_pesagem": "2026-05-06",
+      "peso": 298.5,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-05-06T00:00:00.000Z"
+    },
+    {
+      "id": 34,
+      "animal_id": 9,
+      "data_pesagem": "2026-05-21",
+      "peso": 310.4,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-21T00:00:00.000Z"
+    },
+    {
+      "id": 35,
+      "animal_id": 9,
+      "data_pesagem": "2026-06-05",
+      "peso": 316.8,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-05T00:00:00.000Z"
+    },
+    {
+      "id": 36,
+      "animal_id": 9,
+      "data_pesagem": "2026-06-20",
+      "peso": 332,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-20T00:00:00.000Z"
+    },
+    {
+      "id": 37,
+      "animal_id": 10,
+      "data_pesagem": "2026-05-23",
+      "peso": 276.2,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-23T00:00:00.000Z"
+    },
+    {
+      "id": 38,
+      "animal_id": 10,
+      "data_pesagem": "2026-06-10",
+      "peso": 297.6,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-10T00:00:00.000Z"
+    },
+    {
+      "id": 39,
+      "animal_id": 10,
+      "data_pesagem": "2026-06-28",
+      "peso": 317.5,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-28T00:00:00.000Z"
+    },
+    {
+      "id": 40,
+      "animal_id": 11,
+      "data_pesagem": "2026-05-11",
+      "peso": 226,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-11T00:00:00.000Z"
+    },
+    {
+      "id": 41,
+      "animal_id": 11,
+      "data_pesagem": "2026-05-24",
+      "peso": 238.8,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-05-24T00:00:00.000Z"
+    },
+    {
+      "id": 42,
+      "animal_id": 11,
+      "data_pesagem": "2026-06-06",
+      "peso": 252.1,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-06T00:00:00.000Z"
+    },
+    {
+      "id": 43,
+      "animal_id": 11,
+      "data_pesagem": "2026-06-18",
+      "peso": 257.5,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-18T00:00:00.000Z"
+    },
+    {
+      "id": 44,
+      "animal_id": 11,
+      "data_pesagem": "2026-07-01",
+      "peso": 277.1,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-07-01T00:00:00.000Z"
+    },
+    {
+      "id": 45,
+      "animal_id": 12,
+      "data_pesagem": "2026-04-05",
+      "peso": 265.5,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-04-05T00:00:00.000Z"
+    },
+    {
+      "id": 46,
+      "animal_id": 12,
+      "data_pesagem": "2026-04-27",
+      "peso": 295.7,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-04-27T00:00:00.000Z"
+    },
+    {
+      "id": 47,
+      "animal_id": 12,
+      "data_pesagem": "2026-05-20",
+      "peso": 314.3,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-05-20T00:00:00.000Z"
+    },
+    {
+      "id": 48,
+      "animal_id": 12,
+      "data_pesagem": "2026-06-11",
+      "peso": 365.4,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-11T00:00:00.000Z"
+    },
+    {
+      "id": 49,
+      "animal_id": 13,
+      "data_pesagem": "2026-05-27",
+      "peso": 284.5,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-05-27T00:00:00.000Z"
+    },
+    {
+      "id": 50,
+      "animal_id": 13,
+      "data_pesagem": "2026-06-08",
+      "peso": 297,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-08T00:00:00.000Z"
+    },
+    {
+      "id": 51,
+      "animal_id": 13,
+      "data_pesagem": "2026-06-19",
+      "peso": 309.2,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-19T00:00:00.000Z"
+    },
+    {
+      "id": 52,
+      "animal_id": 13,
+      "data_pesagem": "2026-06-30",
+      "peso": 331.8,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-30T00:00:00.000Z"
+    },
+    {
+      "id": 53,
+      "animal_id": 14,
+      "data_pesagem": "2026-04-09",
+      "peso": 313.7,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-04-09T00:00:00.000Z"
+    },
+    {
+      "id": 54,
+      "animal_id": 14,
+      "data_pesagem": "2026-05-01",
+      "peso": 335.3,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-01T00:00:00.000Z"
+    },
+    {
+      "id": 55,
+      "animal_id": 14,
+      "data_pesagem": "2026-05-24",
+      "peso": 351.2,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-24T00:00:00.000Z"
+    },
+    {
+      "id": 56,
+      "animal_id": 14,
+      "data_pesagem": "2026-06-15",
+      "peso": 352.6,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-15T00:00:00.000Z"
+    },
+    {
+      "id": 57,
+      "animal_id": 15,
+      "data_pesagem": "2026-03-22",
+      "peso": 238.8,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-03-22T00:00:00.000Z"
+    },
+    {
+      "id": 58,
+      "animal_id": 15,
+      "data_pesagem": "2026-04-03",
+      "peso": 254.7,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-04-03T00:00:00.000Z"
+    },
+    {
+      "id": 59,
+      "animal_id": 15,
+      "data_pesagem": "2026-04-14",
+      "peso": 271.3,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-04-14T00:00:00.000Z"
+    },
+    {
+      "id": 60,
+      "animal_id": 15,
+      "data_pesagem": "2026-04-25",
+      "peso": 272.2,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-04-25T00:00:00.000Z"
+    },
+    {
+      "id": 61,
+      "animal_id": 15,
+      "data_pesagem": "2026-05-06",
+      "peso": 296.3,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-06T00:00:00.000Z"
+    },
+    {
+      "id": 62,
+      "animal_id": 15,
+      "data_pesagem": "2026-05-18",
+      "peso": 295.9,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-18T00:00:00.000Z"
+    },
+    {
+      "id": 63,
+      "animal_id": 15,
+      "data_pesagem": "2026-05-29",
+      "peso": 337.1,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-05-29T00:00:00.000Z"
+    },
+    {
+      "id": 64,
+      "animal_id": 15,
+      "data_pesagem": "2026-06-09",
+      "peso": 339.2,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-09T00:00:00.000Z"
+    },
+    {
+      "id": 65,
+      "animal_id": 16,
+      "data_pesagem": "2026-05-24",
+      "peso": 216.2,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-24T00:00:00.000Z"
+    },
+    {
+      "id": 66,
+      "animal_id": 16,
+      "data_pesagem": "2026-06-11",
+      "peso": 228.9,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-11T00:00:00.000Z"
+    },
+    {
+      "id": 67,
+      "animal_id": 16,
+      "data_pesagem": "2026-06-29",
+      "peso": 243.4,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-29T00:00:00.000Z"
+    },
+    {
+      "id": 68,
+      "animal_id": 17,
+      "data_pesagem": "2026-06-21",
+      "peso": 312.5,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-21T00:00:00.000Z"
+    },
+    {
+      "id": 69,
+      "animal_id": 18,
+      "data_pesagem": "2026-05-24",
+      "peso": 259.6,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-05-24T00:00:00.000Z"
+    },
+    {
+      "id": 70,
+      "animal_id": 18,
+      "data_pesagem": "2026-06-11",
+      "peso": 281.7,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-11T00:00:00.000Z"
+    },
+    {
+      "id": 71,
+      "animal_id": 18,
+      "data_pesagem": "2026-06-29",
+      "peso": 302.8,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-29T00:00:00.000Z"
+    },
+    {
+      "id": 72,
+      "animal_id": 19,
+      "data_pesagem": "2026-05-12",
+      "peso": 247.7,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-12T00:00:00.000Z"
+    },
+    {
+      "id": 73,
+      "animal_id": 19,
+      "data_pesagem": "2026-05-30",
+      "peso": 267.9,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-05-30T00:00:00.000Z"
+    },
+    {
+      "id": 74,
+      "animal_id": 19,
+      "data_pesagem": "2026-06-17",
+      "peso": 285.7,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-17T00:00:00.000Z"
+    },
+    {
+      "id": 75,
+      "animal_id": 20,
+      "data_pesagem": "2026-06-12",
+      "peso": 236,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-12T00:00:00.000Z"
+    },
+    {
+      "id": 76,
+      "animal_id": 21,
+      "data_pesagem": "2026-04-16",
+      "peso": 261.3,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-04-16T00:00:00.000Z"
+    },
+    {
+      "id": 77,
+      "animal_id": 21,
+      "data_pesagem": "2026-05-08",
+      "peso": 286.7,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-08T00:00:00.000Z"
+    },
+    {
+      "id": 78,
+      "animal_id": 21,
+      "data_pesagem": "2026-05-31",
+      "peso": 303.8,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-05-31T00:00:00.000Z"
+    },
+    {
+      "id": 79,
+      "animal_id": 21,
+      "data_pesagem": "2026-06-22",
+      "peso": 336.1,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-22T00:00:00.000Z"
+    },
+    {
+      "id": 80,
+      "animal_id": 22,
+      "data_pesagem": "2026-05-05",
+      "peso": 265.4,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-05-05T00:00:00.000Z"
+    },
+    {
+      "id": 81,
+      "animal_id": 22,
+      "data_pesagem": "2026-05-20",
+      "peso": 281.3,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-20T00:00:00.000Z"
+    },
+    {
+      "id": 82,
+      "animal_id": 22,
+      "data_pesagem": "2026-06-04",
+      "peso": 283.3,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-04T00:00:00.000Z"
+    },
+    {
+      "id": 83,
+      "animal_id": 22,
+      "data_pesagem": "2026-06-19",
+      "peso": 306.2,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-19T00:00:00.000Z"
+    },
+    {
+      "id": 84,
+      "animal_id": 23,
+      "data_pesagem": "2026-03-29",
+      "peso": 247.7,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-03-29T00:00:00.000Z"
+    },
+    {
+      "id": 85,
+      "animal_id": 23,
+      "data_pesagem": "2026-04-10",
+      "peso": 255.6,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-04-10T00:00:00.000Z"
+    },
+    {
+      "id": 86,
+      "animal_id": 23,
+      "data_pesagem": "2026-04-21",
+      "peso": 266.2,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-04-21T00:00:00.000Z"
+    },
+    {
+      "id": 87,
+      "animal_id": 23,
+      "data_pesagem": "2026-05-02",
+      "peso": 272,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-02T00:00:00.000Z"
+    },
+    {
+      "id": 88,
+      "animal_id": 23,
+      "data_pesagem": "2026-05-13",
+      "peso": 286.5,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-13T00:00:00.000Z"
+    },
+    {
+      "id": 89,
+      "animal_id": 23,
+      "data_pesagem": "2026-05-25",
+      "peso": 291.7,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-05-25T00:00:00.000Z"
+    },
+    {
+      "id": 90,
+      "animal_id": 23,
+      "data_pesagem": "2026-06-05",
+      "peso": 303.3,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-05T00:00:00.000Z"
+    },
+    {
+      "id": 91,
+      "animal_id": 23,
+      "data_pesagem": "2026-06-16",
+      "peso": 319.6,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-16T00:00:00.000Z"
+    },
+    {
+      "id": 92,
+      "animal_id": 24,
+      "data_pesagem": "2026-04-27",
+      "peso": 210.1,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-04-27T00:00:00.000Z"
+    },
+    {
+      "id": 93,
+      "animal_id": 24,
+      "data_pesagem": "2026-05-09",
+      "peso": 220.2,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-09T00:00:00.000Z"
+    },
+    {
+      "id": 94,
+      "animal_id": 24,
+      "data_pesagem": "2026-05-20",
+      "peso": 235.5,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-20T00:00:00.000Z"
+    },
+    {
+      "id": 95,
+      "animal_id": 24,
+      "data_pesagem": "2026-05-31",
+      "peso": 239.6,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-05-31T00:00:00.000Z"
+    },
+    {
+      "id": 96,
+      "animal_id": 24,
+      "data_pesagem": "2026-06-11",
+      "peso": 259.5,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-11T00:00:00.000Z"
+    },
+    {
+      "id": 97,
+      "animal_id": 24,
+      "data_pesagem": "2026-06-23",
+      "peso": 262.3,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-23T00:00:00.000Z"
+    },
+    {
+      "id": 98,
+      "animal_id": 25,
+      "data_pesagem": "2026-04-02",
+      "peso": 309.8,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-04-02T00:00:00.000Z"
+    },
+    {
+      "id": 99,
+      "animal_id": 25,
+      "data_pesagem": "2026-04-24",
+      "peso": 339.7,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-04-24T00:00:00.000Z"
+    },
+    {
+      "id": 100,
+      "animal_id": 25,
+      "data_pesagem": "2026-05-17",
+      "peso": 370.5,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-05-17T00:00:00.000Z"
+    },
+    {
+      "id": 101,
+      "animal_id": 25,
+      "data_pesagem": "2026-06-08",
+      "peso": 385.2,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-08T00:00:00.000Z"
+    },
+    {
+      "id": 102,
+      "animal_id": 26,
+      "data_pesagem": "2026-05-22",
+      "peso": 288.4,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-22T00:00:00.000Z"
+    },
+    {
+      "id": 103,
+      "animal_id": 26,
+      "data_pesagem": "2026-06-04",
+      "peso": 297.3,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-04T00:00:00.000Z"
+    },
+    {
+      "id": 104,
+      "animal_id": 26,
+      "data_pesagem": "2026-06-17",
+      "peso": 310.4,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-17T00:00:00.000Z"
+    },
+    {
+      "id": 105,
+      "animal_id": 26,
+      "data_pesagem": "2026-06-29",
+      "peso": 322.9,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-29T00:00:00.000Z"
+    },
+    {
+      "id": 106,
+      "animal_id": 27,
+      "data_pesagem": "2026-03-29",
+      "peso": 268.2,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-03-29T00:00:00.000Z"
+    },
+    {
+      "id": 107,
+      "animal_id": 27,
+      "data_pesagem": "2026-04-11",
+      "peso": 282.5,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-04-11T00:00:00.000Z"
+    },
+    {
+      "id": 108,
+      "animal_id": 27,
+      "data_pesagem": "2026-04-24",
+      "peso": 296.4,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-04-24T00:00:00.000Z"
+    },
+    {
+      "id": 109,
+      "animal_id": 27,
+      "data_pesagem": "2026-05-06",
+      "peso": 291.7,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-06T00:00:00.000Z"
+    },
+    {
+      "id": 110,
+      "animal_id": 27,
+      "data_pesagem": "2026-05-19",
+      "peso": 321,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-05-19T00:00:00.000Z"
+    },
+    {
+      "id": 111,
+      "animal_id": 27,
+      "data_pesagem": "2026-06-01",
+      "peso": 310.1,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-01T00:00:00.000Z"
+    },
+    {
+      "id": 112,
+      "animal_id": 27,
+      "data_pesagem": "2026-06-14",
+      "peso": 317.5,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-14T00:00:00.000Z"
+    },
+    {
+      "id": 113,
+      "animal_id": 28,
+      "data_pesagem": "2026-04-02",
+      "peso": 222.6,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-04-02T00:00:00.000Z"
+    },
+    {
+      "id": 114,
+      "animal_id": 28,
+      "data_pesagem": "2026-04-20",
+      "peso": 235.6,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-04-20T00:00:00.000Z"
+    },
+    {
+      "id": 115,
+      "animal_id": 28,
+      "data_pesagem": "2026-05-08",
+      "peso": 269.4,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-08T00:00:00.000Z"
+    },
+    {
+      "id": 116,
+      "animal_id": 28,
+      "data_pesagem": "2026-05-26",
+      "peso": 286.8,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-26T00:00:00.000Z"
+    },
+    {
+      "id": 117,
+      "animal_id": 28,
+      "data_pesagem": "2026-06-13",
+      "peso": 303.2,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-13T00:00:00.000Z"
+    },
+    {
+      "id": 118,
+      "animal_id": 29,
+      "data_pesagem": "2026-05-01",
+      "peso": 274.1,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-05-01T00:00:00.000Z"
+    },
+    {
+      "id": 119,
+      "animal_id": 29,
+      "data_pesagem": "2026-05-14",
+      "peso": 283.7,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-05-14T00:00:00.000Z"
+    },
+    {
+      "id": 120,
+      "animal_id": 29,
+      "data_pesagem": "2026-05-27",
+      "peso": 304.3,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-27T00:00:00.000Z"
+    },
+    {
+      "id": 121,
+      "animal_id": 29,
+      "data_pesagem": "2026-06-08",
+      "peso": 325.4,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-08T00:00:00.000Z"
+    },
+    {
+      "id": 122,
+      "animal_id": 29,
+      "data_pesagem": "2026-06-21",
+      "peso": 321.2,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-21T00:00:00.000Z"
+    },
+    {
+      "id": 123,
+      "animal_id": 30,
+      "data_pesagem": "2026-05-06",
+      "peso": 238.2,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-06T00:00:00.000Z"
+    },
+    {
+      "id": 124,
+      "animal_id": 30,
+      "data_pesagem": "2026-05-18",
+      "peso": 250.8,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-18T00:00:00.000Z"
+    },
+    {
+      "id": 125,
+      "animal_id": 30,
+      "data_pesagem": "2026-05-29",
+      "peso": 251.6,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-29T00:00:00.000Z"
+    },
+    {
+      "id": 126,
+      "animal_id": 30,
+      "data_pesagem": "2026-06-09",
+      "peso": 267.9,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-09T00:00:00.000Z"
+    },
+    {
+      "id": 127,
+      "animal_id": 30,
+      "data_pesagem": "2026-06-20",
+      "peso": 287.4,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-20T00:00:00.000Z"
+    },
+    {
+      "id": 128,
+      "animal_id": 30,
+      "data_pesagem": "2026-07-02",
+      "peso": 293.7,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-07-02T00:00:00.000Z"
+    },
+    {
+      "id": 129,
+      "animal_id": 31,
+      "data_pesagem": "2026-05-10",
+      "peso": 218.5,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-10T00:00:00.000Z"
+    },
+    {
+      "id": 130,
+      "animal_id": 31,
+      "data_pesagem": "2026-05-22",
+      "peso": 235.1,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-22T00:00:00.000Z"
+    },
+    {
+      "id": 131,
+      "animal_id": 31,
+      "data_pesagem": "2026-06-02",
+      "peso": 249,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-02T00:00:00.000Z"
+    },
+    {
+      "id": 132,
+      "animal_id": 31,
+      "data_pesagem": "2026-06-13",
+      "peso": 254.1,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-13T00:00:00.000Z"
+    },
+    {
+      "id": 133,
+      "animal_id": 31,
+      "data_pesagem": "2026-06-24",
+      "peso": 260.7,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-24T00:00:00.000Z"
+    },
+    {
+      "id": 134,
+      "animal_id": 32,
+      "data_pesagem": "2026-04-16",
+      "peso": 250.3,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-04-16T00:00:00.000Z"
+    },
+    {
+      "id": 135,
+      "animal_id": 32,
+      "data_pesagem": "2026-05-16",
+      "peso": 281.7,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-16T00:00:00.000Z"
+    },
+    {
+      "id": 136,
+      "animal_id": 32,
+      "data_pesagem": "2026-06-15",
+      "peso": 337.1,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-15T00:00:00.000Z"
+    },
+    {
+      "id": 137,
+      "animal_id": 33,
+      "data_pesagem": "2026-05-24",
+      "peso": 250.3,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-24T00:00:00.000Z"
+    },
+    {
+      "id": 138,
+      "animal_id": 33,
+      "data_pesagem": "2026-06-11",
+      "peso": 281.7,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-11T00:00:00.000Z"
+    },
+    {
+      "id": 139,
+      "animal_id": 33,
+      "data_pesagem": "2026-06-29",
+      "peso": 293.5,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-29T00:00:00.000Z"
+    },
+    {
+      "id": 140,
+      "animal_id": 34,
+      "data_pesagem": "2026-04-02",
+      "peso": 262,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-04-02T00:00:00.000Z"
+    },
+    {
+      "id": 141,
+      "animal_id": 34,
+      "data_pesagem": "2026-04-17",
+      "peso": 281,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-04-17T00:00:00.000Z"
+    },
+    {
+      "id": 142,
+      "animal_id": 34,
+      "data_pesagem": "2026-05-02",
+      "peso": 303.9,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-02T00:00:00.000Z"
+    },
+    {
+      "id": 143,
+      "animal_id": 34,
+      "data_pesagem": "2026-05-17",
+      "peso": 314.1,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-17T00:00:00.000Z"
+    },
+    {
+      "id": 144,
+      "animal_id": 34,
+      "data_pesagem": "2026-06-01",
+      "peso": 337.1,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-01T00:00:00.000Z"
+    },
+    {
+      "id": 145,
+      "animal_id": 34,
+      "data_pesagem": "2026-06-16",
+      "peso": 362.2,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-16T00:00:00.000Z"
+    },
+    {
+      "id": 146,
+      "animal_id": 35,
+      "data_pesagem": "2026-06-02",
+      "peso": 275.5,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-02T00:00:00.000Z"
+    },
+    {
+      "id": 147,
+      "animal_id": 35,
+      "data_pesagem": "2026-06-15",
+      "peso": 289.8,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-15T00:00:00.000Z"
+    },
+    {
+      "id": 148,
+      "animal_id": 35,
+      "data_pesagem": "2026-06-28",
+      "peso": 302,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-28T00:00:00.000Z"
+    },
+    {
+      "id": 149,
+      "animal_id": 36,
+      "data_pesagem": "2026-04-19",
+      "peso": 241.8,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-04-19T00:00:00.000Z"
+    },
+    {
+      "id": 150,
+      "animal_id": 36,
+      "data_pesagem": "2026-05-07",
+      "peso": 257.2,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-07T00:00:00.000Z"
+    },
+    {
+      "id": 151,
+      "animal_id": 36,
+      "data_pesagem": "2026-05-25",
+      "peso": 276.6,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-25T00:00:00.000Z"
+    },
+    {
+      "id": 152,
+      "animal_id": 36,
+      "data_pesagem": "2026-06-12",
+      "peso": 293.9,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-12T00:00:00.000Z"
+    },
+    {
+      "id": 153,
+      "animal_id": 36,
+      "data_pesagem": "2026-06-30",
+      "peso": 326.1,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-30T00:00:00.000Z"
+    },
+    {
+      "id": 154,
+      "animal_id": 37,
+      "data_pesagem": "2026-03-24",
+      "peso": 242.4,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-03-24T00:00:00.000Z"
+    },
+    {
+      "id": 155,
+      "animal_id": 37,
+      "data_pesagem": "2026-04-05",
+      "peso": 251.5,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-04-05T00:00:00.000Z"
+    },
+    {
+      "id": 156,
+      "animal_id": 37,
+      "data_pesagem": "2026-04-16",
+      "peso": 257.4,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-04-16T00:00:00.000Z"
+    },
+    {
+      "id": 157,
+      "animal_id": 37,
+      "data_pesagem": "2026-04-27",
+      "peso": 264.2,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-04-27T00:00:00.000Z"
+    },
+    {
+      "id": 158,
+      "animal_id": 37,
+      "data_pesagem": "2026-05-08",
+      "peso": 288.5,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-08T00:00:00.000Z"
+    },
+    {
+      "id": 159,
+      "animal_id": 37,
+      "data_pesagem": "2026-05-20",
+      "peso": 277.8,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-05-20T00:00:00.000Z"
+    },
+    {
+      "id": 160,
+      "animal_id": 37,
+      "data_pesagem": "2026-05-31",
+      "peso": 289.5,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-31T00:00:00.000Z"
+    },
+    {
+      "id": 161,
+      "animal_id": 37,
+      "data_pesagem": "2026-06-11",
+      "peso": 311.6,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-11T00:00:00.000Z"
+    },
+    {
+      "id": 162,
+      "animal_id": 38,
+      "data_pesagem": "2026-06-05",
+      "peso": 256.3,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-05T00:00:00.000Z"
+    },
+    {
+      "id": 163,
+      "animal_id": 38,
+      "data_pesagem": "2026-06-20",
+      "peso": 271.4,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-20T00:00:00.000Z"
+    },
+    {
+      "id": 164,
+      "animal_id": 39,
+      "data_pesagem": "2026-03-19",
+      "peso": 291.2,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-03-19T00:00:00.000Z"
+    },
+    {
+      "id": 165,
+      "animal_id": 39,
+      "data_pesagem": "2026-03-31",
+      "peso": 304.7,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-03-31T00:00:00.000Z"
+    },
+    {
+      "id": 166,
+      "animal_id": 39,
+      "data_pesagem": "2026-04-11",
+      "peso": 314.8,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-04-11T00:00:00.000Z"
+    },
+    {
+      "id": 167,
+      "animal_id": 39,
+      "data_pesagem": "2026-04-22",
+      "peso": 324.6,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-04-22T00:00:00.000Z"
+    },
+    {
+      "id": 168,
+      "animal_id": 39,
+      "data_pesagem": "2026-05-03",
+      "peso": 336.4,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-03T00:00:00.000Z"
+    },
+    {
+      "id": 169,
+      "animal_id": 39,
+      "data_pesagem": "2026-05-15",
+      "peso": 352.7,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-05-15T00:00:00.000Z"
+    },
+    {
+      "id": 170,
+      "animal_id": 39,
+      "data_pesagem": "2026-05-26",
+      "peso": 354.3,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-05-26T00:00:00.000Z"
+    },
+    {
+      "id": 171,
+      "animal_id": 39,
+      "data_pesagem": "2026-06-06",
+      "peso": 387.5,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-06T00:00:00.000Z"
+    },
+    {
+      "id": 172,
+      "animal_id": 40,
+      "data_pesagem": "2026-05-11",
+      "peso": 242.9,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-05-11T00:00:00.000Z"
+    },
+    {
+      "id": 173,
+      "animal_id": 40,
+      "data_pesagem": "2026-05-26",
+      "peso": 264.9,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-26T00:00:00.000Z"
+    },
+    {
+      "id": 174,
+      "animal_id": 40,
+      "data_pesagem": "2026-06-10",
+      "peso": 283.5,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-10T00:00:00.000Z"
+    },
+    {
+      "id": 175,
+      "animal_id": 40,
+      "data_pesagem": "2026-06-25",
+      "peso": 301.6,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-25T00:00:00.000Z"
+    },
+    {
+      "id": 176,
+      "animal_id": 41,
+      "data_pesagem": "2026-05-29",
+      "peso": 291.8,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-29T00:00:00.000Z"
+    },
+    {
+      "id": 177,
+      "animal_id": 41,
+      "data_pesagem": "2026-06-28",
+      "peso": 315.7,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-28T00:00:00.000Z"
+    },
+    {
+      "id": 178,
+      "animal_id": 42,
+      "data_pesagem": "2026-04-19",
+      "peso": 323.7,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-04-19T00:00:00.000Z"
+    },
+    {
+      "id": 179,
+      "animal_id": 42,
+      "data_pesagem": "2026-05-11",
+      "peso": 353.9,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-11T00:00:00.000Z"
+    },
+    {
+      "id": 180,
+      "animal_id": 42,
+      "data_pesagem": "2026-06-03",
+      "peso": 373,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-03T00:00:00.000Z"
+    },
+    {
+      "id": 181,
+      "animal_id": 42,
+      "data_pesagem": "2026-06-25",
+      "peso": 390.7,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-25T00:00:00.000Z"
+    },
+    {
+      "id": 182,
+      "animal_id": 43,
+      "data_pesagem": "2026-03-31",
+      "peso": 266.8,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-03-31T00:00:00.000Z"
+    },
+    {
+      "id": 183,
+      "animal_id": 43,
+      "data_pesagem": "2026-04-15",
+      "peso": 284.7,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-04-15T00:00:00.000Z"
+    },
+    {
+      "id": 184,
+      "animal_id": 43,
+      "data_pesagem": "2026-04-30",
+      "peso": 290.1,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-04-30T00:00:00.000Z"
+    },
+    {
+      "id": 185,
+      "animal_id": 43,
+      "data_pesagem": "2026-05-15",
+      "peso": 309.3,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-05-15T00:00:00.000Z"
+    },
+    {
+      "id": 186,
+      "animal_id": 43,
+      "data_pesagem": "2026-05-30",
+      "peso": 305.8,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-05-30T00:00:00.000Z"
+    },
+    {
+      "id": 187,
+      "animal_id": 43,
+      "data_pesagem": "2026-06-14",
+      "peso": 338.8,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-14T00:00:00.000Z"
+    },
+    {
+      "id": 188,
+      "animal_id": 44,
+      "data_pesagem": "2026-04-20",
+      "peso": 239.4,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-04-20T00:00:00.000Z"
+    },
+    {
+      "id": 189,
+      "animal_id": 44,
+      "data_pesagem": "2026-05-03",
+      "peso": 250.1,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-03T00:00:00.000Z"
+    },
+    {
+      "id": 190,
+      "animal_id": 44,
+      "data_pesagem": "2026-05-16",
+      "peso": 277.2,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-16T00:00:00.000Z"
+    },
+    {
+      "id": 191,
+      "animal_id": 44,
+      "data_pesagem": "2026-05-28",
+      "peso": 291.5,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-28T00:00:00.000Z"
+    },
+    {
+      "id": 192,
+      "animal_id": 44,
+      "data_pesagem": "2026-06-10",
+      "peso": 296.4,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-10T00:00:00.000Z"
+    },
+    {
+      "id": 193,
+      "animal_id": 44,
+      "data_pesagem": "2026-06-23",
+      "peso": 308.5,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-23T00:00:00.000Z"
+    },
+    {
+      "id": 194,
+      "animal_id": 45,
+      "data_pesagem": "2026-04-24",
+      "peso": 237.8,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-04-24T00:00:00.000Z"
+    },
+    {
+      "id": 195,
+      "animal_id": 45,
+      "data_pesagem": "2026-05-16",
+      "peso": 271.5,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-16T00:00:00.000Z"
+    },
+    {
+      "id": 196,
+      "animal_id": 45,
+      "data_pesagem": "2026-06-08",
+      "peso": 290.2,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-06-08T00:00:00.000Z"
+    },
+    {
+      "id": 197,
+      "animal_id": 45,
+      "data_pesagem": "2026-06-30",
+      "peso": 324.2,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-30T00:00:00.000Z"
+    },
+    {
+      "id": 198,
+      "animal_id": 46,
+      "data_pesagem": "2026-05-02",
+      "peso": 308.6,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-02T00:00:00.000Z"
+    },
+    {
+      "id": 199,
+      "animal_id": 46,
+      "data_pesagem": "2026-05-14",
+      "peso": 312.7,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-14T00:00:00.000Z"
+    },
+    {
+      "id": 200,
+      "animal_id": 46,
+      "data_pesagem": "2026-05-25",
+      "peso": 331.7,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-05-25T00:00:00.000Z"
+    },
+    {
+      "id": 201,
+      "animal_id": 46,
+      "data_pesagem": "2026-06-05",
+      "peso": 336.1,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-05T00:00:00.000Z"
+    },
+    {
+      "id": 202,
+      "animal_id": 46,
+      "data_pesagem": "2026-06-16",
+      "peso": 352.5,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-16T00:00:00.000Z"
+    },
+    {
+      "id": 203,
+      "animal_id": 46,
+      "data_pesagem": "2026-06-28",
+      "peso": 354.6,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-28T00:00:00.000Z"
+    },
+    {
+      "id": 204,
+      "animal_id": 47,
+      "data_pesagem": "2026-05-07",
+      "peso": 305.1,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-05-07T00:00:00.000Z"
+    },
+    {
+      "id": 205,
+      "animal_id": 47,
+      "data_pesagem": "2026-06-06",
+      "peso": 323,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-06-06T00:00:00.000Z"
+    },
+    {
+      "id": 206,
+      "animal_id": 48,
+      "data_pesagem": "2026-05-02",
+      "peso": 270.2,
+      "tecnico": "José R.",
+      "observacao": null,
+      "created_at": "2026-05-02T00:00:00.000Z"
+    },
+    {
+      "id": 207,
+      "animal_id": 48,
+      "data_pesagem": "2026-06-01",
+      "peso": 295.1,
+      "tecnico": "Ana L.",
+      "observacao": null,
+      "created_at": "2026-06-01T00:00:00.000Z"
+    },
+    {
+      "id": 208,
+      "animal_id": 48,
+      "data_pesagem": "2026-07-01",
+      "peso": 316,
+      "tecnico": "Carlos M.",
+      "observacao": null,
+      "created_at": "2026-07-01T00:00:00.000Z"
+    }
+  ]
+}

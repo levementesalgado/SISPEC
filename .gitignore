@@ -13,8 +13,8 @@ build/
 .data/
 deno.lock
 
-# Backend JSON data (não commitar dados)
-backend/data/
+# Backend JSON data (não commitar dados reais — dados sintéticos ok)
+#backend/data/
 
 # Rust
 ml_service/target/
