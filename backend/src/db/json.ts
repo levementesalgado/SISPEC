@@ -1,4 +1,5 @@
 import { connect } from "https://deno.land/x/redis@v0.32.3/mod.ts";
+import * as pg from "./pg.ts";
 
 const DB_PATH = "./data/db.json";
 const COUNTERS_PATH = "./data/counters.json";
@@ -7,6 +8,10 @@ let redis: Awaited<ReturnType<typeof connect>> | null = null;
 
 function useRedis() {
   return redis !== null;
+}
+
+function usePG() {
+  return pg.isPG();
 }
 
 function parseRedisUrl(url: string) {
@@ -41,7 +46,16 @@ async function initRedis() {
   }
 }
 
+export function getDBType(): string {
+  if (usePG()) return "postgresql";
+  if (useRedis()) return "redis";
+  return "json";
+}
+
 export async function initDB() {
+  const pgOk = await pg.initPG();
+  if (pgOk) return;
+
   const redisUrl = Deno.env.get("REDIS_URL");
   if (redisUrl) {
     await initRedis();
@@ -78,9 +92,10 @@ export async function initDB() {
 }
 
 export async function readDB() {
+  if (usePG()) return pg.readDB();
   if (useRedis()) {
     const data = await redis!.get("sispec:db");
-    return data ? JSON.parse(data) : { lotes: [], animais: [], pesagens: [] };
+    return data ? JSON.parse(data) : { lotes: [], animais: [], pesagens: [], producoes: [] };
   }
 
   const content = await Deno.readTextFile(DB_PATH);
@@ -88,6 +103,7 @@ export async function readDB() {
 }
 
 export async function writeDB(data: any) {
+  if (usePG()) return pg.writeDB(data);
   if (useRedis()) {
     await redis!.set("sispec:db", JSON.stringify(data));
     return;
@@ -96,6 +112,7 @@ export async function writeDB(data: any) {
 }
 
 export async function readCounters() {
+  if (usePG()) return pg.readCounters();
   if (useRedis()) {
     const animalId = parseInt((await redis!.get("sispec:counter:animalId")) || "0");
     const loteId = parseInt((await redis!.get("sispec:counter:loteId")) || "0");
@@ -108,6 +125,7 @@ export async function readCounters() {
 }
 
 export async function writeCounters(data: any) {
+  if (usePG()) return pg.writeCounters(data);
   if (useRedis()) {
     await redis!.set("sispec:counter:animalId", String(data.animalId || 0));
     await redis!.set("sispec:counter:loteId", String(data.loteId || 0));
@@ -119,6 +137,7 @@ export async function writeCounters(data: any) {
 }
 
 export async function nextId(type: "animalId" | "loteId" | "pesagemId" | "producaoId") {
+  if (usePG()) return pg.nextId(type);
   if (useRedis()) {
     return await redis!.incr(`sispec:counter:${type}`);
   }

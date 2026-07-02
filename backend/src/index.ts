@@ -3,7 +3,7 @@ import { cors } from "hono/cors";
 import { serve } from "@hono/node-server";
 
 import { env } from "./env.ts";
-import { initDB } from "./db/json.ts";
+import { initDB, getDBType } from "./db/json.ts";
 
 import authRouter from "./routes/auth.ts";
 import lotesRouter from "./routes/lotes.ts";
@@ -51,7 +51,7 @@ app.route("/api/v1/producoes", producoesRouter);
 app.get("/api/v1/health", (c) => c.json({
   status: "healthy",
   version: "1.0.0",
-  database: "json"
+  database: getDBType()
 }));
 
 // Raiz
