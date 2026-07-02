@@ -16,8 +16,10 @@ async function seed() {
   const db = await readDB();
 
   if (db.animais.length > 0) {
-    console.log("Dados já existem. Pulando seed.");
-    return;
+    db.lotes = [];
+    db.animais = [];
+    db.pesagens = [];
+    console.log("Resetando dados existentes...");
   }
 
   console.log("Criando seed realista...");
