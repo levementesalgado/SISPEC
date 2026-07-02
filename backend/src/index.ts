@@ -15,6 +15,9 @@ import mlRouter from "./routes/ml.ts";
 // Inicializa banco
 await initDB();
 
+// Seed na inicialização para garantir dados realistas
+await import("./seed.ts");
+
 const app = new Hono();
 
 // CORS
