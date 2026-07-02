@@ -1,45 +1,67 @@
 # SISPEC
-**Sistema Inteligente de Pecuária de Confinamento**
 
-> Da caderneta de campo ao Agro 4.0 — em etapas reais, ano a ano.
+**Sistema Inteligente de Pecuária de Confinamento com Aprendizado de Máquina**
 
-## 📋 Descrição
+> Da caderneta de campo ao Agro 5.0: Inteligência Artificial na Pecuária de Precisão
 
-Sistema para gestão de confinamento bovino com:
-- Cadastro de animais e lotes *(CRUD completo)*
-- Registro de pesagens *(com timeline por animal)*
-- Cálculo automático de GMD (Ganho Médio Diário)
-- Dashboard com KPIs, gráficos e alertas
-- Projeção de peso de abate
-- Busca e filtro por brinco, raça ou lote
+## Descrição
 
-## 🏗️ Arquitetura
+Muitos produtores ainda utilizam cadernetas de campo ou planilhas para registrar informações do rebanho, dificultando o acompanhamento do desempenho individual dos animais e a tomada de decisões baseada em dados. O SISPEC é uma plataforma web para gestão de rebanho bovino que integra tecnologias modernas de desenvolvimento de software com indicadores zootécnicos para monitoramento do desempenho produtivo:
+
+- **Gestão zootécnica**: cadastro de animais e lotes, registro de pesagens, timeline por animal
+- **Machine Learning em Rust**: predição de peso futuro (Random Forest, XGBoost, LSTM), detecção de anomalias (Isolation Forest, DBSCAN), projeção de abate com simulação de cenários
+- **Dashboards em 3 níveis**: operacional (12 KPIs em tempo real), tático (8 indicadores gerenciais + ranking lotes + simulação cenários), estratégico (6 indicadores executivos + scorecard ESG + série histórica)
+- **Alertas inteligentes**: regras fixas + ML para detecção precoce de animais críticos
+- **Infra completa**: Docker Compose (PostgreSQL, Redis, ML Service Rust), migrations Flyway
+
+## Arquitetura
 
 ```
 sispec/
-├── backend/                  # FastAPI + SQLAlchemy + SQLite (ativo)
-│   ├── app/
-│   │   ├── api/endpoints/    # animais.py, lotes.py, pesagens.py, dashboard.py
-│   │   ├── models/           # Animal, Lote, Pesagem, Usuario
-│   │   ├── schemas/          # Pydantic (validação entrada/saída)
-│   │   ├── services/         # animal_service.py (GMD, métricas)
-│   │   └── core/             # database.py, config.py
-│   ├── requirements.txt
-│   └── seed.py               # Dados de exemplo (48 animais, 131 pesagens)
-│
-├── frontend/                 # React 18 + Vite + Tailwind
+├── backend/                          # Deno + Hono (API principal)
 │   ├── src/
-│   │   ├── pages/            # Dashboard, Animais, AnimalDetail, Lotes, Cadastro, Login
-│   │   ├── utils/api.js      # Cliente HTTP (fetch puro)
-│   │   └── App.jsx           # Rotas + navegação + auth guard
-│   ├── vercel.json           # Config de deploy Vercel
-│   └── package.json
+│   │   ├── routes/                   # animais, lotes, pesagens, dashboard
+│   │   ├── models/                   # schemas e tipos
+│   │   ├── services/                 # cálculos zootécnicos, GMD, métricas
+│   │   └── core/                     # database (PostgreSQL), config, auth
+│   ├── migrations/                   # Flyway
+│   └── seed/
 │
-├── planejamento-sispec/      # Documentos de planejamento
+├── ml_service/                       # Rust + axum + smartcore
+│   ├── src/
+│   │   ├── models/                   # implementação dos modelos
+│   │   └── api/                      # endpoints de inferência e treinamento
+│   └── Cargo.toml
+│
+├── frontend/                         # React 18 + Vite + Tailwind
+│   ├── src/
+│   │   ├── pages/                    # Dashboard (3 níveis), Animais, Lotes, etc.
+│   │   └── components/               # gráficos, tabelas, alertas
+│   └── vercel.json
+│
 └── README.md
 ```
 
-## 🚀 Quick Start
+```
+[Frontend React] ──HTTP/WS──> [Backend Deno + Hono] ──REST──> [ML Service Rust]
+                                    │
+                               [PostgreSQL]
+```
+
+## Quick Start
+
+### Full Stack (Docker Compose)
+
+```bash
+docker compose up -d
+```
+
+| Serviço | URL |
+|---------|-----|
+| Frontend | http://localhost:5173 |
+| Backend API | http://localhost:3000 |
+| ML Service | http://localhost:8001 |
+| PostgreSQL | localhost:5432 |
 
 ### Login de Teste
 
@@ -48,22 +70,20 @@ sispec/
 | admin | sispec123 | Administrador |
 | tecnico | tecnico123 | Operador |
 
-### Backend (FastAPI)
+### Backend (Deno + Hono)
 
 ```bash
 cd backend
-python -m venv venv
-source venv/bin/activate       # Linux/Mac
-pip install -r requirements.txt
-
-# Seed com dados de exemplo
-python seed.py
-
-# Rodar
-uvicorn app.main:app --reload --port 8000
+deno run --allow-net --allow-read --allow-write --allow-env src/index.ts
 ```
 
-API docs automáticas: http://localhost:8000/docs
+### ML Service (Rust)
+
+```bash
+cd ml_service
+cargo build --release
+./target/release/ml_service
+```
 
 ### Frontend
 
@@ -73,74 +93,50 @@ npm install
 npm run dev
 ```
 
-Acesse:
-- **Frontend:** http://localhost:5173
-- **API:** http://localhost:8000
-- **API Docs:** http://localhost:8000/docs
+## Dashboards
 
-## 🌐 Deploy (Vercel)
+| Nível | Público | KPIs | Atualização |
+|-------|---------|------|-------------|
+| Operacional | Tratador | 12 KPIs em tempo real (GMD, peso, alertas) | 5s |
+| Tático | Gerente | 8 indicadores gerenciais + ranking lotes + simulação cenários | Semanal |
+| Estratégico | Executivo | 6 indicadores executivos + scorecard ESG + série histórica | Mensal |
 
-O frontend está configurado para deploy no Vercel:
-
-```bash
-cd frontend
-npm install
-vercel login              # ou use VERCEL_TOKEN
-vercel --prod
-```
-
-**Variáveis de ambiente (Vercel):**
-
-| Variável | Valor | Obrigatória |
-|----------|-------|-------------|
-| `VITE_API_URL` | URL do backend em produção | Sim, se backend não estiver no mesmo domínio |
-
-> ⚠️ O backend (FastAPI + SQLite) **não roda no Vercel** (plano gratuito não suporta Python serverless + SQLite). Hospede o backend separadamente (Render, Railway, ou VPS) e aponte `VITE_API_URL` para ele.
-
-## 🗺️ Rotas do Frontend
+## Rotas do Frontend
 
 | Rota | Página | Descrição |
 |------|--------|-----------|
-| `/login` | Login | Autenticação (demo: admin/sispec123) |
-| `/` | Dashboard | KPIs, gráfico GMD, alertas |
+| `/login` | Login | Autenticação |
+| `/` | Dashboard | Visão geral com KPIs |
+| `/dashboard/operacional` | Dashboard Operacional | 12 KPIs em tempo real |
+| `/dashboard/tatico` | Dashboard Tático | 8 indicadores gerenciais |
+| `/dashboard/estrategico` | Dashboard Estratégico | 6 indicadores executivos |
 | `/animais` | Rebanho | Lista com busca, status, GMD |
-| `/animais/:id` | Detalhe Animal | Timeline pesagens, métricas |
+| `/animais/:id` | Detalhe Animal | Timeline pesagens + ML predição |
 | `/lotes` | Lotes | Gerenciamento de lotes |
 | `/cadastro` | Novo Animal | Wizard 3 etapas |
+| `/alertas` | Central de Alertas | Alertas inteligentes + ML |
 
-## 📊 Tecnologias
+## Tecnologias
 
-**Backend:**
-- [FastAPI](https://fastapi.tiangolo.com/) — Framework web Python
-- [SQLAlchemy 2.0](https://www.sqlalchemy.org/) — ORM
-- [SQLite](https://www.sqlite.org/) — Banco de dados embarcado
-- [Pydantic 2](https://docs.pydantic.dev/) — Validação de schemas
-- [Uvicorn](https://www.uvicorn.org/) — Servidor ASGI
+**Backend:** Deno, Hono, PostgreSQL, Redis, Docker, Flyway
+**ML:** Rust, axum, smartcore (Random Forest, K-Means, regressão linear)
+**Frontend:** React 18, Vite, Tailwind CSS 3, Recharts 2, Lucide React
+**Infra:** Docker, Render, Vercel, WebSockets
 
-**Frontend:**
-- [React 18](https://react.dev/) via Preact compat
-- [Vite 5](https://vitejs.dev/) — Build tool
-- [Tailwind CSS 3](https://tailwindcss.com/) — Estilos utilitários
-- [Recharts 2](https://recharts.org/) — Gráficos
-- [Lucide React](https://lucide.dev/) — Ícones
-- [React Router DOM 6](https://reactrouter.com/) — Roteamento SPA
+## Pipeline de ML
 
-## 📚 Documentação
+1. **Coleta**: dados de pesagens + clima + dieta via API e importação CSV
+2. **Feature engineering**: GMD acumulado, ITU, eficiência alimentar, ECC
+3. **Modelos**: Random Forest, XGBoost, LSTM, Prophet, Isolation Forest
+4. **Avaliação**: RMSE < 8 kg, MAPE < 5%, validação TimeSeriesSplit
+5. **Monitoramento**: drift detection com Evidently AI, retreinamento a cada 30 dias
 
-- [Apresentação](apresentacao_sispec(5).html)
-- [Planejamento](planejamento-sispec/planejamento-geral.txt)
-
-## 👥 Equipe
+## Autor
 
 | Nome | Função |
 |------|--------|
-| Mateus Iuri (Tech Lead) | Backend, API, Banco de Dados |
-| Pedro Utsumi | Frontend React |
-| Pedro Lima | Relatórios e Dashboards |
-| Patrick | Mobile/PWA |
-| João | QA e Testes |
-| Edil | DevOps e Design |
+| Mateus Iuri | Backend, API, ML, Frontend, Banco de Dados, DevOps |
 
-## 📄 Licença
+## Licença
 
-GNU General Public License v3 (GPLv3) — © 2025 ROCHA, M. I.
+GNU General Public License v3 (GPLv3), Copyright 2025 ROCHA, M. I.

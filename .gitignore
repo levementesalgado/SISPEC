@@ -15,3 +15,6 @@ deno.lock
 
 # Backend JSON data (não commitar dados)
 backend/data/
+
+# Rust
+ml_service/target/

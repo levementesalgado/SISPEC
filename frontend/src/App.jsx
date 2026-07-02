@@ -4,6 +4,9 @@ import { ToastProvider } from './components/Toast'
 import { Menu, X, LayoutDashboard, Users, FolderTree, PlusCircle, LogOut, Loader2 } from 'lucide-react'
 
 const Dashboard = lazy(() => import('./pages/Dashboard'))
+const DashboardOperacional = lazy(() => import('./pages/DashboardOperacional'))
+const DashboardTatico = lazy(() => import('./pages/DashboardTatico'))
+const DashboardEstrategico = lazy(() => import('./pages/DashboardEstrategico'))
 const Animais = lazy(() => import('./pages/Animais'))
 const Lotes = lazy(() => import('./pages/Lotes'))
 const Cadastro = lazy(() => import('./pages/Cadastro'))
@@ -48,6 +51,9 @@ function App() {
 
   const navItems = [
     { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/dashboard/operacional', label: 'Operacional', icon: LayoutDashboard },
+    { path: '/dashboard/tatico', label: 'Tático', icon: LayoutDashboard },
+    { path: '/dashboard/estrategico', label: 'Estratégico', icon: LayoutDashboard },
     { path: '/animais', label: 'Rebanho', icon: Users },
     { path: '/lotes', label: 'Lotes', icon: FolderTree },
     { path: '/cadastro', label: 'Novo Animal', icon: PlusCircle },
@@ -132,6 +138,9 @@ function App() {
         <Suspense fallback={<Loading />}>
           <Routes>
             <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/dashboard/operacional" element={<ProtectedRoute><DashboardOperacional /></ProtectedRoute>} />
+            <Route path="/dashboard/tatico" element={<ProtectedRoute><DashboardTatico /></ProtectedRoute>} />
+            <Route path="/dashboard/estrategico" element={<ProtectedRoute><DashboardEstrategico /></ProtectedRoute>} />
             <Route path="/animais" element={<ProtectedRoute><Animais /></ProtectedRoute>} />
             <Route path="/animais/:id" element={<ProtectedRoute><AnimalDetail /></ProtectedRoute>} />
             <Route path="/lotes" element={<ProtectedRoute><Lotes /></ProtectedRoute>} />

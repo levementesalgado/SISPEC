@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
-import { TrendingUp, AlertTriangle, CheckCircle, Scale, Activity } from 'lucide-react'
+import { TrendingUp, AlertTriangle, CheckCircle, Scale, Activity, Eye, BarChart3, Target } from 'lucide-react'
 import { fetchKPIs, fetchGMDData, fetchAlertas } from '../utils/api'
 
 export default function Dashboard() {
@@ -57,6 +58,43 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-serif text-paper">Dashboard</h1>
+
+      {/* Links para dashboards específicos */}
+      <div className="grid md:grid-cols-3 gap-4">
+        <Link to="/dashboard/operacional" className="card group hover:border-sage/50 transition-all">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-sage/20 flex items-center justify-center">
+              <Activity size={20} className="text-sage" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-paper group-hover:text-sage transition-colors">Operacional</h3>
+              <p className="text-xs text-white/40 mt-0.5">12 KPIs em tempo real</p>
+            </div>
+          </div>
+        </Link>
+        <Link to="/dashboard/tatico" className="card group hover:border-sage/50 transition-all">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-sage/20 flex items-center justify-center">
+              <BarChart3 size={20} className="text-sage" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-paper group-hover:text-sage transition-colors">Tático</h3>
+              <p className="text-xs text-white/40 mt-0.5">8 indicadores gerenciais</p>
+            </div>
+          </div>
+        </Link>
+        <Link to="/dashboard/estrategico" className="card group hover:border-sage/50 transition-all">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-sage/20 flex items-center justify-center">
+              <Target size={20} className="text-sage" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-paper group-hover:text-sage transition-colors">Estratégico</h3>
+              <p className="text-xs text-white/40 mt-0.5">6 indicadores executivos</p>
+            </div>
+          </div>
+        </Link>
+      </div>
 
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

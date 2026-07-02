@@ -10,6 +10,7 @@ import lotesRouter from "./routes/lotes.ts";
 import animaisRouter from "./routes/animais.ts";
 import pesagensRouter from "./routes/pesagens.ts";
 import dashboardRouter from "./routes/dashboard.ts";
+import mlRouter from "./routes/ml.ts";
 
 // Inicializa banco
 await initDB();
@@ -39,6 +40,7 @@ app.route("/api/v1/lotes", lotesRouter);
 app.route("/api/v1/animais", animaisRouter);
 app.route("/api/v1/pesagens", pesagensRouter);
 app.route("/api/v1/dashboard", dashboardRouter);
+app.route("/api/v1/ml", mlRouter);
 
 // Health check
 app.get("/api/v1/health", (c) => c.json({

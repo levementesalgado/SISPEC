@@ -27,6 +27,24 @@ export async function fetchAlertas() {
   return res.json()
 }
 
+export async function fetchDashboardOperacional() {
+  const res = await fetch(`${API_BASE}/dashboard/operacional`, { headers: getHeaders() })
+  if (!res.ok) throw new Error('Erro ao buscar dashboard operacional')
+  return res.json()
+}
+
+export async function fetchDashboardTatico() {
+  const res = await fetch(`${API_BASE}/dashboard/tatico`, { headers: getHeaders() })
+  if (!res.ok) throw new Error('Erro ao buscar dashboard tático')
+  return res.json()
+}
+
+export async function fetchDashboardEstrategico() {
+  const res = await fetch(`${API_BASE}/dashboard/estrategico`, { headers: getHeaders() })
+  if (!res.ok) throw new Error('Erro ao buscar dashboard estratégico')
+  return res.json()
+}
+
 export async function fetchAnimais(params = {}) {
   const query = new URLSearchParams(params)
   const res = await fetch(`${API_BASE}/animais?${query}`, { headers: getHeaders() })

@@ -1,15 +1,36 @@
-# SISPEC - Sistema Inteligente de Pecuária de Confinamento
+# SISPEC — Sistema Inteligente de Pecuária de Confinamento
 
-## Quick Start
+> ML + IoT + 3 dashboards · Agro 5.0
 
-### Windows
-Clique duas vezes em `start.bat` e escolha opção 1
+## Quick Start (Full Stack)
 
-### Linux/macOS
 ```bash
-./start.sh
+docker compose up -d
 ```
-Escolha opção 1 para rodar ambos
+
+| Serviço | URL |
+|---------|-----|
+| Frontend | http://localhost:5173 |
+| Backend API | http://localhost:3000 |
+| ML Service | http://localhost:8001/docs |
+| PostgreSQL | localhost:5432 |
+
+## Quick Start (Dev)
+
+### Backend
+```bash
+cd backend && deno run --allow-net --allow-read --allow-write --allow-env src/main.ts
+```
+
+### ML Service
+```bash
+cd ml_service && pip install -r requirements.txt && uvicorn api.main:app --reload --port 8001
+```
+
+### Frontend
+```bash
+cd frontend && npm install && npm run dev
+```
 
 ## Login de Teste
 
@@ -17,26 +38,23 @@ Escolha opção 1 para rodar ambos
 |---------|-------|--------|
 | admin | sispec123 | Administrador |
 | tecnico | tecnico123 | Operador |
-| vinberkuko | admin123 | Usuário |
 
-## Deploy (VPS/Server)
+## Dashboards
 
-### Linux (screen)
+| Nível | Público | KPIs | Atualização |
+|-------|---------|------|-------------|
+| Operacional | Tratador | 12 KPIs em tempo real | 5s |
+| Tático | Gerente | 8 indicadores + ranking | Semanal |
+| Estratégico | Executivo | 6 indicadores + ESG | Mensal |
+
+## Deploy
+
 ```bash
 ./deploy.sh
 ```
 
-### Windows
-```bash
-deploy.bat
-```
-
-## Menu do start.sh
-1. Ambos (backend + frontend) - Para uso normal
-2. Apenas Backend
-3. Apenas Frontend
-4. Sair
-
 ## Problemas?
+
 - Backend: http://localhost:3000
 - Frontend: http://localhost:5173
+- ML: http://localhost:8001/docs

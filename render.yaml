@@ -9,8 +9,24 @@ services:
     healthCheckPath: /api/v1/health
     envVars:
       - key: REDIS_URL
-        value: redis://default:SUA_SENHA_AQUI@red-d8oh15v7f7vs73eo96f0:6379
+        value: redis://default:1YwhXj7sUnRSsqgzYq1MqEJa8EQJNFKs@red-d8oh15v7f7vs73eo96f0:6379
+      - key: ML_SERVICE_URL
+        value: http://sispec-ml:8001
       - key: PORT
         value: 10000
+      - key: HOST
+        value: 0.0.0.0
+
+  - type: web
+    name: sispec-ml
+    runtime: docker
+    repo: https://github.com/levementesalgado/SISPEC.git
+    branch: main
+    rootDir: ml_service
+    dockerfilePath: Dockerfile
+    healthCheckPath: /ml/health
+    envVars:
+      - key: PORT
+        value: 8001
       - key: HOST
         value: 0.0.0.0
