@@ -2,9 +2,10 @@ use axum::{
     extract::State,
     http::StatusCode,
     Json, Router,
-    routing::get,
+    routing::{get, post},
 };
 use serde::{Deserialize, Serialize};
+
 
 use crate::AppState;
 
@@ -62,14 +63,15 @@ async fn predict(
     State(state): State<AppState>,
     Json(req): Json<PredictRequest>,
 ) -> Result<Json<PredictResponse>, StatusCode> {
-    let result = state.predictor.predict(
+    let mut predictor = state.predictor.lock().await;
+    let result = predictor.predict(
         req.peso_entrada,
         req.dias_confinamento,
         req.gmd_medio,
     );
 
     let peso_projetado = (result.peso_480kg + result.peso_30dias) / 2.0;
-    let dias_para_abate = ((480.0 - req.peso_entrada) / req.gmd_medio) as i64;
+    let dias_para_abate = ((480.0 - req.peso_entrada) / req.gmd_medio.max(0.1)) as i64;
     let confianca = result.confianca;
 
     Ok(Json(PredictResponse {
@@ -84,7 +86,8 @@ async fn anomalias(
     State(state): State<AppState>,
     Json(req): Json<AnomalyRequest>,
 ) -> Json<AnomalyResponse> {
-    let result = state.predictor.detect_anomaly(
+    let predictor = state.predictor.lock().await;
+    let result = predictor.detect_anomaly(
         req.peso_atual,
         req.gmd_atual,
         req.gmd_medio_lote,
@@ -99,17 +102,18 @@ async fn anomalias(
 }
 
 async fn treinar(State(state): State<AppState>) -> Json<TreinarResponse> {
-    state.predictor.treinar();
+    let mut predictor = state.predictor.lock().await;
+    predictor.treinar();
     Json(TreinarResponse {
         status: "ok".into(),
-        mensagem: "Modelo treinado com dados sintéticos".into(),
+        mensagem: "Modelo treinado com dados sintéticos via smartcore".into(),
     })
 }
 
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/health", get(health))
-        .route("/predicao", axum::routing::post(predict))
-        .route("/anomalias", axum::routing::post(anomalias))
-        .route("/treinar", axum::routing::post(treinar))
+        .route("/predicao", post(predict))
+        .route("/anomalias", post(anomalias))
+        .route("/treinar", post(treinar))
 }

@@ -3,12 +3,13 @@ mod models;
 
 use axum::Router;
 use std::sync::Arc;
+use tokio::sync::Mutex;
 use tower_http::cors::CorsLayer;
 use tracing_subscriber::EnvFilter;
 
 #[derive(Clone)]
 pub struct AppState {
-    pub predictor: Arc<models::Predictor>,
+    pub predictor: Arc<Mutex<models::Predictor>>,
 }
 
 #[tokio::main]
@@ -17,7 +18,7 @@ async fn main() {
         .with_env_filter(EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()))
         .init();
 
-    let predictor = Arc::new(models::Predictor::new());
+    let predictor = Arc::new(Mutex::new(models::Predictor::new()));
 
     let app = Router::new()
         .nest("/ml", api::routes())
