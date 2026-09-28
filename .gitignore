@@ -30,6 +30,9 @@ __pycache__/
 requirements.txt
 pyproject.toml
 
+# Hashes de senha — regenerado pelo seed no startup
+backend/data/usuarios.json
+
 # Scripts de conveniência — Docker Compose cobre start/deploy
 *.sh
 *.bat

@@ -23,6 +23,7 @@ export default function Login() {
       if (!res.ok) throw new Error(data.error || 'Erro ao fazer login')
 
       localStorage.setItem('token', data.token)
+      localStorage.setItem('refresh_token', data.refresh_token)
       localStorage.setItem('user', JSON.stringify(data.user))
       window.location.href = '/'
     } catch (err) {

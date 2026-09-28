@@ -1,112 +1,151 @@
 import { Hono } from "hono";
+import {
+  signAccessToken,
+  signRefreshToken,
+  verifyToken,
+  newJti,
+  REFRESH_EXPIRY_SECONDS,
+  TOKEN_EXPIRY_SECONDS,
+  AuthConfigError,
+} from "../auth/jwt.ts";
+import {
+  findUserByUsername,
+  verifyPassword,
+  setRefreshToken,
+  getRefreshToken,
+  revokeJti,
+  isJtiRevoked,
+  ensureSeedUsers,
+} from "../auth/users.ts";
+import { requireAuth, type AuthEnv } from "../auth/middleware.ts";
 
-const auth = new Hono();
+const auth = new Hono<AuthEnv>();
 
-const USERS: Record<string, { password: string; role: string }> = {
-  "admin": { password: "sispec123", role: "admin" },
-  "tecnico": { password: "tecnico123", role: "user" },
-};
-
-const SECRET = Deno.env.get("JWT_SECRET") || "sispec-dev-secret-change-in-production";
-const TOKEN_EXPIRY = 3600; // 1 hora
-const REFRESH_EXPIRY = 86400 * 7; // 7 dias
-
-async function createToken(payload: Record<string, unknown>, expiresIn: number): Promise<string> {
-  const header = { alg: "HS256", typ: "JWT" };
-  const now = Math.floor(Date.now() / 1000);
-  const body = { ...payload, iat: now, exp: now + expiresIn };
-
-  const b64 = (obj: unknown) =>
-    btoa(JSON.stringify(obj)).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
-
-  const data = `${b64(header)}.${b64(body)}`;
-  const key = await crypto.subtle.importKey(
-    "raw", new TextEncoder().encode(SECRET),
-    { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
-  );
-  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(data));
-  const sigB64 = btoa(String.fromCharCode(...new Uint8Array(sig)))
-    .replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
-
-  return `${data}.${sigB64}`;
-}
-
-async function verifyToken(token: string): Promise<Record<string, unknown> | null> {
-  const parts = token.split(".");
-  if (parts.length !== 3) return null;
-
-  const [headerB64, bodyB64, sigB64] = parts;
-  const data = `${headerB64}.${bodyB64}`;
-
-  const key = await crypto.subtle.importKey(
-    "raw", new TextEncoder().encode(SECRET),
-    { name: "HMAC", hash: "SHA-256" }, false, ["verify"]
-  );
-
-  const sigBytes = Uint8Array.from(atob(sigB64.replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
-  const valid = await crypto.subtle.verify("HMAC", key, sigBytes, new TextEncoder().encode(data));
-  if (!valid) return null;
-
-  const body = JSON.parse(atob(bodyB64.replace(/-/g, "+").replace(/_/g, "/")));
-  if (body.exp && body.exp < Math.floor(Date.now() / 1000)) return null;
-
-  return body;
+function errorResponse(err: unknown) {
+  if (err instanceof AuthConfigError) {
+    console.error(err.message);
+    return { error: "Erro de configuração do servidor", status: 500 as const };
+  }
+  console.error("Erro em /auth:", err);
+  return { error: "Erro interno", status: 500 as const };
 }
 
 auth.post("/login", async (c) => {
-  const { username, password } = await c.req.json();
+  let body: { username?: string; password?: string };
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: "Corpo da requisição inválido" }, 400);
+  }
+
+  const { username, password } = body;
   if (!username || !password) {
     return c.json({ error: "Usuário e senha obrigatórios" }, 400);
   }
 
-  const user = USERS[username];
-  if (!user || user.password !== password) {
-    return c.json({ error: "Usuário ou senha incorretos" }, 401);
+  try {
+    const user = await findUserByUsername(username);
+    if (!user) {
+      return c.json({ error: "Usuário ou senha incorretos" }, 401);
+    }
+
+    const senhaValida = await verifyPassword(password, user.senha_hash);
+    if (!senhaValida) {
+      return c.json({ error: "Usuário ou senha incorretos" }, 401);
+    }
+
+    const credencial = { username: user.username, role: user.role };
+    const accessJti = newJti();
+    const refreshJti = newJti();
+
+    const token = await signAccessToken(credencial, accessJti);
+    const refreshToken = await signRefreshToken({ username: user.username }, refreshJti);
+
+    const expiraEm = new Date(Date.now() + REFRESH_EXPIRY_SECONDS * 1000);
+    await setRefreshToken(user.username, refreshJti, expiraEm);
+
+    return c.json({
+      success: true,
+      token,
+      refresh_token: refreshToken,
+      expires_in: TOKEN_EXPIRY_SECONDS,
+      user: { username: user.username, nome: user.nome, role: user.role },
+    });
+  } catch (err) {
+    const { error, status } = errorResponse(err);
+    return c.json({ error }, status);
   }
-
-  const token = await createToken({ username, role: user.role }, TOKEN_EXPIRY);
-  const refreshToken = await createToken({ username, type: "refresh" }, REFRESH_EXPIRY);
-
-  return c.json({
-    success: true,
-    token,
-    refresh_token: refreshToken,
-    user: { username, role: user.role },
-  });
 });
 
 auth.post("/refresh", async (c) => {
-  const { refresh_token } = await c.req.json();
+  let body: { refresh_token?: string };
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: "Corpo da requisição inválido" }, 400);
+  }
+
+  const { refresh_token } = body;
   if (!refresh_token) return c.json({ error: "Refresh token obrigatório" }, 400);
 
-  const payload = await verifyToken(refresh_token);
-  if (!payload || payload.type !== "refresh") {
-    return c.json({ error: "Refresh token inválido ou expirado" }, 401);
+  try {
+    const claims = await verifyToken(refresh_token, "refresh");
+    if (!claims || claims.type !== "refresh") {
+      return c.json({ error: "Refresh token inválido ou expirado" }, 401);
+    }
+
+    if (await isJtiRevoked(claims.jti)) {
+      await revokeJti(claims.jti, new Date(claims.exp * 1000));
+      return c.json({ error: "Refresh token já utilizado" }, 401);
+    }
+
+    const stored = await getRefreshToken(claims.username);
+    if (!stored) return c.json({ error: "Usuário não encontrado" }, 401);
+
+    if (stored.refresh_jti !== claims.jti) {
+      await revokeJti(stored.refresh_jti ?? "", new Date());
+      return c.json({ error: "Refresh token revogado" }, 401);
+    }
+
+    const user = await findUserByUsername(claims.username);
+    if (!user) return c.json({ error: "Usuário não encontrado" }, 401);
+
+    await revokeJti(claims.jti, new Date(claims.exp * 1000));
+
+    const accessJti = newJti();
+    const refreshJti = newJti();
+    const token = await signAccessToken({ username: user.username, role: user.role }, accessJti);
+    const refreshToken = await signRefreshToken({ username: user.username }, refreshJti);
+    await setRefreshToken(
+      user.username,
+      refreshJti,
+      new Date(Date.now() + REFRESH_EXPIRY_SECONDS * 1000),
+    );
+
+    return c.json({
+      success: true,
+      token,
+      refresh_token: refreshToken,
+      expires_in: TOKEN_EXPIRY_SECONDS,
+    });
+  } catch (err) {
+    const { error, status } = errorResponse(err);
+    return c.json({ error }, status);
   }
-
-  const username = payload.username as string;
-  const user = USERS[username];
-  if (!user) return c.json({ error: "Usuário não encontrado" }, 404);
-
-  const token = await createToken({ username, role: user.role }, TOKEN_EXPIRY);
-  const refreshToken = await createToken({ username, type: "refresh" }, REFRESH_EXPIRY);
-
-  return c.json({ success: true, token, refresh_token: refreshToken });
 });
 
-auth.get("/me", async (c) => {
-  const authHeader = c.req.header("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return c.json({ error: "Token não fornecido" }, 401);
-  }
-
-  const payload = await verifyToken(authHeader.slice(7));
-  if (!payload) return c.json({ error: "Token inválido ou expirado" }, 401);
-
-  return c.json({
-    username: payload.username,
-    role: payload.role,
-  });
+auth.post("/logout", requireAuth(), async (c) => {
+  const username = c.get("username");
+  await setRefreshToken(username, null, null);
+  return c.json({ success: true });
 });
+
+auth.get("/me", requireAuth(), (c) => {
+  return c.json({ username: c.get("username"), role: c.get("role") });
+});
+
+export async function initAuth(): Promise<void> {
+  await ensureSeedUsers();
+}
 
 export default auth;

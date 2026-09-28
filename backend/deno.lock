@@ -2,7 +2,9 @@
   "version": "5",
   "specifiers": {
     "jsr:@hono/hono@*": "4.12.15",
-    "npm:@hono/node-server@2": "2.0.0_hono@4.12.15"
+    "npm:@hono/node-server@2": "2.0.0_hono@4.12.15",
+    "npm:bcryptjs@2.4.3": "2.4.3",
+    "npm:bcryptjs@^2.4.3": "2.4.3"
   },
   "jsr": {
     "@hono/hono@4.12.15": {
@@ -15,6 +17,9 @@
       "dependencies": [
         "hono"
       ]
+    },
+    "bcryptjs@2.4.3": {
+      "integrity": "sha512-V/Hy/X9Vt7f3BbPJEi8BdVFMByHi+jNXrYkW3huaybV/kQ0KJg0Y6PkEMbn+zeT+i+SiKZ/HMqJGIIt4LZDqNQ=="
     },
     "hono@4.12.15": {
       "integrity": "sha512-qM0jDhFEaCBb4TxoW7f53Qrpv9RBiayUHo0S52JudprkhvpjIrGoU1mnnr29Fvd1U335ZFPZQY1wlkqgfGXyLg=="
@@ -183,7 +188,8 @@
   "workspace": {
     "dependencies": [
       "jsr:@hono/hono@*",
-      "npm:@hono/node-server@2"
+      "npm:@hono/node-server@2",
+      "npm:bcryptjs@^2.4.3"
     ]
   }
 }

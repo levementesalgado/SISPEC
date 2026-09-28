@@ -5,7 +5,8 @@ import { serve } from "@hono/node-server";
 import { env } from "./env.ts";
 import { initDB, getDBType } from "./db/json.ts";
 
-import authRouter from "./routes/auth.ts";
+import authRouter, { initAuth } from "./routes/auth.ts";
+import { requireAuth, type AuthEnv } from "./auth/middleware.ts";
 import lotesRouter from "./routes/lotes.ts";
 import animaisRouter from "./routes/animais.ts";
 import pesagensRouter from "./routes/pesagens.ts";
@@ -19,7 +20,10 @@ await initDB();
 // Seed na inicialização para garantir dados realistas
 await import("./seed.ts");
 
-const app = new Hono();
+// Contas de acesso (idempotente)
+await initAuth();
+
+const app = new Hono<AuthEnv>();
 
 // CORS
 const allowedOrigins = [
@@ -38,16 +42,10 @@ app.use("/*", cors({
   credentials: true
 }));
 
-// Rotas
+// Rotas públicas (auth e health)
 app.route("/api/v1/auth", authRouter);
-app.route("/api/v1/lotes", lotesRouter);
-app.route("/api/v1/animais", animaisRouter);
-app.route("/api/v1/pesagens", pesagensRouter);
-app.route("/api/v1/dashboard", dashboardRouter);
-app.route("/api/v1/ml", mlRouter);
-app.route("/api/v1/producoes", producoesRouter);
 
-// Health check
+// Health check — público, usado pelo Render para saber se o serviço está vivo
 app.get("/api/v1/health", (c) => c.json({
   status: "healthy",
   version: "1.0.0",
@@ -60,6 +58,16 @@ app.get("/", (c) => c.json({
   version: "1.0.0",
   docs: "/api/v1"
 }));
+
+// Tudo abaixo exige Bearer token válido
+app.use("/api/v1/*", requireAuth());
+
+app.route("/api/v1/lotes", lotesRouter);
+app.route("/api/v1/animais", animaisRouter);
+app.route("/api/v1/pesagens", pesagensRouter);
+app.route("/api/v1/dashboard", dashboardRouter);
+app.route("/api/v1/ml", mlRouter);
+app.route("/api/v1/producoes", producoesRouter);
 
 console.log(`🚀 SISPEC API rodando em http://${env.HOST}:${env.PORT}`);
 

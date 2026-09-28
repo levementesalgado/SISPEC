@@ -4,7 +4,7 @@
 
 ## 🔴 Alto
 - [x] **ML Service em Rust** — axum + smartcore (Random Forest, predição peso, anomalias). Endpoints: `/ml/predicao`, `/ml/anomalias`, `/ml/treinar`
-- [ ] **AUTH: JWT para bcrypt + refresh token** — substituir token base64 falsificável
+
 - [ ] **DB: migrar de JSON para PostgreSQL completo** — atomicidade, concorrência, migrations Flyway (schema inicial criado em `migrations/V001__initial_schema.sql`)
 - [ ] **Integrar ML Service no backend Deno** — chamadas REST para `/ml/predicao` e `/ml/anomalias`
 - [ ] **Testes: suíte automatizada** — Deno.test (backend) + Cypress (frontend) + k6 (carga)

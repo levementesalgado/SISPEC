@@ -168,7 +168,11 @@ export async function writeDB(data: Database): Promise<void> {
   }
 }
 
-async function query(pool: Pool, text: string, params?: unknown[]): Promise<QueryResult> {
+async function query<T = Record<string, unknown>>(
+  pool: Pool,
+  text: string,
+  params?: unknown[],
+): Promise<QueryResult<T>> {
   const client = await pool.connect();
   try {
     return await client.queryObject(text, params);
@@ -209,6 +213,9 @@ export async function writeCounters(_data: Record<string, number>): Promise<void
   // noop — sequences auto-increment
 }
 
-export function querySQL(text: string, params?: unknown[]): Promise<QueryResult> {
-  return query(getPool(), text, params);
+export function querySQL<T = Record<string, unknown>>(
+  text: string,
+  params?: unknown[],
+): Promise<QueryResult<T>> {
+  return query<T>(getPool(), text, params);
 }

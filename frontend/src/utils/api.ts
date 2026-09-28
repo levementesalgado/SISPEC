@@ -21,124 +21,145 @@ function getHeaders(): Record<string, string> {
   return headers
 }
 
+function clearSession(): void {
+  localStorage.removeItem('token')
+  localStorage.removeItem('refresh_token')
+  localStorage.removeItem('user')
+}
+
+let refreshInFlight: Promise<boolean> | null = null
+
+async function refreshAccessToken(): Promise<boolean> {
+  if (refreshInFlight) return refreshInFlight
+
+  const refreshToken = localStorage.getItem('refresh_token')
+  if (!refreshToken) return false
+
+  refreshInFlight = (async () => {
+    try {
+      const res = await fetch(`${API_BASE}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      })
+      if (!res.ok) {
+        clearSession()
+        return false
+      }
+      const data = await res.json()
+      localStorage.setItem('token', data.token)
+      localStorage.setItem('refresh_token', data.refresh_token)
+      return true
+    } catch {
+      return false
+    } finally {
+      refreshInFlight = null
+    }
+  })()
+
+  return refreshInFlight
+}
+
+async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const send = () => fetch(`${API_BASE}${path}`, { ...init, headers: getHeaders() })
+
+  let res = await send()
+
+  if (res.status === 401) {
+    const renewed = await refreshAccessToken()
+    if (!renewed) {
+      clearSession()
+      window.location.href = '/login'
+      throw new Error('Sessão expirada')
+    }
+    res = await send()
+  }
+
+  if (!res.ok) throw new Error(`Erro ${res.status} ao buscar ${path}`)
+  return res.json() as Promise<T>
+}
+
+async function apiSend<T>(path: string, method: string, data: unknown, errorFallback: string): Promise<T> {
+  const init: RequestInit = {
+    method,
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  }
+
+  let res = await fetch(`${API_BASE}${path}`, init)
+
+  if (res.status === 401) {
+    const renewed = await refreshAccessToken()
+    if (!renewed) {
+      clearSession()
+      window.location.href = '/login'
+      throw new Error('Sessão expirada')
+    }
+    res = await fetch(`${API_BASE}${path}`, init)
+  }
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}))
+    throw new Error(error.detail || error.error || errorFallback)
+  }
+  return res.json() as Promise<T>
+}
+
 export async function fetchKPIs(params = ''): Promise<KPIs> {
-  const res = await fetch(`${API_BASE}/dashboard/kpis${params}`, { headers: getHeaders() })
-  if (!res.ok) throw new Error('Erro ao buscar KPIs')
-  return res.json()
+  return apiFetch(`/dashboard/kpis${params}`)
 }
 
 export async function fetchGMDData(): Promise<{ semana: string; gmd: number; meta: number }[]> {
-  const res = await fetch(`${API_BASE}/dashboard/gmd-semanas`, { headers: getHeaders() })
-  if (!res.ok) throw new Error('Erro ao buscar dados de GMD')
-  return res.json()
+  return apiFetch(`/dashboard/gmd-semanas`)
 }
 
 export async function fetchAlertas(params = ''): Promise<{ tipo: string; titulo: string; descricao: string }[]> {
-  const res = await fetch(`${API_BASE}/dashboard/alertas${params}`, { headers: getHeaders() })
-  if (!res.ok) throw new Error('Erro ao buscar alertas')
-  return res.json()
+  return apiFetch(`/dashboard/alertas${params}`)
 }
 
 export async function fetchDashboardOperacional(params = ''): Promise<DashboardOperacionalData> {
-  const res = await fetch(`${API_BASE}/dashboard/operacional${params}`, { headers: getHeaders() })
-  if (!res.ok) throw new Error('Erro ao buscar dashboard operacional')
-  return res.json()
+  return apiFetch(`/dashboard/operacional${params}`)
 }
 
 export async function fetchAnimais(params: Record<string, string> = {}): Promise<Animal[]> {
   const query = new URLSearchParams(params)
-  const res = await fetch(`${API_BASE}/animais?${query}`, { headers: getHeaders() })
-  if (!res.ok) throw new Error('Erro ao buscar animais')
-  return res.json()
+  return apiFetch(`/animais?${query}`)
 }
 
 export async function fetchAnimal(id: string): Promise<Animal> {
-  const res = await fetch(`${API_BASE}/animais/${id}`, { headers: getHeaders() })
-  if (!res.ok) throw new Error('Erro ao buscar animal')
-  return res.json()
+  return apiFetch(`/animais/${id}`)
 }
 
 export async function fetchPesagens(params: Record<string, string> = {}): Promise<Pesagem[]> {
   const query = new URLSearchParams(params)
-  const res = await fetch(`${API_BASE}/pesagens?${query}`, { headers: getHeaders() })
-  if (!res.ok) throw new Error('Erro ao buscar pesagens')
-  return res.json()
+  return apiFetch(`/pesagens?${query}`)
 }
 
 export async function fetchLotes(): Promise<Lote[]> {
-  const res = await fetch(`${API_BASE}/lotes`, { headers: getHeaders() })
-  if (!res.ok) throw new Error('Erro ao buscar lotes')
-  return res.json()
+  return apiFetch(`/lotes`)
 }
 
 export async function criarAnimal(data: AnimalCreate): Promise<Animal> {
-  const res = await fetch(`${API_BASE}/animais`, {
-    method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify(data),
-  })
-  if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.detail || error.error || 'Erro ao criar animal')
-  }
-  return res.json()
+  return apiSend(`/animais`, 'POST', data, 'Erro ao criar animal')
 }
 
 export async function criarPesagem(data: PesagemCreate): Promise<Pesagem> {
-  const res = await fetch(`${API_BASE}/pesagens`, {
-    method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify(data),
-  })
-  if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.detail || error.error || 'Erro ao criar pesagem')
-  }
-  return res.json()
+  return apiSend(`/pesagens`, 'POST', data, 'Erro ao criar pesagem')
 }
 
 export async function criarLote(data: LoteCreate): Promise<Lote> {
-  const res = await fetch(`${API_BASE}/lotes`, {
-    method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify(data),
-  })
-  if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || 'Erro ao criar lote')
-  }
-  return res.json()
+  return apiSend(`/lotes`, 'POST', data, 'Erro ao criar lote')
 }
 
 export async function fetchProducoes(params: Record<string, string> = {}): Promise<Producao[]> {
   const query = new URLSearchParams(params)
-  const res = await fetch(`${API_BASE}/producoes?${query}`, { headers: getHeaders() })
-  if (!res.ok) throw new Error('Erro ao buscar produções')
-  return res.json()
+  return apiFetch(`/producoes?${query}`)
 }
 
 export async function criarProducao(data: ProducaoCreate): Promise<Producao> {
-  const res = await fetch(`${API_BASE}/producoes`, {
-    method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify(data),
-  })
-  if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || 'Erro ao registrar produção')
-  }
-  return res.json()
+  return apiSend(`/producoes`, 'POST', data, 'Erro ao registrar produção')
 }
 
 export async function atualizarAnimal(id: string, data: AnimalUpdate): Promise<Animal> {
-  const res = await fetch(`${API_BASE}/animais/${id}`, {
-    method: 'PUT',
-    headers: getHeaders(),
-    body: JSON.stringify(data),
-  })
-  if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || 'Erro ao atualizar animal')
-  }
-  return res.json()
+  return apiSend(`/animais/${id}`, 'PUT', data, 'Erro ao atualizar animal')
 }

@@ -54,7 +54,8 @@ O backend Deno é a API principal e atua como **proxy** para o ML Service — o 
 | `hono` (jsr) | Framework HTTP, roteamento, middleware |
 | `@hono/node-server` (npm) | Adaptador para `serve()` no Deno |
 | `deno-postgres` | Driver PostgreSQL |
-| `bcrypt` / `jose` | Hash de senha e JWT |
+| `bcryptjs` (npm) | Hash de senha (bcrypt, custo 10) |
+| `crypto.subtle` | HS256 nativo para JWT, sem dependência |
 
 Instaladas via `deno.json` (import map). Comandos:
 
@@ -159,14 +160,38 @@ cd backend
 flyway -url jdbc:postgresql://localhost:5432/sispec -user sispec -password sispec2025 migrate
 ```
 
-Schema inicial em `backend/migrations/V001__initial_schema.sql` (tabelas `lotes`, `animais`, `pesagens`).
+Schema inicial em `backend/migrations/V001__initial_schema.sql` (tabelas `usuarios`, `lotes`, `animais`, `pesagens`, `producoes`).
 
-### Login de teste
+### Autenticação
 
-| Usuário | Senha | Função |
-|---------|-------|--------|
-| admin | sispec123 | Administrador |
-| tecnico | tecnico123 | Operador |
+Todas as rotas exceto `/api/v1/auth/*` e `/api/v1/health` exigem `Authorization: Bearer <token>`.
+Senhas em **bcrypt** (custo 10), access token HS256 de 1 h, refresh token de 7 dias com
+**rotação**: cada uso emite um par novo e o anterior é revogado, então reenvio de um token
+consumido é rejeitado.
+
+```bash
+# login
+curl -X POST http://localhost:3000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"sispec123"}'
+
+# usar o token
+curl http://localhost:3000/api/v1/animais -H "Authorization: Bearer <token>"
+```
+
+No frontend, um 401 dispara o refresh automaticamente e reenvia a requisição; se o refresh
+também falhar, a sessão é limpa e o usuário volta ao login.
+
+> **`JWT_SECRET` é obrigatório.** Sem ele o servidor sobe mas todo login retorna 500 — não há
+> fallback inseguro. Gere com `openssl rand -base64 48`.
+
+| Usuário | Senha | Papel |
+|---------|-------|-------|
+| admin | sispec123 | `admin` — acesso total |
+| tecnico | tecnico123 | `tecnico` — operador |
+
+As contas são criadas no startup (idempotente) com hash bcrypt; em PostgreSQL vão para a tabela
+`usuarios`, em JSON para `backend/data/usuarios.json` (ignorado pelo git).
 
 ## API
 
@@ -174,8 +199,11 @@ Base: `/api/v1`
 
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| GET | `/health` | Status do serviço |
-| POST | `/auth/login` | Autenticação, retorna JWT |
+| GET | `/health` | Status do serviço (público) |
+| POST | `/auth/login` | Autenticação, retorna access + refresh token |
+| POST | `/auth/refresh` | Rotaciona o par de tokens |
+| POST | `/auth/logout` | Revoga o refresh token do usuário |
+| GET | `/auth/me` | Dados do usuário autenticado |
 | GET | `/animais` | Lista rebanho com filtros |
 | POST | `/animais` | Cadastra animal |
 | GET | `/animais/:id` | Detalhe + timeline de pesagens |
@@ -235,7 +263,7 @@ Endpoints do ML Service (porta 8001, prefixo `/ml`):
 | `DATABASE_URL` | — | `postgres://user:pass@host:5432/db` |
 | `REDIS_URL` | — | `redis://host:6379` |
 | `ML_SERVICE_URL` | `http://localhost:8001` | Endpoint do ML Service |
-| `JWT_SECRET` | — | Chave de assinatura de tokens |
+| `JWT_SECRET` | — | **Obrigatório.** Chave HS256. Sem ela o login retorna 500 |
 
 ### ML Service
 

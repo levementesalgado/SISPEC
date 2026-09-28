@@ -53,8 +53,20 @@ function App() {
     localStorage.setItem('modalidade', mod)
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      try {
+        await fetch(`${import.meta.env.VITE_API_URL || '/api/v1'}/auth/logout`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        })
+      } catch {
+        // servidor indisponível: limpa a sessão local de qualquer forma
+      }
+    }
     localStorage.removeItem('token')
+    localStorage.removeItem('refresh_token')
     localStorage.removeItem('user')
     navigate('/login')
   }

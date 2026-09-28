@@ -1,3 +1,24 @@
+CREATE TABLE IF NOT EXISTS usuarios (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    senha_hash VARCHAR(100) NOT NULL,
+    nome VARCHAR(100),
+    role VARCHAR(20) NOT NULL DEFAULT 'user' CHECK (role IN ('admin', 'tecnico', 'user')),
+    ativo INTEGER DEFAULT 1,
+    refresh_jti TEXT,
+    refresh_expira_em TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS refresh_tokens_revogados (
+    jti VARCHAR(64) PRIMARY KEY,
+    revogado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expira_em TIMESTAMP NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_usuarios_username ON usuarios(username);
+
 CREATE TABLE IF NOT EXISTS lotes (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,

@@ -23,6 +23,7 @@ services:
       DATABASE_URL: postgres://sispec:sispec2025@postgres:5432/sispec
       REDIS_URL: redis://redis:6379
       ML_SERVICE_URL: http://ml_service:8001
+      JWT_SECRET: ${JWT_SECRET:-sispec-dev-secret-mudar-em-producao}
     depends_on:
       - postgres
       - redis

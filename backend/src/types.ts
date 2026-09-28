@@ -124,3 +124,22 @@ export interface Alerta {
   titulo: string;
   descricao: string;
 }
+
+export type Role = "admin" | "tecnico" | "user";
+
+export interface StoredUser {
+  id: number;
+  username: string;
+  senha_hash: string;
+  nome?: string | null;
+  role: Role;
+  ativo: number | boolean;
+  refresh_jti?: string | null;
+  refresh_expira_em?: string | null;
+}
+
+export interface UserWithRefresh {
+  username: string;
+  refresh_jti: string | null;
+  refresh_expira_em: string | null;
+}
