@@ -1,5 +1,6 @@
 import { readDB, writeDB, nextId } from "./db/json.ts";
 import { formatDate } from "./services/calculos.ts";
+import type { NewLote } from "./types.ts";
 
 const racasCorte = ["Nelore", "Angus", "Brahman", "Senepol"];
 const racasLeite = ["Girolando", "Holandesa", "Jersey", "Pardo Suíço"];
@@ -26,13 +27,13 @@ async function seed() {
 
   console.log("Criando seed realista (Corte + Leite)...");
 
-  const lotesCorte = [
+  const lotesCorte: NewLote[] = [
     { nome: "Lote A — Confinamento", descricao: "Animais em confinamento principal", modalidade: "CORTE" },
     { nome: "Lote B — Recria", descricao: "Animais em fase de recria", modalidade: "CORTE" },
     { nome: "Lote C — Terminação", descricao: "Animais em terminação para abate", modalidade: "CORTE" },
   ];
 
-  const lotesLeite = [
+  const lotesLeite: NewLote[] = [
     { nome: "Lote D — Lactação", descricao: "Vacas em lactação", modalidade: "LEITE" },
     { nome: "Lote E — Secagem", descricao: "Vacas secas em recuperação", modalidade: "LEITE" },
     { nome: "Lote F — Novilhas", descricao: "Novilhas de reposição leiteira", modalidade: "LEITE" },
@@ -49,8 +50,8 @@ async function seed() {
   console.log(`Criados ${db.lotes.length} lotes`);
 
   const hoje = new Date();
-  const lotesCorteIds = db.lotes.filter((l: any) => l.modalidade === "CORTE").map((l: any) => l.id);
-  const lotesLeiteIds = db.lotes.filter((l: any) => l.modalidade === "LEITE").map((l: any) => l.id);
+  const lotesCorteIds = db.lotes.filter((l) => l.modalidade === "CORTE").map((l) => l.id);
+  const lotesLeiteIds = db.lotes.filter((l) => l.modalidade === "LEITE").map((l) => l.id);
 
   // --- Animais de Corte (24) ---
   for (let i = 1; i <= 24; i++) {
@@ -98,7 +99,7 @@ async function seed() {
   console.log(`Criados ${db.animais.length} animais`);
 
   // --- Pesagens para Corte ---
-  const animaisCorte = db.animais.filter((a: any) => lotesCorteIds.includes(a.lote_id));
+  const animaisCorte = db.animais.filter((a) => a.lote_id != null && lotesCorteIds.includes(a.lote_id));
   for (const animal of animaisCorte) {
     const gmdBase = rand(0.7, 1.3);
     const numPesagens = randInt(3, 8);
@@ -127,7 +128,7 @@ async function seed() {
   console.log(`Criadas ${db.pesagens.length} pesagens (Corte)`);
 
   // --- Produções de Leite ---
-  const animaisLeite = db.animais.filter((a: any) => lotesLeiteIds.includes(a.lote_id));
+  const animaisLeite = db.animais.filter((a) => a.lote_id != null && lotesLeiteIds.includes(a.lote_id));
   for (const animal of animaisLeite) {
     const diasLactacao = calcularDias(new Date(animal.data_entrada), hoje);
     const numRegistros = Math.min(randInt(3, 10), Math.floor(diasLactacao / 15) + 1);

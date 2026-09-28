@@ -1,5 +1,6 @@
-import { connect } from "https://deno.land/x/redis@v0.32.3/mod.ts";
+import { connect } from "redis";
 import * as pg from "./pg.ts";
+import type { Database } from "../types.ts";
 
 const DB_PATH = "./data/db.json";
 const COUNTERS_PATH = "./data/counters.json";
@@ -91,18 +92,20 @@ export async function initDB() {
   }
 }
 
-export async function readDB() {
+const EMPTY: Database = { lotes: [], animais: [], pesagens: [], producoes: [], counters: {} };
+
+export async function readDB(): Promise<Database> {
   if (usePG()) return pg.readDB();
   if (useRedis()) {
     const data = await redis!.get("sispec:db");
-    return data ? JSON.parse(data) : { lotes: [], animais: [], pesagens: [], producoes: [] };
+    return data ? JSON.parse(data) : EMPTY;
   }
 
   const content = await Deno.readTextFile(DB_PATH);
   return JSON.parse(content);
 }
 
-export async function writeDB(data: any) {
+export async function writeDB(data: Database) {
   if (usePG()) return pg.writeDB(data);
   if (useRedis()) {
     await redis!.set("sispec:db", JSON.stringify(data));
@@ -124,7 +127,7 @@ export async function readCounters() {
   return JSON.parse(content);
 }
 
-export async function writeCounters(data: any) {
+export async function writeCounters(data: Record<string, number>) {
   if (usePG()) return pg.writeCounters(data);
   if (useRedis()) {
     await redis!.set("sispec:counter:animalId", String(data.animalId || 0));

@@ -11,11 +11,11 @@ pesagens.get("/", async (c) => {
   let filtered = db.pesagens;
   
   if (animal_id) {
-    filtered = filtered.filter((p: any) => p.animal_id === parseInt(animal_id));
+    filtered = filtered.filter((p) => p.animal_id === parseInt(animal_id));
   }
   
   // Ordenar por data descendente
-  filtered.sort((a: any, b: any) => 
+  filtered.sort((a, b) => 
     new Date(b.data_pesagem).getTime() - new Date(a.data_pesagem).getTime()
   );
   
@@ -26,7 +26,7 @@ pesagens.get("/", async (c) => {
 pesagens.get("/:id", async (c) => {
   const id = parseInt(c.req.param("id"));
   const db = await readDB();
-  const pesagem = db.pesagens.find((p: any) => p.id === id);
+  const pesagem = db.pesagens.find((p) => p.id === id);
   
   if (!pesagem) {
     return c.json({ error: "Pesagem não encontrada" }, 404);
@@ -65,7 +65,7 @@ pesagens.post("/", async (c) => {
   }
   
   // Verifica se animal existe
-  const animal = db.animais.find((a: any) => a.id === body.animal_id);
+  const animal = db.animais.find((a) => a.id === body.animal_id);
   if (!animal) {
     return c.json({ error: "Animal não encontrado" }, 400);
   }
@@ -98,7 +98,7 @@ pesagens.delete("/:id", async (c) => {
   const id = parseInt(c.req.param("id"));
   const db = await readDB();
   
-  const index = db.pesagens.findIndex((p: any) => p.id === id);
+  const index = db.pesagens.findIndex((p) => p.id === id);
   if (index === -1) {
     return c.json({ error: "Pesagem não encontrada" }, 404);
   }

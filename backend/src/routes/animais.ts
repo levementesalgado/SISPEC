@@ -1,8 +1,7 @@
 import { Hono } from "hono";
 import { readDB, writeDB, nextId } from "../db/json.ts";
-import { getMetricsAnimal, getDashboardKPIs } from "../services/metrics.ts";
-import { calcularGMD } from "../services/calculos.ts";
-import { formatDate } from "../services/calculos.ts";
+import { getMetricsAnimal } from "../services/metrics.ts";
+import type { ComposicaoRacial } from "../types.ts";
 
 const animais = new Hono();
 
@@ -14,17 +13,17 @@ animais.get("/", async (c) => {
   let filtered = db.animais;
 
   if (status) {
-    filtered = filtered.filter((a: any) => a.status === status);
+    filtered = filtered.filter((a) => a.status === status);
   }
 
   if (lote_id) {
-    filtered = filtered.filter((a: any) => a.lote_id === parseInt(lote_id));
+    filtered = filtered.filter((a) => a.lote_id === parseInt(lote_id));
   }
 
   const result = [];
   for (const animal of filtered) {
     const metrics = await getMetricsAnimal(animal.id, db);
-    const lote = db.lotes.find((l: any) => l.id === animal.lote_id);
+    const lote = db.lotes.find((l) => l.id === animal.lote_id);
 
     result.push({
       ...animal,
@@ -42,14 +41,14 @@ animais.get("/", async (c) => {
 animais.get("/:id", async (c) => {
   const id = parseInt(c.req.param("id"));
   const db = await readDB();
-  const animal = db.animais.find((a: any) => a.id === id);
+  const animal = db.animais.find((a) => a.id === id);
 
   if (!animal) {
     return c.json({ error: "Animal não encontrado" }, 404);
   }
 
   const metrics = await getMetricsAnimal(animal.id, db);
-  const lote = db.lotes.find((l: any) => l.id === animal.lote_id);
+  const lote = db.lotes.find((l) => l.id === animal.lote_id);
 
   return c.json({
     ...animal,
@@ -83,7 +82,7 @@ animais.post("/", async (c) => {
   
   // Validação: composição cruzado não pode passar de 100%
   if (body.raca === 'Cruzado' && body.composicao) {
-    const total = body.composicao.reduce((sum: number, c: any) => sum + (c.porcentagem || 0), 0);
+    const total = body.composicao.reduce((sum: number, c: ComposicaoRacial) => sum + (c.porcentagem || 0), 0);
     if (total > 100) {
       return c.json({ error: `Porcentagem total (${total}%) não pode passar de 100%` }, 400);
     }
@@ -93,14 +92,14 @@ animais.post("/", async (c) => {
 
   // Valida lote se foi enviado
   if (body.lote_id !== undefined && body.lote_id !== null) {
-    const loteExiste = db.lotes.find((l: any) => l.id === body.lote_id);
+    const loteExiste = db.lotes.find((l) => l.id === body.lote_id);
     if (!loteExiste) {
       return c.json({ error: "Lote não encontrado" }, 400);
     }
   }
 
   // Verifica brinco duplicado
-  if (db.animais.find((a: any) => a.brinco === body.brinco)) {
+  if (db.animais.find((a) => a.brinco === body.brinco)) {
     return c.json({ error: "Brinco já cadastrado" }, 400);
   }
   
@@ -135,7 +134,7 @@ animais.post("/", async (c) => {
   
   await writeDB(db);
   
-  const lote = db.lotes.find((l: any) => l.id === novoAnimal.lote_id);
+  const lote = db.lotes.find((l) => l.id === novoAnimal.lote_id);
   const metrics = await getMetricsAnimal(id, db);
 
   return c.json({
@@ -151,14 +150,14 @@ animais.put("/:id", async (c) => {
   const body = await c.req.json();
   const db = await readDB();
 
-  const index = db.animais.findIndex((a: any) => a.id === id);
+  const index = db.animais.findIndex((a) => a.id === id);
   if (index === -1) {
     return c.json({ error: "Animal não encontrado" }, 404);
   }
 
   // Valida lote se foi enviado
   if (body.lote_id !== undefined && body.lote_id !== null) {
-    const loteExiste = db.lotes.find((l: any) => l.id === body.lote_id);
+    const loteExiste = db.lotes.find((l) => l.id === body.lote_id);
     if (!loteExiste) {
       return c.json({ error: "Lote não encontrado" }, 400);
     }
@@ -166,7 +165,7 @@ animais.put("/:id", async (c) => {
 
   // Verifica brinco duplicado se mudou
   if (body.brinco && body.brinco !== db.animais[index].brinco) {
-    if (db.animais.find((a: any) => a.brinco === body.brinco && a.id !== id)) {
+    if (db.animais.find((a) => a.brinco === body.brinco && a.id !== id)) {
       return c.json({ error: "Brinco já cadastrado" }, 400);
     }
   }
@@ -181,7 +180,7 @@ animais.put("/:id", async (c) => {
 
   const metrics = await getMetricsAnimal(id, db);
 
-  const lote = db.lotes.find((l: any) => l.id === db.animais[index].lote_id);
+  const lote = db.lotes.find((l) => l.id === db.animais[index].lote_id);
 
   return c.json({
     ...db.animais[index],
@@ -195,13 +194,13 @@ animais.delete("/:id", async (c) => {
   const id = parseInt(c.req.param("id"));
   const db = await readDB();
   
-  const index = db.animais.findIndex((a: any) => a.id === id);
+  const index = db.animais.findIndex((a) => a.id === id);
   if (index === -1) {
     return c.json({ error: "Animal não encontrado" }, 404);
   }
   
   // Remove pesagens
-  db.pesagens = db.pesagens.filter((p: any) => p.animal_id !== id);
+  db.pesagens = db.pesagens.filter((p) => p.animal_id !== id);
   
   // Remove animal
   db.animais.splice(index, 1);

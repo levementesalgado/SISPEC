@@ -1,5 +1,5 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ScatterChart, Scatter } from 'recharts'
-import { TrendingUp, DollarSign, Leaf, BarChart3, BrainCircuit } from 'lucide-react'
+import { Leaf, BarChart3, BrainCircuit } from 'lucide-react'
 
 const SERIE_HISTORICA = [
   { safra: '2021', animais: 180, gmd_medio: 0.98, peso_abate: 475 },

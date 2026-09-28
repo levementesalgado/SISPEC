@@ -1,8 +1,10 @@
+export type Modalidade = 'CORTE' | 'LEITE'
+
 export interface Lote {
   id: number
   nome: string
   descricao?: string
-  modalidade: 'CORTE' | 'LEITE'
+  modalidade: Modalidade
   ativo: boolean
   created_at?: string
 }
@@ -45,9 +47,49 @@ export interface Producao {
 }
 
 export interface Alerta {
-  tipo: 'crit' | 'warn' | 'info'
+  tipo: 'crit' | 'warn' | 'ok'
   titulo: string
   descricao: string
+}
+
+export interface AnimalCreate {
+  brinco: string
+  raca: string
+  sexo: string
+  data_entrada: string
+  peso_entrada: number
+  lote_id: number | null
+  observacao?: string
+  composicao?: ComposicaoRacial[]
+}
+
+export interface AnimalUpdate {
+  lote_id?: number | null
+  observacao?: string
+}
+
+export interface PesagemCreate {
+  animal_id: number
+  data_pesagem: string
+  peso: number
+  tecnico: string
+  observacao?: string | null
+}
+
+export interface LoteCreate {
+  nome: string
+  descricao?: string
+  modalidade: Modalidade
+}
+
+export interface ProducaoCreate {
+  animal_id: number
+  data_producao: string
+  quantidade: number
+  ccs?: number
+  gordura?: number
+  proteina?: number
+  observacao?: string
 }
 
 export interface KPI_Corte {

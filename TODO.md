@@ -8,8 +8,6 @@
 - [ ] **DB: migrar de JSON para PostgreSQL completo** — atomicidade, concorrência, migrations Flyway (schema inicial criado em `migrations/V001__initial_schema.sql`)
 - [ ] **Integrar ML Service no backend Deno** — chamadas REST para `/ml/predicao` e `/ml/anomalias`
 - [ ] **Testes: suíte automatizada** — Deno.test (backend) + Cypress (frontend) + k6 (carga)
-- [ ] **Tipagem do backend** — 44 erros `TS7006` (implícito `any`) nos handlers Hono
-- [ ] **Tipagem do frontend** — erros TS2322 em `Lotes.tsx` e validadores Recharts
 
 ## 🟡 Médio
 - [ ] **ML: pipeline de treinamento contínuo** — integração com MLflow + retreinamento automático

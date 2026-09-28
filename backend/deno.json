@@ -3,13 +3,18 @@
   "version": "1.0.0",
   "type": "module",
   "exports": "./src/index.ts",
-  "scripts": {
+  "tasks": {
     "dev": "deno run --allow-net --allow-read --allow-write --allow-env --watch src/index.ts",
-    "start": "deno run --allow-net --allow-read --allow-write --allow-env --allow-sys src/index.ts"
+    "start": "deno run --allow-net --allow-read --allow-write --allow-env --allow-sys src/index.ts",
+    "check": "deno check src/index.ts",
+    "fmt": "deno fmt src/",
+    "lint": "deno lint src/"
   },
   "imports": {
     "hono": "jsr:@hono/hono",
     "hono/*": "jsr:@hono/hono/*",
-    "@hono/node-server": "npm:@hono/node-server@^2.0.0"
+    "@hono/node-server": "npm:@hono/node-server@^2.0.0",
+    "postgres": "https://deno.land/x/postgres@v0.19.3/mod.ts",
+    "redis": "https://deno.land/x/redis@v0.32.3/mod.ts"
   }
 }

@@ -1,5 +1,11 @@
-import { Pool } from "https://deno.land/x/postgres@v0.19.3/mod.ts";
+import { Pool } from "postgres";
+import type { Animal, Database, Lote, Pesagem, Producao } from "../types.ts";
 import { runMigrations } from "./migrate.ts";
+
+export interface QueryResult<T = Record<string, unknown>> {
+  rows: T[];
+  rowCount?: number;
+}
 
 let pool: Pool | null = null;
 
@@ -23,8 +29,8 @@ export async function initPG(): Promise<boolean> {
     console.log("  Migrações aplicadas");
 
     return true;
-  } catch (err: any) {
-    console.error("  Erro ao conectar PostgreSQL:", err?.message || err);
+  } catch (err: unknown) {
+    console.error("  Erro ao conectar PostgreSQL:", err instanceof Error ? err.message : err);
     pool = null;
     return false;
   }
@@ -34,17 +40,7 @@ export function isPG(): boolean {
   return pool !== null;
 }
 
-function mapRow(rows: any[], fields: string[]): any[] {
-  return rows.map((row: any) => {
-    const obj: any = {};
-    for (let i = 0; i < fields.length; i++) {
-      obj[fields[i]] = row[i];
-    }
-    return obj;
-  });
-}
-
-export async function readDB(): Promise<any> {
+export async function readDB(): Promise<Database> {
   const p = getPool();
   const client = await p.connect();
   try {
@@ -70,17 +66,18 @@ export async function readDB(): Promise<any> {
     );
 
     return {
-      lotes: lotes.rows,
-      animais: animais.rows,
-      pesagens: pesagens.rows,
-      producoes: producoes.rows,
+      lotes: lotes.rows as Lote[],
+      animais: animais.rows as Animal[],
+      pesagens: pesagens.rows as Pesagem[],
+      producoes: producoes.rows as Producao[],
+      counters: {},
     };
   } finally {
     client.release();
   }
 }
 
-export async function writeDB(data: any): Promise<void> {
+export async function writeDB(data: Database): Promise<void> {
   const p = getPool();
   const client = await p.connect();
   try {
@@ -163,7 +160,7 @@ export async function writeDB(data: any): Promise<void> {
     }
 
     await client.queryObject("COMMIT");
-  } catch (err: any) {
+  } catch (err: unknown) {
     await client.queryObject("ROLLBACK");
     throw err;
   } finally {
@@ -171,7 +168,7 @@ export async function writeDB(data: any): Promise<void> {
   }
 }
 
-async function query(pool: any, text: string, params?: any[]): Promise<any> {
+async function query(pool: Pool, text: string, params?: unknown[]): Promise<QueryResult> {
   const client = await pool.connect();
   try {
     return await client.queryObject(text, params);
@@ -193,10 +190,10 @@ export async function nextId(type: string): Promise<number> {
 
   const p = getPool();
   const result = await query(p, `SELECT nextval('${seq}') AS id`);
-  return Number((result.rows[0] as any).id);
+  return Number((result.rows[0] as { id: number }).id);
 }
 
-export async function readCounters(): Promise<any> {
+export async function readCounters(): Promise<Record<string, number>> {
   const p = getPool();
   const result = await query(p, `
     SELECT
@@ -205,13 +202,13 @@ export async function readCounters(): Promise<any> {
       (SELECT last_value FROM pesagens_id_seq) AS "pesagemId",
       (SELECT last_value FROM producoes_id_seq) AS "producaoId"
   `);
-  return result.rows[0];
+  return result.rows[0] as Record<string, number>;
 }
 
-export async function writeCounters(_data: any): Promise<void> {
+export async function writeCounters(_data: Record<string, number>): Promise<void> {
   // noop — sequences auto-increment
 }
 
-export async function querySQL(text: string, params?: any[]): Promise<any> {
+export function querySQL(text: string, params?: unknown[]): Promise<QueryResult> {
   return query(getPool(), text, params);
 }

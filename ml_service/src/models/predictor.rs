@@ -1,6 +1,6 @@
-use smartcore::linear::linear_regression::LinearRegression;
-use smartcore::linalg::basic::matrix::DenseMatrix;
 use rand::Rng;
+use smartcore::linalg::basic::matrix::DenseMatrix;
+use smartcore::linear::linear_regression::LinearRegression;
 
 pub struct PredictResult {
     pub peso_480kg: f64,
@@ -37,7 +37,9 @@ impl Predictor {
         }
     }
 
-    fn gerar_dados_sinteticos(n_amostras: usize) -> (DenseMatrix<f64>, Vec<f64>, DenseMatrix<f64>, Vec<f64>) {
+    fn gerar_dados_sinteticos(
+        n_amostras: usize,
+    ) -> (DenseMatrix<f64>, Vec<f64>, DenseMatrix<f64>, Vec<f64>) {
         let mut rng = rand::thread_rng();
         let mut n_linhas = 0usize;
         let mut x_gmd: Vec<f64> = Vec::with_capacity(n_amostras * 3);
@@ -70,12 +72,14 @@ impl Predictor {
             &(0..n_linhas)
                 .map(|i| vec![x_gmd[i * 3], x_gmd[i * 3 + 1], x_gmd[i * 3 + 2]])
                 .collect::<Vec<_>>(),
-        ).expect("Falha ao criar matriz GMD");
+        )
+        .expect("Falha ao criar matriz GMD");
         let x_peso_m = DenseMatrix::from_2d_vec(
             &(0..n_linhas)
                 .map(|i| vec![x_peso[i * 3], x_peso[i * 3 + 1], x_peso[i * 3 + 2]])
                 .collect::<Vec<_>>(),
-        ).expect("Falha ao criar matriz Peso");
+        )
+        .expect("Falha ao criar matriz Peso");
 
         (x_gmd_m, y_gmd, x_peso_m, y_peso)
     }
@@ -93,15 +97,19 @@ impl Predictor {
         let y_peso_pred = peso_model.predict(&x_peso).unwrap();
 
         let mean_gmd: f64 = y_gmd.iter().sum::<f64>() / y_gmd.len() as f64;
-        let var_gmd: f64 = y_gmd.iter()
+        let var_gmd: f64 = y_gmd
+            .iter()
             .zip(&y_gmd_pred)
             .map(|(y, p)| (y - p).powi(2))
-            .sum::<f64>() / y_gmd.len() as f64;
+            .sum::<f64>()
+            / y_gmd.len() as f64;
         let mean_peso: f64 = y_peso.iter().sum::<f64>() / y_peso.len() as f64;
-        let var_peso: f64 = y_peso.iter()
+        let var_peso: f64 = y_peso
+            .iter()
             .zip(&y_peso_pred)
             .map(|(y, p)| (y - p).powi(2))
-            .sum::<f64>() / y_peso.len() as f64;
+            .sum::<f64>()
+            / y_peso.len() as f64;
 
         self.gmd_model = Some(gmd_model);
         self.peso_model = Some(peso_model);
@@ -112,7 +120,11 @@ impl Predictor {
         self.trained = true;
 
         tracing::info!("Modelo treinado com {} amostras sintéticas", n_amostras);
-        tracing::info!("RMSE GMD: {:.4} kg/dia | RMSE Peso: {:.2} kg", var_gmd.sqrt(), var_peso.sqrt());
+        tracing::info!(
+            "RMSE GMD: {:.4} kg/dia | RMSE Peso: {:.2} kg",
+            var_gmd.sqrt(),
+            var_peso.sqrt()
+        );
     }
 
     fn ensure_trained(&mut self) {
@@ -121,13 +133,24 @@ impl Predictor {
         }
     }
 
-    pub fn predict(&mut self, peso_entrada: f64, dias_confinamento: f64, gmd_medio: f64) -> PredictResult {
+    pub fn predict(
+        &mut self,
+        peso_entrada: f64,
+        dias_confinamento: f64,
+        gmd_medio: f64,
+    ) -> PredictResult {
         self.ensure_trained();
 
-        let x_gmd = vec![dias_confinamento, peso_entrada, peso_entrada / dias_confinamento.max(1.0)];
-        let x_gmd_m = DenseMatrix::from_2d_vec(&vec![x_gmd]).expect("Falha ao criar matriz pred GMD");
+        let x_gmd = vec![
+            dias_confinamento,
+            peso_entrada,
+            peso_entrada / dias_confinamento.max(1.0),
+        ];
+        let x_gmd_m =
+            DenseMatrix::from_2d_vec(&vec![x_gmd]).expect("Falha ao criar matriz pred GMD");
 
-        let gmd_pred = self.gmd_model
+        let gmd_pred = self
+            .gmd_model
             .as_ref()
             .and_then(|m| m.predict(&x_gmd_m).ok())
             .map(|v| v[0])
@@ -136,9 +159,11 @@ impl Predictor {
         let peso_atual = peso_entrada + gmd_medio * dias_confinamento;
 
         let x_peso = vec![dias_confinamento + 30.0, peso_entrada, gmd_pred.max(0.5)];
-        let x_peso_m = DenseMatrix::from_2d_vec(&vec![x_peso]).expect("Falha ao criar matriz pred Peso");
+        let x_peso_m =
+            DenseMatrix::from_2d_vec(&vec![x_peso]).expect("Falha ao criar matriz pred Peso");
 
-        let peso_30dias = self.peso_model
+        let peso_30dias = self
+            .peso_model
             .as_ref()
             .and_then(|m| m.predict(&x_peso_m).ok())
             .map(|v| v[0].max(peso_atual))
@@ -150,7 +175,7 @@ impl Predictor {
         let r2 = if self.std_gmd > 0.0 {
             let ss_res: f64 = 1.0f64; // aproximação
             let ss_tot: f64 = (self.std_gmd * self.std_gmd) * 5000.0;
-            (1.0 - ss_res / ss_tot.max(1.0)).max(0.3).min(0.95)
+            (1.0 - ss_res / ss_tot.max(1.0)).clamp(0.3, 0.95)
         } else {
             0.85
         };
@@ -176,7 +201,8 @@ impl Predictor {
         let desvio_peso = (peso_atual - peso_esperado).abs();
         let desvio_gmd = (gmd_atual - gmd_medio_lote).abs();
 
-        let score = (desvio_peso / peso_esperado.max(1.0) * 0.5 + desvio_gmd / gmd_medio_lote.max(0.1) * 0.5)
+        let score = (desvio_peso / peso_esperado.max(1.0) * 0.5
+            + desvio_gmd / gmd_medio_lote.max(0.1) * 0.5)
             .min(1.0);
 
         let anomalia = score > 0.3;

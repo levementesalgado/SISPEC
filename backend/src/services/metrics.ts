@@ -1,15 +1,22 @@
 import { env } from "../env.ts";
 import { readDB } from "../db/json.ts";
 import { calcularGMD, getGMDStatus, getDiasParaAbate, calcularDiasConfinamento, formatDate } from "./calculos.ts";
+import type {
+  Animal,
+  Database,
+  MetricasAnimal,
+  MetricasAnimalLeite,
+  Alerta,
+} from "../types.ts";
 
-export async function getMetricsAnimal(animalId: number, db?: any) {
-  if (!db) db = await readDB();
-  const animal = db.animais.find((a: any) => a.id === animalId);
+export async function getMetricsAnimal(animalId: number, db?: Database) {
+  const store: Database = db ?? (await readDB());
+  const animal = store.animais.find((a) => a.id === animalId);
   if (!animal) return null;
 
-  const pesagens = db.pesagens
-    .filter((p: any) => p.animal_id === animalId)
-    .sort((a: any, b: any) => new Date(b.data_pesagem).getTime() - new Date(a.data_pesagem).getTime());
+  const pesagens = store.pesagens
+    .filter((p) => p.animal_id === animalId)
+    .sort((a, b) => new Date(b.data_pesagem).getTime() - new Date(a.data_pesagem).getTime());
 
   const pesoAtual = pesagens.length > 0 ? pesagens[0].peso : animal.peso_entrada;
   const gmd = calcularGMD(animal.peso_entrada, pesoAtual, animal.data_entrada, formatDate(new Date()));
@@ -23,24 +30,24 @@ export async function getMetricsAnimal(animalId: number, db?: any) {
   };
 }
 
-function getModalidadeAnimal(animal: any, db: any): string {
-  const lote = db.lotes.find((l: any) => l.id === animal.lote_id);
+function getModalidadeAnimal(animal: Animal, db: Database): string {
+  const lote = db.lotes.find((l) => l.id === animal.lote_id);
   return lote?.modalidade || "CORTE";
 }
 
-export async function getMetricsAnimalLeite(animalId: number, db?: any) {
-  if (!db) db = await readDB();
-  const animal = db.animais.find((a: any) => a.id === animalId);
+export async function getMetricsAnimalLeite(animalId: number, db?: Database) {
+  const store: Database = db ?? (await readDB());
+  const animal = store.animais.find((a) => a.id === animalId);
   if (!animal) return null;
 
-  const producoes = (db.producoes || [])
-    .filter((p: any) => p.animal_id === animalId)
-    .sort((a: any, b: any) => new Date(b.data).getTime() - new Date(a.data).getTime());
+  const producoes = (store.producoes || [])
+    .filter((p) => p.animal_id === animalId)
+    .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
 
-  const litrosList = producoes.map((p: any) => p.litros);
-  const ccsList = producoes.filter((p: any) => p.ccs).map((p: any) => p.ccs);
-  const gorduraList = producoes.filter((p: any) => p.gordura).map((p: any) => p.gordura);
-  const proteinaList = producoes.filter((p: any) => p.proteina).map((p: any) => p.proteina);
+  const litrosList = producoes.map((p) => p.litros);
+  const ccsList = producoes.flatMap((p) => (p.ccs != null ? [p.ccs] : []));
+  const gorduraList = producoes.flatMap((p) => (p.gordura != null ? [p.gordura] : []));
+  const proteinaList = producoes.flatMap((p) => (p.proteina != null ? [p.proteina] : []));
 
   const producaoMedia = litrosList.length
     ? Math.round((litrosList.reduce((a: number, b: number) => a + b, 0) / litrosList.length) * 10) / 10
@@ -71,9 +78,9 @@ export async function getMetricsAnimalLeite(animalId: number, db?: any) {
 
 export async function getDashboardKPIs(modalidade?: string) {
   const db = await readDB();
-  const animais = db.animais.filter((a: any) => a.status === "ATIVO");
+  const animais = db.animais.filter((a) => a.status === "ATIVO");
   const filtrados = modalidade
-    ? animais.filter((a: any) => getModalidadeAnimal(a, db) === modalidade)
+    ? animais.filter((a) => getModalidadeAnimal(a, db) === modalidade)
     : animais;
 
   if (filtrados.length === 0) {
@@ -85,9 +92,13 @@ export async function getDashboardKPIs(modalidade?: string) {
   }
 
   const isCorte = !modalidade || modalidade === "CORTE";
-  let gmds: number[] = []; let pesos: number[] = [];
-  let abaixoMeta = 0; let proximoAbate = 0;
-  let litrosList: number[] = []; let ccsList: number[] = []; let lactList: number[] = [];
+  const gmds: number[] = [];
+  const pesos: number[] = [];
+  let abaixoMeta = 0;
+  let proximoAbate = 0;
+  const litrosList: number[] = [];
+  const ccsList: number[] = [];
+  const lactList: number[] = [];
 
   for (const animal of filtrados) {
     if (isCorte) {
@@ -121,9 +132,9 @@ export async function getDashboardKPIs(modalidade?: string) {
   };
 }
 
-export async function getGMDTimeline(db?: any) {
-  if (!db) db = await readDB();
-  const pesagens = db.pesagens.sort((a: any, b: any) =>
+export async function getGMDTimeline(db?: Database) {
+  const store: Database = db ?? (await readDB());
+  const pesagens = store.pesagens.sort((a, b) =>
     new Date(a.data_pesagem).getTime() - new Date(b.data_pesagem).getTime());
 
   if (pesagens.length === 0) return [];
@@ -135,7 +146,7 @@ export async function getGMDTimeline(db?: any) {
     const key = `${d.getFullYear()}-W${String(Math.ceil((d.getDate() + (new Date(d.getFullYear(), d.getMonth(), 1).getDay())) / 7)).padStart(2, "0")}`;
     if (!semanas[key]) semanas[key] = { pesos: [], gmds: [] };
     semanas[key].pesos.push(p.peso);
-    const animal = db.animais.find((a: any) => a.id === p.animal_id);
+    const animal = store.animais.find((a) => a.id === p.animal_id);
     if (animal) {
       const gmd = calcularGMD(animal.peso_entrada, p.peso, animal.data_entrada, p.data_pesagem);
       semanas[key].gmds.push(gmd);
@@ -157,27 +168,27 @@ export async function getDashboardOperacional(modalidade?: string) {
   const timeline = isCorte ? await getGMDTimeline(db) : [];
 
   const animaisAtivos = (modalidade
-    ? db.animais.filter((a: any) => a.status === "ATIVO" && getModalidadeAnimal(a, db) === modalidade)
-    : db.animais.filter((a: any) => a.status === "ATIVO"));
+    ? db.animais.filter((a) => a.status === "ATIVO" && getModalidadeAnimal(a, db) === modalidade)
+    : db.animais.filter((a) => a.status === "ATIVO"));
 
   if (isCorte) {
     const todasMetricas = (await Promise.all(
-      animaisAtivos.map((a: any) => getMetricsAnimal(a.id, db))
-    )).filter(Boolean) as any[];
+      animaisAtivos.map((a) => getMetricsAnimal(a.id, db))
+    )).filter((m): m is MetricasAnimal => m !== null);
 
     const diasConfMedio = todasMetricas.length
-      ? Math.round(todasMetricas.reduce((s: number, m: any) => s + m.dias_confinamento, 0) / todasMetricas.length)
+      ? Math.round(todasMetricas.reduce((s: number, m: MetricasAnimal) => s + m.dias_confinamento, 0) / todasMetricas.length)
       : 0;
 
     const abates = todasMetricas
-      .map((m: any) => m.dias_para_abate)
+      .map((m) => m.dias_para_abate)
       .filter((d: number | null): d is number => d !== null && d > 0);
 
     const projAbate = abates.length
       ? Math.round(abates.reduce((a: number, b: number) => a + b, 0) / abates.length)
       : 45;
 
-    const pesos = todasMetricas.map((m: any) => m.peso_atual);
+    const pesos = todasMetricas.map((m) => m.peso_atual);
     const desvio = pesos.length
       ? Math.round(Math.sqrt(
           pesos.reduce((sq: number, p: number) => sq + (p - kpis.peso_medio) ** 2, 0) / pesos.length
@@ -205,19 +216,19 @@ export async function getDashboardOperacional(modalidade?: string) {
   }
 
   const todasLeite = (await Promise.all(
-    animaisAtivos.map((a: any) => getMetricsAnimalLeite(a.id, db))
-  )).filter(Boolean) as any[];
+    animaisAtivos.map((a) => getMetricsAnimalLeite(a.id, db))
+  )).filter((m): m is MetricasAnimalLeite => m !== null);
 
   const prodMedia = todasLeite.length
-    ? Math.round(todasLeite.reduce((s: number, m: any) => s + m.producao_media, 0) / todasLeite.length * 10) / 10
+    ? Math.round(todasLeite.reduce((s: number, m: MetricasAnimalLeite) => s + m.producao_media, 0) / todasLeite.length * 10) / 10
     : 0;
 
   const ccsMedia = todasLeite.length
-    ? Math.round(todasLeite.reduce((s: number, m: any) => s + m.ccs_medio, 0) / todasLeite.length)
+    ? Math.round(todasLeite.reduce((s: number, m: MetricasAnimalLeite) => s + m.ccs_medio, 0) / todasLeite.length)
     : 0;
 
   const lactMedia = todasLeite.length
-    ? Math.round(todasLeite.reduce((s: number, m: any) => s + m.dias_lactacao, 0) / todasLeite.length)
+    ? Math.round(todasLeite.reduce((s: number, m: MetricasAnimalLeite) => s + m.dias_lactacao, 0) / todasLeite.length)
     : 0;
 
   return {
@@ -226,10 +237,10 @@ export async function getDashboardOperacional(modalidade?: string) {
       producao_media: prodMedia,
       ccs_medio: ccsMedia,
       dias_lactacao_medio: lactMedia,
-      gordura_media: Math.round(todasLeite.reduce((s: number, m: any) => s + m.gordura_media, 0) / todasLeite.length * 10) / 10,
-      proteina_media: Math.round(todasLeite.reduce((s: number, m: any) => s + m.proteina_media, 0) / todasLeite.length * 10) / 10,
-      vacas_em_lactacao: todasLeite.filter((m: any) => m.status_lactacao !== "seca").length,
-      vacas_secas: todasLeite.filter((m: any) => m.status_lactacao === "seca").length,
+      gordura_media: Math.round(todasLeite.reduce((s: number, m: MetricasAnimalLeite) => s + m.gordura_media, 0) / todasLeite.length * 10) / 10,
+      proteina_media: Math.round(todasLeite.reduce((s: number, m: MetricasAnimalLeite) => s + m.proteina_media, 0) / todasLeite.length * 10) / 10,
+      vacas_em_lactacao: todasLeite.filter((m) => m.status_lactacao !== "seca").length,
+      vacas_secas: todasLeite.filter((m) => m.status_lactacao === "seca").length,
       total_animais: kpis.total_animais,
       alertas_ativos: alertas.length,
     },
@@ -239,20 +250,20 @@ export async function getDashboardOperacional(modalidade?: string) {
 
 export async function getDashboardTatico() {
   const db = await readDB();
-  const animais = db.animais.filter((a: any) => a.status === "ATIVO");
+  const animais = db.animais.filter((a) => a.status === "ATIVO");
 
   // ranking lotes com Promise.all
-  const rankingLotes = await Promise.all(db.lotes.map(async (l: any) => {
-    const anims = animais.filter((a: any) => a.lote_id === l.id);
-    const metrics = await Promise.all(anims.map((a: any) => getMetricsAnimal(a.id, db)));
-    const gmds = metrics.filter((m: any) => m && m.gmd > 0).map((m: any) => m.gmd);
-    const pesos = metrics.filter((m: any) => m).map((m: any) => m.peso_atual);
+  const rankingLotes = await Promise.all(db.lotes.map(async (l) => {
+    const anims = animais.filter((a) => a.lote_id === l.id);
+    const metrics = await Promise.all(anims.map((a) => getMetricsAnimal(a.id, db)));
+    const gmds = metrics.flatMap((m) => (m && m.gmd > 0 ? [m.gmd] : []));
+    const pesos = metrics.flatMap((m) => (m ? [m.peso_atual] : []));
     const gmdMedio = gmds.length ? gmds.reduce((a: number, b: number) => a + b, 0) / gmds.length : 0;
     const pesoMedio = pesos.length ? pesos.reduce((a: number, b: number) => a + b, 0) / pesos.length : 0;
     return { lote: l.nome, gmd: Math.round(gmdMedio * 100) / 100, animais: anims.length, peso_medio: Math.round(pesoMedio) };
   }));
 
-  const todosPesos = await Promise.all(animais.map(async (a: any) => {
+  const todosPesos = await Promise.all(animais.map(async (a) => {
     const m = await getMetricsAnimal(a.id, db);
     return m?.peso_atual || a.peso_entrada;
   }));
@@ -284,10 +295,10 @@ export async function getDashboardTatico() {
     indicadores: {
       gmd_medio_geral: gmdMedioGeral,
       conversao_alimentar: env.ICA_IDEAL,
-      taxa_descarte: db.animais.length ? Math.round(animais.filter((a: any) => a.status !== "ATIVO").length / db.animais.length * 100) : 0,
+      taxa_descarte: db.animais.length ? Math.round(animais.filter((a) => a.status !== "ATIVO").length / db.animais.length * 100) : 0,
       homogeneidade: todosPesos.length ? Math.round((1 - (desvioPadrao(todosPesos) / media(todosPesos))) * 100) : 0,
     },
-    ranking_lotes: rankingLotes.sort((a: any, b: any) => b.gmd - a.gmd),
+    ranking_lotes: rankingLotes.sort((a, b) => b.gmd - a.gmd),
     distribuicao_peso: distPeso,
     evolucao_gmd: evolucaoGMD,
     cenarios,
@@ -296,8 +307,7 @@ export async function getDashboardTatico() {
 
 export async function getDashboardEstrategico() {
   const db = await readDB();
-  const animais = db.animais.filter((a: any) => a.status === "ATIVO");
-  const kpis = await getDashboardKPIs();
+  const animais = db.animais.filter((a) => a.status === "ATIVO");
 
   const historico = [
     { safra: "2021", animais: 180, gmd_medio: 0.98, peso_abate: 475 },
@@ -335,9 +345,9 @@ export async function getDashboardEstrategico() {
   };
 }
 
-async function getDashboardAlertasLeite(db: any) {
-  const alertas: any[] = [];
-  for (const animal of db.animais.filter((a: any) => a.status === "ATIVO" && getModalidadeAnimal(a, db) === "LEITE")) {
+async function getDashboardAlertasLeite(db: Database) {
+  const alertas: Alerta[] = [];
+  for (const animal of db.animais.filter((a) => a.status === "ATIVO" && getModalidadeAnimal(a, db) === "LEITE")) {
     const metrics = await getMetricsAnimalLeite(animal.id, db);
     if (!metrics) continue;
     if (metrics.status_lactacao === "seca") {
@@ -358,9 +368,9 @@ async function getDashboardAlertasLeite(db: any) {
   return alertas;
 }
 
-async function getDashboardAlertas(db: any) {
-  const alertas: any[] = [];
-  for (const animal of db.animais.filter((a: any) => a.status === "ATIVO")) {
+async function getDashboardAlertas(db: Database) {
+  const alertas: Alerta[] = [];
+  for (const animal of db.animais.filter((a) => a.status === "ATIVO")) {
     const metrics = await getMetricsAnimal(animal.id, db);
     if (!metrics) continue;
     if (metrics.gmd_status === "crit") {

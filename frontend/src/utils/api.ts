@@ -1,6 +1,18 @@
-import type { Animal, Lote, Pesagem, Producao, DashboardOperacionalData, KPIs } from '../types'
+import type {
+  Animal,
+  Lote,
+  Pesagem,
+  Producao,
+  DashboardOperacionalData,
+  KPIs,
+  AnimalCreate,
+  AnimalUpdate,
+  PesagemCreate,
+  LoteCreate,
+  ProducaoCreate,
+} from '../types'
 
-const API_BASE = (import.meta as Record<string, any>).env.VITE_API_URL || '/api/v1'
+const API_BASE = import.meta.env.VITE_API_URL || '/api/v1'
 
 function getHeaders(): Record<string, string> {
   const token = localStorage.getItem('token')
@@ -33,18 +45,6 @@ export async function fetchDashboardOperacional(params = ''): Promise<DashboardO
   return res.json()
 }
 
-export async function fetchDashboardTatico(): Promise<any> {
-  const res = await fetch(`${API_BASE}/dashboard/tatico`, { headers: getHeaders() })
-  if (!res.ok) throw new Error('Erro ao buscar dashboard tático')
-  return res.json()
-}
-
-export async function fetchDashboardEstrategico(): Promise<any> {
-  const res = await fetch(`${API_BASE}/dashboard/estrategico`, { headers: getHeaders() })
-  if (!res.ok) throw new Error('Erro ao buscar dashboard estratégico')
-  return res.json()
-}
-
 export async function fetchAnimais(params: Record<string, string> = {}): Promise<Animal[]> {
   const query = new URLSearchParams(params)
   const res = await fetch(`${API_BASE}/animais?${query}`, { headers: getHeaders() })
@@ -71,7 +71,7 @@ export async function fetchLotes(): Promise<Lote[]> {
   return res.json()
 }
 
-export async function criarAnimal(data: Record<string, any>): Promise<Animal> {
+export async function criarAnimal(data: AnimalCreate): Promise<Animal> {
   const res = await fetch(`${API_BASE}/animais`, {
     method: 'POST',
     headers: getHeaders(),
@@ -84,7 +84,7 @@ export async function criarAnimal(data: Record<string, any>): Promise<Animal> {
   return res.json()
 }
 
-export async function criarPesagem(data: Record<string, any>): Promise<Pesagem> {
+export async function criarPesagem(data: PesagemCreate): Promise<Pesagem> {
   const res = await fetch(`${API_BASE}/pesagens`, {
     method: 'POST',
     headers: getHeaders(),
@@ -97,7 +97,7 @@ export async function criarPesagem(data: Record<string, any>): Promise<Pesagem> 
   return res.json()
 }
 
-export async function criarLote(data: Record<string, any>): Promise<Lote> {
+export async function criarLote(data: LoteCreate): Promise<Lote> {
   const res = await fetch(`${API_BASE}/lotes`, {
     method: 'POST',
     headers: getHeaders(),
@@ -117,7 +117,7 @@ export async function fetchProducoes(params: Record<string, string> = {}): Promi
   return res.json()
 }
 
-export async function criarProducao(data: Record<string, any>): Promise<Producao> {
+export async function criarProducao(data: ProducaoCreate): Promise<Producao> {
   const res = await fetch(`${API_BASE}/producoes`, {
     method: 'POST',
     headers: getHeaders(),
@@ -130,7 +130,7 @@ export async function criarProducao(data: Record<string, any>): Promise<Producao
   return res.json()
 }
 
-export async function atualizarAnimal(id: string, data: Record<string, any>): Promise<Animal> {
+export async function atualizarAnimal(id: string, data: AnimalUpdate): Promise<Animal> {
   const res = await fetch(`${API_BASE}/animais/${id}`, {
     method: 'PUT',
     headers: getHeaders(),

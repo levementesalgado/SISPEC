@@ -1,5 +1,5 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
-import { TrendingUp, Target, BarChart3, Layers } from 'lucide-react'
+import { Target, BarChart3, Layers } from 'lucide-react'
 
 interface RankingLote {
   lote: string

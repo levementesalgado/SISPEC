@@ -214,7 +214,6 @@ export default function AnimalDetail() {
             <div className="absolute left-4 top-4 bottom-4 w-0.5 bg-sage/20"></div>
             <div className="space-y-4">
               {pesagens.map((p, index) => {
-                const pesoAnterior = index < pesagens.length - 1 ? pesagens[index + 1].peso : animal.peso_entrada
                 const gmd = index < pesagens.length - 1 ? calcularGMD(pesagens[index + 1], p) : null
                 const daysDiff = index < pesagens.length - 1
                   ? Math.floor((new Date(p.data_pesagem).getTime() - new Date(pesagens[index + 1].data_pesagem).getTime()) / (1000 * 60 * 60 * 24))

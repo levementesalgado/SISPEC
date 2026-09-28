@@ -1,11 +1,10 @@
 use axum::{
     extract::State,
     http::StatusCode,
-    Json, Router,
     routing::{get, post},
+    Json, Router,
 };
 use serde::{Deserialize, Serialize};
-
 
 use crate::AppState;
 
@@ -64,11 +63,7 @@ async fn predict(
     Json(req): Json<PredictRequest>,
 ) -> Result<Json<PredictResponse>, StatusCode> {
     let mut predictor = state.predictor.lock().await;
-    let result = predictor.predict(
-        req.peso_entrada,
-        req.dias_confinamento,
-        req.gmd_medio,
-    );
+    let result = predictor.predict(req.peso_entrada, req.dias_confinamento, req.gmd_medio);
 
     let peso_projetado = (result.peso_480kg + result.peso_30dias) / 2.0;
     let dias_para_abate = ((480.0 - req.peso_entrada) / req.gmd_medio.max(0.1)) as i64;

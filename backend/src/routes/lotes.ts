@@ -8,7 +8,7 @@ lotes.get("/", async (c) => {
   const db = await readDB();
   const { modalidade } = c.req.query();
   let resultado = db.lotes;
-  if (modalidade) resultado = resultado.filter((l: any) => (l.modalidade || "CORTE") === modalidade);
+  if (modalidade) resultado = resultado.filter((l) => (l.modalidade || "CORTE") === modalidade);
   return c.json(resultado);
 });
 
@@ -16,7 +16,7 @@ lotes.get("/", async (c) => {
 lotes.get("/:id", async (c) => {
   const id = parseInt(c.req.param("id"));
   const db = await readDB();
-  const lote = db.lotes.find((l: any) => l.id === id);
+  const lote = db.lotes.find((l) => l.id === id);
   
   if (!lote) {
     return c.json({ error: "Lote não encontrado" }, 404);
@@ -36,7 +36,7 @@ lotes.post("/", async (c) => {
   const db = await readDB();
   
   // Verifica se já existe
-  if (db.lotes.find((l: any) => l.nome === body.nome)) {
+  if (db.lotes.find((l) => l.nome === body.nome)) {
     return c.json({ error: "Lote já existe" }, 400);
   }
   
@@ -65,7 +65,7 @@ lotes.put("/:id", async (c) => {
   const body = await c.req.json();
   const db = await readDB();
   
-  const index = db.lotes.findIndex((l: any) => l.id === id);
+  const index = db.lotes.findIndex((l) => l.id === id);
   if (index === -1) {
     return c.json({ error: "Lote não encontrado" }, 404);
   }
@@ -86,7 +86,7 @@ lotes.delete("/:id", async (c) => {
   const id = parseInt(c.req.param("id"));
   const db = await readDB();
   
-  const index = db.lotes.findIndex((l: any) => l.id === id);
+  const index = db.lotes.findIndex((l) => l.id === id);
   if (index === -1) {
     return c.json({ error: "Lote não encontrado" }, 404);
   }

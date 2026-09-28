@@ -1,7 +1,7 @@
 import { useState, lazy, Suspense, createContext, useContext, type ReactNode } from 'react'
 import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom'
 import { ToastProvider } from './components/Toast'
-import { Menu, X, LayoutDashboard, Users, FolderTree, PlusCircle, LogOut, Loader2, Beef, Milk } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Users, FolderTree, PlusCircle, LogOut, Loader2, Beef, Milk, type LucideIcon } from 'lucide-react'
 
 interface ModalidadeContextType {
   modalidade: string
@@ -39,16 +39,12 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 interface NavItem {
   path: string
   label: string
-  icon: React.ComponentType<{ size: number }>
+  icon: LucideIcon
 }
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [modalidade, setModalidade] = useState(() => localStorage.getItem('modalidade') || 'CORTE')
-  const [user, setUser] = useState<Record<string, any> | null>(() => {
-    try { return JSON.parse(localStorage.getItem('user') || 'null') }
-    catch { return null }
-  })
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -60,7 +56,6 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
-    setUser(null)
     navigate('/login')
   }
 

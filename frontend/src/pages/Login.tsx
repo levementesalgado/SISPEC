@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { LogIn, AlertCircle } from 'lucide-react'
 
-const API_URL = (import.meta as Record<string, any>).env.VITE_API_URL || '/api/v1'
+const API_URL = import.meta.env.VITE_API_URL || '/api/v1'
 
 export default function Login() {
   const [loading, setLoading] = useState(false)

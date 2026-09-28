@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts'
-import { TrendingUp, AlertTriangle, Scale, Activity, Thermometer, Droplets, Clock, Target, Milk, FlaskConical, Droplet, Percent } from 'lucide-react'
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts'
+import { TrendingUp, AlertTriangle, Scale, Activity, Thermometer, Droplets, Clock, Target, Milk, FlaskConical, Droplet, Percent, type LucideIcon } from 'lucide-react'
 import { fetchDashboardOperacional } from '../utils/api'
 import { useModalidade } from '../App'
 
@@ -35,7 +35,7 @@ interface KpiCard {
   label: string
   key: string
   unit: string
-  icon: React.ComponentType<{ size: number }>
+  icon: LucideIcon
 }
 
 interface AlertaItem {
@@ -56,9 +56,9 @@ export default function DashboardOperacional() {
   useEffect(() => {
     async function load() {
       try {
-        const data = await fetchDashboardOperacional(`?modalidade=${modalidade}`) as any
+        const data = await fetchDashboardOperacional(`?modalidade=${modalidade}`)
         setKpis(data.kpis)
-        if (isCorte && data.timeline && data.timeline.length) {
+        if (isCorte && 'timeline' in data && data.timeline?.length) {
           setTimeline(data.timeline)
         } else if (isCorte) {
           setTimeline([

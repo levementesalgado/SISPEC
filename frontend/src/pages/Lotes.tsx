@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Plus, ChevronDown, ChevronRight, Users } from 'lucide-react'
 import { fetchLotes, criarLote, fetchAnimais } from '../utils/api'
-import type { Lote, Animal } from '../types'
+import type { Lote, Animal, Modalidade } from '../types'
 
 export default function Lotes() {
   const [lotes, setLotes] = useState<Lote[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
-  const [novoLote, setNovoLote] = useState({ nome: '', descricao: '', modalidade: 'CORTE' as const })
+  const [novoLote, setNovoLote] = useState<{ nome: string; descricao: string; modalidade: Modalidade }>({ nome: '', descricao: '', modalidade: 'CORTE' })
   const [loteExpandido, setLoteExpandido] = useState<number | null>(null)
   const [animaisLote, setAnimaisLote] = useState<Animal[]>([])
 
@@ -100,7 +100,7 @@ export default function Lotes() {
                 <label className="block text-sm text-white/60 mb-1">Modalidade</label>
                 <select
                   value={novoLote.modalidade}
-                  onChange={(e) => setNovoLote({ ...novoLote, modalidade: e.target.value as 'CORTE' | 'LEITE' })}
+                  onChange={(e) => setNovoLote({ ...novoLote, modalidade: e.target.value as Modalidade })}
                   className="input"
                 >
                   <option value="CORTE">🐂 Corte</option>

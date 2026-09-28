@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { CheckCircle, AlertCircle, ChevronRight, ChevronLeft } from 'lucide-react'
 import { criarAnimal, fetchLotes } from '../utils/api'
 import { useToasts } from '../components/Toast'
-import type { Lote, ComposicaoRacial } from '../types'
+import type { Lote, ComposicaoRacial, AnimalCreate } from '../types'
 
 export default function Cadastro() {
   const navigate = useNavigate()
@@ -57,7 +57,7 @@ export default function Cadastro() {
 
   const atualizaComposicao = (index: number, campo: keyof ComposicaoRacial, valor: string | number) => {
     const nova = [...composicao]
-    ;(nova[index] as any)[campo] = valor
+    nova[index] = { ...nova[index], [campo]: valor }
     setComposicao(nova)
   }
 
@@ -108,7 +108,7 @@ export default function Cadastro() {
     }
 
     try {
-      const animalData: Record<string, any> = {
+      const animalData: AnimalCreate = {
         ...form,
         peso_entrada: parseFloat(form.peso_entrada),
         lote_id: form.lote_id ? parseInt(form.lote_id) : null

@@ -1,6 +1,11 @@
-import { readAll } from "https://deno.land/std@0.224.0/io/read_all.ts";
+interface QueryClient {
+  connect(): Promise<{
+    queryObject<T>(sql: string, args?: unknown[]): Promise<{ rows: T[] }>;
+    release(): void;
+  }>;
+}
 
-export async function runMigrations(pool: any) {
+export async function runMigrations(pool: QueryClient) {
   const client = await pool.connect();
   try {
     await client.queryObject(`
