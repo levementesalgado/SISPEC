@@ -1,22 +1,63 @@
 import { env } from "../env.ts";
-import { readDB } from "../db/json.ts";
+import { getRepo } from "../db/index.ts";
 import { calcularGMD, getGMDStatus, getDiasParaAbate, calcularDiasConfinamento, formatDate } from "./calculos.ts";
 import type {
   Animal,
   Database,
+  Pesagem,
+  Producao,
+  GMDStatus,
   MetricasAnimal,
   MetricasAnimalLeite,
   Alerta,
 } from "../types.ts";
 
-export async function getMetricsAnimal(animalId: number, db?: Database) {
-  const store: Database = db ?? (await readDB());
+/**
+ * Índice de pesagens por animal. Sem ele, cada getMetricsAnimal refaz um
+ * filter+sort sobre o array inteiro — com N animais e M pesagens isso é O(N*M).
+ */
+function indexarPesagens(db: Database): Map<number, Pesagem[]> {
+  const porAnimal = new Map<number, Pesagem[]>();
+  for (const p of db.pesagens) {
+    const lista = porAnimal.get(p.animal_id);
+    if (lista) lista.push(p);
+    else porAnimal.set(p.animal_id, [p]);
+  }
+  for (const lista of porAnimal.values()) {
+    lista.sort((a, b) => new Date(b.data_pesagem).getTime() - new Date(a.data_pesagem).getTime());
+  }
+  return porAnimal;
+}
+
+function indexarProducoes(db: Database): Map<number, Producao[]> {
+  const porAnimal = new Map<number, Producao[]>();
+  for (const p of db.producoes) {
+    const lista = porAnimal.get(p.animal_id);
+    if (lista) lista.push(p);
+    else porAnimal.set(p.animal_id, [p]);
+  }
+  for (const lista of porAnimal.values()) {
+    lista.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
+  }
+  return porAnimal;
+}
+
+function indiceDePesagens(db: Database): Map<number, Pesagem[]> {
+  return (db as Database & { _idxPesagens?: Map<number, Pesagem[]> })._idxPesagens ??=
+    indexarPesagens(db);
+}
+
+function indiceDeProducoes(db: Database): Map<number, Producao[]> {
+  return (db as Database & { _idxProducoes?: Map<number, Producao[]> })._idxProducoes ??=
+    indexarProducoes(db);
+}
+
+export async function getMetricsAnimal(animalId: number, db?: Database): Promise<MetricasAnimal | null> {
+  const store: Database = db ?? (await getRepo().snapshot());
   const animal = store.animais.find((a) => a.id === animalId);
   if (!animal) return null;
 
-  const pesagens = store.pesagens
-    .filter((p) => p.animal_id === animalId)
-    .sort((a, b) => new Date(b.data_pesagem).getTime() - new Date(a.data_pesagem).getTime());
+  const pesagens = indiceDePesagens(store).get(animalId) ?? [];
 
   const pesoAtual = pesagens.length > 0 ? pesagens[0].peso : animal.peso_entrada;
   const gmd = calcularGMD(animal.peso_entrada, pesoAtual, animal.data_entrada, formatDate(new Date()));
@@ -24,7 +65,7 @@ export async function getMetricsAnimal(animalId: number, db?: Database) {
   return {
     peso_atual: pesoAtual,
     gmd,
-    gmd_status: gmd > 0 ? getGMDStatus(gmd, env.GMD_META) : "sem_pesagem",
+    gmd_status: (gmd > 0 ? getGMDStatus(gmd, env.GMD_META) : "sem_pesagem") as GMDStatus,
     dias_confinamento: calcularDiasConfinamento(animal.data_entrada),
     dias_para_abate: getDiasParaAbate(pesoAtual, gmd, env.PESO_ABATE),
   };
@@ -35,14 +76,12 @@ function getModalidadeAnimal(animal: Animal, db: Database): string {
   return lote?.modalidade || "CORTE";
 }
 
-export async function getMetricsAnimalLeite(animalId: number, db?: Database) {
-  const store: Database = db ?? (await readDB());
+export async function getMetricsAnimalLeite(animalId: number, db?: Database): Promise<MetricasAnimalLeite | null> {
+  const store: Database = db ?? (await getRepo().snapshot());
   const animal = store.animais.find((a) => a.id === animalId);
   if (!animal) return null;
 
-  const producoes = (store.producoes || [])
-    .filter((p) => p.animal_id === animalId)
-    .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
+  const producoes = indiceDeProducoes(store).get(animalId) ?? [];
 
   const litrosList = producoes.map((p) => p.litros);
   const ccsList = producoes.flatMap((p) => (p.ccs != null ? [p.ccs] : []));
@@ -77,7 +116,7 @@ export async function getMetricsAnimalLeite(animalId: number, db?: Database) {
 }
 
 export async function getDashboardKPIs(modalidade?: string) {
-  const db = await readDB();
+  const db = await getRepo().snapshot();
   const animais = db.animais.filter((a) => a.status === "ATIVO");
   const filtrados = modalidade
     ? animais.filter((a) => getModalidadeAnimal(a, db) === modalidade)
@@ -133,7 +172,7 @@ export async function getDashboardKPIs(modalidade?: string) {
 }
 
 export async function getGMDTimeline(db?: Database) {
-  const store: Database = db ?? (await readDB());
+  const store: Database = db ?? (await getRepo().snapshot());
   const pesagens = store.pesagens.sort((a, b) =>
     new Date(a.data_pesagem).getTime() - new Date(b.data_pesagem).getTime());
 
@@ -161,7 +200,7 @@ export async function getGMDTimeline(db?: Database) {
 }
 
 export async function getDashboardOperacional(modalidade?: string) {
-  const db = await readDB();
+  const db = await getRepo().snapshot();
   const isCorte = !modalidade || modalidade === "CORTE";
   const kpis = await getDashboardKPIs(modalidade);
   const alertas = isCorte ? await getDashboardAlertas(db) : await getDashboardAlertasLeite(db);
@@ -249,11 +288,14 @@ export async function getDashboardOperacional(modalidade?: string) {
 }
 
 export async function getDashboardTatico() {
-  const db = await readDB();
+  const db = await getRepo().snapshot();
   const animais = db.animais.filter((a) => a.status === "ATIVO");
 
   // ranking lotes com Promise.all
-  const rankingLotes = await Promise.all(db.lotes.map(async (l) => {
+  // Só lotes ativos entram no ranking: o snapshot pode conter lotes
+  // desativados (soft delete) e eles não devem aparecer em relatório.
+  const lotesAtivos = db.lotes.filter((l) => l.ativo);
+  const rankingLotes = await Promise.all(lotesAtivos.map(async (l) => {
     const anims = animais.filter((a) => a.lote_id === l.id);
     const metrics = await Promise.all(anims.map((a) => getMetricsAnimal(a.id, db)));
     const gmds = metrics.flatMap((m) => (m && m.gmd > 0 ? [m.gmd] : []));
@@ -306,7 +348,7 @@ export async function getDashboardTatico() {
 }
 
 export async function getDashboardEstrategico() {
-  const db = await readDB();
+  const db = await getRepo().snapshot();
   const animais = db.animais.filter((a) => a.status === "ATIVO");
 
   const historico = [

@@ -1,66 +1,66 @@
 import { Hono } from "hono";
-import { readDB, writeDB, nextId } from "../db/json.ts";
+import { getRepo } from "../db/index.ts";
+import type { NewProducao } from "../types.ts";
 
 const producoes = new Hono();
 
 producoes.get("/", async (c) => {
-  const db = await readDB();
   const { animal_id } = c.req.query();
-  let filtered = db.producoes || [];
-  if (animal_id) filtered = filtered.filter((p) => p.animal_id === parseInt(animal_id));
-  filtered.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
-  return c.json(filtered);
+  const animalId = animal_id ? parseInt(animal_id) : undefined;
+  if (animalId !== undefined && Number.isNaN(animalId)) {
+    return c.json({ error: "animal_id inválido" }, 400);
+  }
+  return c.json(await getRepo().listProducoes(animalId));
 });
 
 producoes.get("/:id", async (c) => {
   const id = parseInt(c.req.param("id"));
-  const db = await readDB();
-  const prod = (db.producoes || []).find((p) => p.id === id);
-  if (!prod) return c.json({ error: "Produção não encontrada" }, 404);
-  return c.json(prod);
+  if (Number.isNaN(id)) return c.json({ error: "ID inválido" }, 400);
+
+  const producao = await getRepo().getProducao(id);
+  if (!producao) return c.json({ error: "Produção não encontrada" }, 404);
+  return c.json(producao);
 });
 
 producoes.post("/", async (c) => {
   const body = await c.req.json();
+
   if (!body.animal_id) return c.json({ error: "ID do animal é obrigatório" }, 400);
   if (!body.data) return c.json({ error: "Data é obrigatória" }, 400);
-  if (!body.litros || body.litros <= 0) return c.json({ error: "Produção em litros é obrigatória" }, 400);
+  if (!body.litros || body.litros <= 0) {
+    return c.json({ error: "Produção em litros é obrigatória" }, 400);
+  }
 
-  const db = await readDB();
-  const animal = db.animais.find((a) => a.id === body.animal_id);
-  if (!animal) return c.json({ error: "Animal não encontrado" }, 400);
+  const data = new Date(body.data);
+  if (Number.isNaN(data.getTime())) return c.json({ error: "Data inválida" }, 400);
 
-  const dataPesagem = new Date(body.data);
   const hoje = new Date();
   hoje.setHours(23, 59, 59, 999);
-  if (dataPesagem > hoje) return c.json({ error: "Data não pode ser futura" }, 400);
+  if (data > hoje) return c.json({ error: "Data não pode ser futura" }, 400);
 
-  const id = await nextId("producaoId");
-  const nova = {
-    id,
+  const repo = getRepo();
+  const animal = await repo.getAnimal(body.animal_id);
+  if (!animal) return c.json({ error: "Animal não encontrado" }, 400);
+
+  const nova: NewProducao = {
     animal_id: body.animal_id,
     data: body.data,
     litros: body.litros,
     ccs: body.ccs || null,
     gordura: body.gordura || null,
     proteina: body.proteina || null,
-    created_at: new Date().toISOString()
   };
 
-  if (!db.producoes) db.producoes = [];
-  db.producoes.push(nova);
-  await writeDB(db);
-  return c.json(nova, 201);
+  return c.json(await repo.createProducao(nova), 201);
 });
 
 producoes.delete("/:id", async (c) => {
   const id = parseInt(c.req.param("id"));
-  const db = await readDB();
-  if (!db.producoes) return c.json({ error: "Nenhuma produção encontrada" }, 404);
-  const index = db.producoes.findIndex((p) => p.id === id);
-  if (index === -1) return c.json({ error: "Produção não encontrada" }, 404);
-  db.producoes.splice(index, 1);
-  await writeDB(db);
+  if (Number.isNaN(id)) return c.json({ error: "ID inválido" }, 400);
+
+  if (!(await getRepo().deleteProducao(id))) {
+    return c.json({ error: "Produção não encontrada" }, 404);
+  }
   return c.body(null, 204);
 });
 

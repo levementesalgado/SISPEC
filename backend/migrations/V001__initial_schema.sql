@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS producoes (
     animal_id INTEGER NOT NULL REFERENCES animais(id) ON DELETE CASCADE,
     data DATE NOT NULL,
     litros DECIMAL(7,2) NOT NULL,
-    ccs INTEGER,
+    ccs DECIMAL(5,2),
     gordura DECIMAL(4,1),
     proteina DECIMAL(4,1),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

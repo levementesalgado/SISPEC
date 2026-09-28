@@ -1,17 +1,6 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: sispec
-      POSTGRES_USER: sispec
-      POSTGRES_PASSWORD: sispec2025
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
   backend:
     build:
       context: ./backend
@@ -25,8 +14,10 @@ services:
       ML_SERVICE_URL: http://ml_service:8001
       JWT_SECRET: ${JWT_SECRET:-sispec-dev-secret-mudar-em-producao}
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   ml_service:
     build:
@@ -36,6 +27,22 @@ services:
       - "8001:8001"
     volumes:
       - ml_models:/app/models
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: sispec
+      POSTGRES_USER: sispec
+      POSTGRES_PASSWORD: sispec2025
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sispec -d sispec"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   redis:
     image: redis:7-alpine

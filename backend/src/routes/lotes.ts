@@ -1,99 +1,65 @@
 import { Hono } from "hono";
-import { readDB, writeDB, nextId } from "../db/json.ts";
+import { getRepo } from "../db/index.ts";
+import type { LoteCreate } from "../types.ts";
 
 const lotes = new Hono();
 
-// Listar lotes
 lotes.get("/", async (c) => {
-  const db = await readDB();
   const { modalidade } = c.req.query();
-  let resultado = db.lotes;
-  if (modalidade) resultado = resultado.filter((l) => (l.modalidade || "CORTE") === modalidade);
-  return c.json(resultado);
+  return c.json(await getRepo().listLotes({ modalidade: modalidade || undefined }));
 });
 
-// Buscar lote por ID
 lotes.get("/:id", async (c) => {
   const id = parseInt(c.req.param("id"));
-  const db = await readDB();
-  const lote = db.lotes.find((l) => l.id === id);
-  
-  if (!lote) {
-    return c.json({ error: "Lote não encontrado" }, 404);
-  }
-  
-  return c.json(lote);
+  if (Number.isNaN(id)) return c.json({ error: "ID inválido" }, 400);
+
+  const lote = await getRepo().getLote(id);
+  if (!lote) return c.json({ error: "Lote não encontrado" }, 404);
+
+  const repo = getRepo();
+  const totais = await repo.countAnimaisPorLote();
+  return c.json({ ...lote, total_animais: totais.get(id) ?? 0 });
 });
 
-// Criar lote
 lotes.post("/", async (c) => {
   const body = await c.req.json();
-  
-  if (!body.nome) {
-    return c.json({ error: "Nome é obrigatório" }, 400);
-  }
-  
-  const db = await readDB();
-  
-  // Verifica se já existe
-  if (db.lotes.find((l) => l.nome === body.nome)) {
+  if (!body.nome) return c.json({ error: "Nome é obrigatório" }, 400);
+
+  const repo = getRepo();
+  if (await repo.findLoteByNome(body.nome)) {
     return c.json({ error: "Lote já existe" }, 400);
   }
-  
-  const id = await nextId("loteId");
+
   const modalidade = ["CORTE", "LEITE"].includes(body.modalidade) ? body.modalidade : "CORTE";
+  const data: LoteCreate = { nome: body.nome, descricao: body.descricao ?? null, modalidade };
 
-  const novoLote = {
-    id,
-    nome: body.nome,
-    descricao: body.descricao || null,
-    modalidade,
-    ativo: 1,
-    created_at: new Date().toISOString()
-  };
-  
-  db.lotes.push(novoLote);
-  
-  await writeDB(db);
-
-  return c.json(novoLote, 201);
+  return c.json(await repo.createLote(data), 201);
 });
 
-// Atualizar lote
 lotes.put("/:id", async (c) => {
   const id = parseInt(c.req.param("id"));
-  const body = await c.req.json();
-  const db = await readDB();
-  
-  const index = db.lotes.findIndex((l) => l.id === id);
-  if (index === -1) {
-    return c.json({ error: "Lote não encontrado" }, 404);
-  }
-  
-  db.lotes[index] = {
-    ...db.lotes[index],
-    ...body,
-    updated_at: new Date().toISOString()
-  };
-  
-  await writeDB(db);
+  if (Number.isNaN(id)) return c.json({ error: "ID inválido" }, 400);
 
-  return c.json(db.lotes[index]);
+  const body = await c.req.json();
+  const patch: Record<string, unknown> = {};
+  if (body.nome !== undefined) patch.nome = body.nome;
+  if (body.descricao !== undefined) patch.descricao = body.descricao;
+  if (body.modalidade !== undefined) patch.modalidade = body.modalidade;
+  if (body.ativo !== undefined) patch.ativo = body.ativo;
+
+  const updated = await getRepo().updateLote(id, patch);
+  if (!updated) return c.json({ error: "Lote não encontrado" }, 404);
+
+  return c.json(updated);
 });
 
-// Deletar lote (soft delete)
 lotes.delete("/:id", async (c) => {
   const id = parseInt(c.req.param("id"));
-  const db = await readDB();
-  
-  const index = db.lotes.findIndex((l) => l.id === id);
-  if (index === -1) {
+  if (Number.isNaN(id)) return c.json({ error: "ID inválido" }, 400);
+
+  if (!(await getRepo().deactivateLote(id))) {
     return c.json({ error: "Lote não encontrado" }, 404);
   }
-  
-  db.lotes[index].ativo = 0;
-  
-  await writeDB(db);
 
   return c.body(null, 204);
 });

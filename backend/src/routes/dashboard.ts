@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { env } from "../env.ts";
-import { readDB } from "../db/json.ts";
+import { getRepo } from "../db/index.ts";
 import { getDashboardKPIs, getDashboardOperacional, getDashboardTatico, getDashboardEstrategico, getMetricsAnimal, getGMDTimeline } from "../services/metrics.ts";
 import type { Alerta } from "../types.ts";
 
@@ -21,7 +21,7 @@ dashboard.get("/gmd-semanas", async (c) => {
 
 // Alertas
 dashboard.get("/alertas", async (c) => {
-  const db = await readDB();
+  const db = await getRepo().snapshot();
   const modalidade = c.req.query("modalidade") || undefined;
   const animais = modalidade
     ? db.animais.filter((a) => a.status === "ATIVO" && (db.lotes.find((l) => l.id === a.lote_id)?.modalidade || "CORTE") === modalidade)

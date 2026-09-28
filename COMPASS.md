@@ -73,6 +73,7 @@ Registro consolidado das mudanças do projeto, para síntese do relatório CNPq.
 | 2026-09-28 | `6bd68f0` | **Remoção de Python** e scripts de conveniência; documentação completa de dependências e deploy |
 | 2026-09-28 | `b179165` | **Tipagem completa** backend e frontend |
 | 2026-09-28 | `e0a0823` | **Auth completa**: bcrypt, JWT HS256, refresh com rotação, rotas protegidas |
+| 2026-09-28 | `c50a2c1` | **Persistência PostgreSQL completa**: repositório com operações por entidade, 3 backends na mesma interface |
 
 ---
 
@@ -177,6 +178,119 @@ causaria loop de refetch, então foram deixados.
 
 ---
 
+## Persistência PostgreSQL (setembro 2026)
+
+### O problema encontrado
+
+A camada de dados existente carregava o banco inteiro em memória e regravava a cada escrita:
+
+```ts
+// antes, em toda rota
+const db = await readDB();   // 4 SELECTs
+db.lotes.push(novo);
+await writeDB(db);           // N INSERTs, um por linha
+```
+
+Em JSON isso passava despercebido. Em PostgreSQL, um `POST /lotes` viraria uma transação com
+`INSERT ... ON CONFLICT` para **todas** as linhas de todas as tabelas — pior com o crescimento
+do banco. Com 36 pontos de I/O no código, a camada precisava de uma operação por entidade.
+
+Além disso, `readDB()` sem tipo de retorno contaminava toda a cadeia com `any` (ver seção de
+tipagem).
+
+### A solução: interface de repositório
+
+`backend/src/db/repo.ts` define operações por entidade, e três implementações satisfazem o
+mesmo contrato:
+
+| Ordem | Backend | Condição | Arquivo |
+|-------|---------|----------|---------|
+| 1 | PostgreSQL | `DATABASE_URL` | `repo.pg.ts` |
+| 2 | Redis | `REDIS_URL` | `repo.json.ts` + `storage.ts` |
+| 3 | JSON | nenhuma | `repo.json.ts` + `index.ts` |
+
+Operações: `listLotes`, `getLote`, `findLoteByNome`, `createLote`, `updateLote`,
+`deactivateLote`, `countAnimaisPorLote`, `listAnimais` (com filtro de status, lote, modalidade e
+busca), `getAnimal`, `findAnimalByBrinco`, `createAnimal`, `updateAnimal`, `deleteAnimal`,
+`countAnimais`, `listPesagens`, `getPesagem`, `createPesagem`, `deletePesagem`,
+`listProducoes`, `getProducao`, `createProducao`, `deleteProducao`, `snapshot`,
+`metricasAgregadas`.
+
+### Transações
+
+`deleteAnimal` remove o animal, suas pesagens e suas produções atomicamente. O `DELETE` anterior
+fazia isso em memória, o que em PG exigiria três comandos sem garantia de consistência.
+
+### Diagnóstico de performance
+
+Primeira medição no PostgreSQL: **84 ms** em `GET /animais`, 68 ms em KPIs. O Redis fazia o
+mesmo em 7 ms, sugerindo problema de driver. A Isolando as camadas:
+
+| Medição | Tempo |
+|---------|-------|
+| Round-trip `SELECT 1` (sem dados) | 0,47 ms |
+| `SELECT * FROM pesagens` (130 linhas) | 8,69 ms |
+| Diferença (parse de dados) | **8,27 ms** |
+| `GROUP BY` agregado | 2,04 ms |
+
+Não era rede nem query: era trafegar e parsear dezenas de milhares de linhas de JSON a cada
+request de dashboard, quando o dashboard só precisa de agregações.
+
+Solução: `metricasAgregadas()` calcula tudo no banco com `GROUP BY` e subquery para o valor mais
+recente. O modo JSON calcula em memória, com o mesmo resultado.
+
+| Endpoint | Antes | Depois |
+|----------|-------|--------|
+| `GET /animais?limit=20` | 84,2 ms | **7,1 ms** |
+| `GET /dashboard/kpis` | 68,5 ms | **5,1 ms** |
+| `GET /dashboard/estrategico` | 61,9 ms | **4,8 ms** |
+| `POST /lotes` | 8,8 ms | 8,6 ms |
+
+Também houve troca do driver de `deno.land/x/postgres` para o oficial `jsr:@db/postgres`
+(12,8 ms → 9,1 ms em query pura) e remoção da transação no `snapshot()`, que é leitura pura e
+custava um round-trip extra segurando a conexão do pool.
+
+### Verificação de paridade
+
+Suite de **70 verificações** rodada contra os três backends: leituras, filtros, ordenação,
+dashboards, CRUD completo, 12 casos de validação, 404, 401 sem token, cascade de delete e
+isolamento de soft delete.
+
+| Backend | Resultado |
+|---------|-----------|
+| PostgreSQL | 70/70 |
+| Redis | 70/70 |
+| JSON | 70/70 |
+
+Para confirmar que não eram só "as mesma quantidade de respostas", os valores dos dashboards
+foram coletados dos dois backends e comparados campo a campo. Para isso o seed precisou ficar
+**determinístico** (PRNG mulberry32, semente em `SEED_RANDOM`) — com `Math.random()` cada
+execução gerava dados diferentes e a comparação era impossível.
+
+Estado inicial: 55 diferenças. Após as correções: **zero**.
+
+### Bugs encontrados durante a migração
+
+| Bug | Sintoma | Causa |
+|-----|---------|-------|
+| `DATE` com deslocamento de dia | `data_entrada` virava dia anterior | Driver converte para `Date` no fuso do servidor; leitura corrigida para UTC |
+| `TIMESTAMP` como texto de `Date` | `created_at` vinha como `"Mon Sep 28 2026..."` | Sem normalização; agora `toISOString()` |
+| `ccs INTEGER` rejeitava decimal | `invalid input syntax for type integer: "3.4"` | CCS é medido em escala decimal (x1000/mL); schema corrigido para `DECIMAL(5,2)` |
+| Lotes desativados no ranking | `tatico_ranking` trazia 12 linhas em vez de 6 | `snapshot()` inclui soft-deleted; filtro por `ativo` faltava |
+
+Os dois primeiros só apareceram com o PostgreSQL real — o driver devolve `Date` onde o JSON
+devolve string, e o cliente teria recebido dois formatos diferentes dependendo do backend.
+
+### Seed
+
+Reescrito para usar o repositório, com PRNG determinístico. O GMD passou a ser simulado por
+**GMD alvo** (0,8 a 1,6 kg/dia, faixa real de confinamento) distribuído nas pesagens, em vez de
+incremento fixo por pesagem — o incremento fixo produzia GMD dependente do número de pesagens.
+
+Brincos usam índice sequencial do lote em vez do `id` do banco, para não variarem entre uma base
+vazia e uma reaproveitada.
+
+
 ## Segurança: autenticação (setembro 2026)
 
 ### Vulnerabilidade encontrada
@@ -246,10 +360,10 @@ servidor antes de limpar o `localStorage`.
 
 | Componente | Tecnologia | Linhas | Arquivos |
 |------------|-----------|--------|----------|
-| Backend | Deno 2 + Hono | 2.370 | 19 |
+| Backend | Deno 2 + Hono | 3.268 | 23 |
 | Frontend | React 18 / Preact + Vite + Tailwind | 2.267 | 16 |
 | ML Service | Rust + axum + smartcore | 376 | 5 |
-| **Total** | | **5.013** | **40** |
+| **Total** | | **5.911** | **44** |
 
 | Ativo | Quantidade |
 |-------|-----------|

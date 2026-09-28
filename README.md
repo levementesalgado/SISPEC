@@ -55,7 +55,8 @@ O backend Deno é a API principal e atua como **proxy** para o ML Service — o 
 |-------------|-----|
 | `hono` (jsr) | Framework HTTP, roteamento, middleware |
 | `@hono/node-server` (npm) | Adaptador para `serve()` no Deno |
-| `deno-postgres` | Driver PostgreSQL |
+| `@db/postgres` (jsr) | Driver PostgreSQL com pool de conexões |
+| `redis` | Driver Redis para o modo cache |
 | `bcryptjs` (npm) | Hash de senha (bcrypt, custo 10) |
 | `crypto.subtle` | HS256 nativo para JWT, sem dependência |
 
@@ -157,12 +158,41 @@ cd frontend && npm install && npm run dev
 
 ### Migrations
 
+Aplicadas automaticamente no startup pelo backend — o arquivo é lido uma única vez e
+registrado em `_migrations`. Para rodar manualmente:
+
 ```bash
 cd backend
 flyway -url jdbc:postgresql://localhost:5432/sispec -user sispec -password sispec2025 migrate
 ```
 
-Schema inicial em `backend/migrations/V001__initial_schema.sql` (tabelas `usuarios`, `lotes`, `animais`, `pesagens`, `producoes`).
+Schema em `backend/migrations/V001__initial_schema.sql` — tabelas `usuarios`,
+`refresh_tokens_revogados`, `lotes`, `animais`, `pesagens`, `producoes`.
+
+### Camada de dados
+
+O backend fala com o banco através de uma interface (`backend/src/db/repo.ts`) com operações
+por entidade, e escolhe a implementação na inicialização:
+
+| Ordem | Backend | Condição | Uso |
+|-------|---------|----------|-----|
+| 1 | PostgreSQL | `DATABASE_URL` definida | Produção e desenvolvimento com banco |
+| 2 | Redis | `REDIS_URL` definida | Cache do snapshot |
+| 3 | JSON | nenhuma das anteriores | Desenvolvimento sem dependência externa |
+
+Os três passam pela mesma suíte de 70 verificações e produzem os mesmos valores — o modo
+JSON não é um atalho com comportamento diferente, é a mesma interface com outro backend.
+
+Duas decisões que valem nota:
+
+- **Consultas específicas, não snapshot por request.** A implementação anterior lia o banco
+  inteiro e regravava a cada escrita, o que em PostgreSQL significava centenas de INSERTs por
+  requisição. O repositório tem uma operação por entidade e `deleteAnimal` roda em transação.
+- **Métricas agregadas no banco.** `metricasAgregadas()` roda um `GROUP BY` no PostgreSQL em vez
+  de trafegar todas as pesagens e produções: 84 ms → 7 ms por request de dashboard.
+
+O seed é determinístico (PRNG mulberry32, semente em `SEED_RANDOM`), então a mesma semente gera
+os mesmos dados em qualquer backend — é o que permite comparar os dois.
 
 ### Autenticação
 

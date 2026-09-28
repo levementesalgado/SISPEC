@@ -74,8 +74,22 @@ export interface NewAnimal {
   data_entrada: string;
   peso_entrada: number;
   lote_id?: number | null;
-  observacao?: string;
+  observacao?: string | null;
   composicao?: ComposicaoRacial[] | null;
+}
+
+export type LoteCreate = NewLote;
+export type AnimalCreate = NewAnimal;
+
+export interface AnimalUpdate {
+  brinco?: string;
+  raca?: string;
+  sexo?: Sexo;
+  data_entrada?: string;
+  peso_entrada?: number;
+  lote_id?: number | null;
+  observacao?: string | null;
+  status?: StatusAnimal;
 }
 
 export interface NewPesagem {
@@ -83,7 +97,7 @@ export interface NewPesagem {
   data_pesagem: string;
   peso: number;
   tecnico?: string;
-  observacao?: string;
+  observacao?: string | null;
 }
 
 export interface NewProducao {
@@ -96,17 +110,36 @@ export interface NewProducao {
   observacao?: string;
 }
 
-export type GMDStatus = "ok" | "atencao" | "critico" | "sem_pesagem";
+export type GMDStatus = "ok" | "warn" | "crit" | "sem_pesagem";
+
+export type StatusLactacao = "inicio" | "meio" | "final" | "seca";
+
+/**
+ * Métricas agregadas por animal, como o dashboard precisa.
+ * Em PostgreSQL vem de um GROUP BY; no modo JSON é calculada em memória.
+ */
+export interface AnimalMetricas {
+  peso_atual: number;
+  gmd: number;
+  dias_confinamento: number;
+  dias_para_abate: number | null;
+  // leite
+  producao_media: number;
+  producao_atual: number;
+  ccs_medio: number;
+  gordura_media: number;
+  proteina_media: number;
+  dias_lactacao: number;
+  status_lactacao: StatusLactacao;
+}
 
 export interface MetricasAnimal {
   peso_atual: number;
   gmd: number;
   gmd_status: GMDStatus;
   dias_confinamento: number;
-  dias_para_abate: number;
+  dias_para_abate: number | null;
 }
-
-export type StatusLactacao = "inicio" | "meio" | "final" | "seca";
 
 export interface MetricasAnimalLeite {
   producao_media: number;

@@ -1,34 +1,81 @@
 import bcrypt from "bcryptjs";
-import { isPG, querySQL } from "../db/pg.ts";
+import { isPG, getPool } from "../db/conn.ts";
 import type { Role, StoredUser, UserWithRefresh } from "../types.ts";
 
-const USERS_PATH = "./data/usuarios.json";
 const BCRYPT_ROUNDS = 10;
 
-const EMPTY: StoredUser[] = [];
+const USERS_PATH = "./data/usuarios.json";
+
+export interface UserStorage {
+  read(): Promise<StoredUser[]>;
+  write(users: StoredUser[]): Promise<void>;
+}
+
+class PgUserStorage implements UserStorage {
+  async read(): Promise<StoredUser[]> {
+    const client = await getPool().connect();
+    try {
+      const result = await client.queryObject<StoredUser>(
+        "SELECT id, username, senha_hash, nome, role, ativo FROM usuarios WHERE ativo = 1 ORDER BY id",
+      );
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  write(): Promise<void> {
+    return Promise.reject(new Error("Usuários só são persistidos via setRefreshToken"));
+  }
+
+  async query(sql: string, params: unknown[] = []): Promise<StoredUser[]> {
+    const client = await getPool().connect();
+    try {
+      const result = await client.queryObject<StoredUser>(sql, params);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+}
+
+function fileStorage(): UserStorage {
+  return {
+    async read() {
+      try {
+        return JSON.parse(await Deno.readTextFile(USERS_PATH)) as StoredUser[];
+      } catch {
+        return [];
+      }
+    },
+    async write(users) {
+      await Deno.mkdir("./data", { recursive: true });
+      await Deno.writeTextFile(USERS_PATH, JSON.stringify(users, null, 2));
+    },
+  };
+}
+
+/**
+ * Usuários ficam no arquivo local mesmo com Redis no snapshot: o conjunto é
+ * pequeno e fixo, e evitar uma chave separada simplifica a revogação de
+ * refresh token. Em produção com PostgreSQL vai para a tabela `usuarios`.
+ */
+function storage(): UserStorage {
+  if (isPG()) return new PgUserStorage();
+  return fileStorage();
+}
 
 export async function readUsers(): Promise<StoredUser[]> {
-  if (isPG()) {
-    const result = await querySQL<StoredUser>(
-      "SELECT id, username, senha_hash, nome, role, ativo FROM usuarios WHERE ativo = 1",
-    );
-    return result.rows;
-  }
-  try {
-    const content = await Deno.readTextFile(USERS_PATH);
-    return JSON.parse(content) as StoredUser[];
-  } catch {
-    return EMPTY;
-  }
+  return await storage().read();
 }
 
 export async function findUserByUsername(username: string): Promise<StoredUser | null> {
   if (isPG()) {
-    const result = await querySQL<StoredUser>(
+    const rows = await new PgUserStorage().query(
       "SELECT id, username, senha_hash, nome, role, ativo FROM usuarios WHERE username = $1 AND ativo = 1",
       [username],
     );
-    return result.rows[0] ?? null;
+    return rows[0] ?? null;
   }
   const users = await readUsers();
   return users.find((u) => u.username === username && u.ativo !== 0) ?? null;
@@ -48,11 +95,15 @@ export async function setRefreshToken(
   expiraEm: Date | null,
 ): Promise<void> {
   if (isPG()) {
-    await querySQL("UPDATE usuarios SET refresh_jti = $1, refresh_expira_em = $2 WHERE username = $3", [
-      jti,
-      expiraEm?.toISOString() ?? null,
-      username,
-    ]);
+    const client = await getPool().connect();
+    try {
+      await client.queryObject(
+        "UPDATE usuarios SET refresh_jti = $1, refresh_expira_em = $2, updated_at = NOW() WHERE username = $3",
+        [jti, expiraEm?.toISOString() ?? null, username],
+      );
+    } finally {
+      client.release();
+    }
     return;
   }
 
@@ -61,17 +112,23 @@ export async function setRefreshToken(
   if (!user) return;
   user.refresh_jti = jti;
   user.refresh_expira_em = expiraEm?.toISOString() ?? null;
-  await Deno.writeTextFile(USERS_PATH, JSON.stringify(users, null, 2));
+  await fileStorage().write(users);
 }
 
 export async function getRefreshToken(username: string): Promise<UserWithRefresh | null> {
   if (isPG()) {
-    const result = await querySQL<UserWithRefresh>(
-      "SELECT username, refresh_jti, refresh_expira_em FROM usuarios WHERE username = $1",
-      [username],
-    );
-    return result.rows[0] ?? null;
+    const client = await getPool().connect();
+    try {
+      const result = await client.queryObject<UserWithRefresh>(
+        "SELECT username, refresh_jti, refresh_expira_em FROM usuarios WHERE username = $1",
+        [username],
+      );
+      return result.rows[0] ?? null;
+    } finally {
+      client.release();
+    }
   }
+
   const users = await readUsers();
   const user = users.find((u) => u.username === username);
   if (!user) return null;
@@ -82,22 +139,37 @@ export async function getRefreshToken(username: string): Promise<UserWithRefresh
   };
 }
 
-export async function revokeJti(jti: string, expiraEm: Date): Promise<void> {
-  if (isPG()) {
-    await querySQL(
+async function revokeJtiPg(jti: string, expiraEm: Date): Promise<void> {
+  const client = await getPool().connect();
+  try {
+    await client.queryObject(
       "INSERT INTO refresh_tokens_revogados (jti, expira_em) VALUES ($1, $2) ON CONFLICT DO NOTHING",
       [jti, expiraEm.toISOString()],
     );
+  } finally {
+    client.release();
+  }
+}
+
+export async function revokeJti(jti: string, expiraEm: Date): Promise<void> {
+  if (!jti) return;
+  if (isPG()) {
+    await revokeJtiPg(jti, expiraEm);
   }
 }
 
 export async function isJtiRevoked(jti: string): Promise<boolean> {
   if (!isPG()) return false;
-  const result = await querySQL<{ jti: string }>(
-    "SELECT jti FROM refresh_tokens_revogados WHERE jti = $1 AND expira_em > NOW()",
-    [jti],
-  );
-  return result.rows.length > 0;
+  const client = await getPool().connect();
+  try {
+    const result = await client.queryObject<{ jti: string }>(
+      "SELECT jti FROM refresh_tokens_revogados WHERE jti = $1 AND expira_em > NOW()",
+      [jti],
+    );
+    return result.rows.length > 0;
+  } finally {
+    client.release();
+  }
 }
 
 export async function ensureSeedUsers(): Promise<void> {
@@ -111,16 +183,22 @@ export async function ensureSeedUsers(): Promise<void> {
 
   for (const seed of seeds) {
     const senhaHash = await hashPassword(seed.senha);
+
     if (isPG()) {
-      await querySQL(
-        `INSERT INTO usuarios (username, senha_hash, nome, role, ativo)
-         VALUES ($1, $2, $3, $4, 1)
-         ON CONFLICT (username) DO UPDATE SET senha_hash = EXCLUDED.senha_hash`,
-        [seed.username, senhaHash, seed.nome, seed.role],
-      );
+      const client = await getPool().connect();
+      try {
+        await client.queryObject(
+          `INSERT INTO usuarios (username, senha_hash, nome, role, ativo)
+           VALUES ($1, $2, $3, $4, 1)
+           ON CONFLICT (username) DO UPDATE SET senha_hash = EXCLUDED.senha_hash`,
+          [seed.username, senhaHash, seed.nome, seed.role],
+        );
+      } finally {
+        client.release();
+      }
     } else {
       const user: StoredUser = {
-        id: seeds.indexOf(seed) + 1,
+        id: existentes.length + 1,
         username: seed.username,
         senha_hash: senhaHash,
         nome: seed.nome,
@@ -134,7 +212,7 @@ export async function ensureSeedUsers(): Promise<void> {
   }
 
   if (!isPG()) {
-    await Deno.writeTextFile(USERS_PATH, JSON.stringify(existentes, null, 2));
+    await fileStorage().write(existentes);
   }
-  console.log(`Seed de usuários: ${seeds.length} contas criadas`);
+  console.log(`  ${seeds.length} contas de acesso prontas`);
 }

@@ -3,7 +3,7 @@ import { cors } from "hono/cors";
 import { serve } from "@hono/node-server";
 
 import { env } from "./env.ts";
-import { initDB, getDBType } from "./db/json.ts";
+import { initRepository, getDBType, closeRepository } from "./db/index.ts";
 
 import authRouter, { initAuth } from "./routes/auth.ts";
 import { requireAuth, type AuthEnv } from "./auth/middleware.ts";
@@ -14,8 +14,8 @@ import dashboardRouter from "./routes/dashboard.ts";
 import mlRouter from "./routes/ml.ts";
 import producoesRouter from "./routes/producoes.ts";
 
-// Inicializa banco
-await initDB();
+// Inicializa repositório (PostgreSQL, Redis ou JSON, em ordem de preferência)
+await initRepository();
 
 // Seed na inicialização para garantir dados realistas
 await import("./seed.ts");
@@ -71,8 +71,18 @@ app.route("/api/v1/producoes", producoesRouter);
 
 console.log(`🚀 SISPEC API rodando em http://${env.HOST}:${env.PORT}`);
 
-serve({
+const server = serve({
   fetch: app.fetch,
   port: env.PORT,
   hostname: env.HOST
 });
+
+async function shutdown(sinal: string) {
+  console.log(`\n${sinal} recebido, encerrando...`);
+  await closeRepository();
+  await server.close();
+  Deno.exit(0);
+}
+
+Deno.addSignalListener("SIGINT", () => void shutdown("SIGINT"));
+Deno.addSignalListener("SIGTERM", () => void shutdown("SIGTERM"));

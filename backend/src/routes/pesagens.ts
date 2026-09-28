@@ -1,111 +1,74 @@
 import { Hono } from "hono";
-import { readDB, writeDB, nextId } from "../db/json.ts";
+import { getRepo } from "../db/index.ts";
+import type { NewPesagem } from "../types.ts";
 
 const pesagens = new Hono();
 
-// Listar pesagens
 pesagens.get("/", async (c) => {
-  const db = await readDB();
   const { animal_id } = c.req.query();
-  
-  let filtered = db.pesagens;
-  
-  if (animal_id) {
-    filtered = filtered.filter((p) => p.animal_id === parseInt(animal_id));
+  const animalId = animal_id ? parseInt(animal_id) : undefined;
+  if (animalId !== undefined && Number.isNaN(animalId)) {
+    return c.json({ error: "animal_id inválido" }, 400);
   }
-  
-  // Ordenar por data descendente
-  filtered.sort((a, b) => 
-    new Date(b.data_pesagem).getTime() - new Date(a.data_pesagem).getTime()
-  );
-  
-  return c.json(filtered);
+  return c.json(await getRepo().listPesagens(animalId));
 });
 
-// Buscar pesagem por ID
 pesagens.get("/:id", async (c) => {
   const id = parseInt(c.req.param("id"));
-  const db = await readDB();
-  const pesagem = db.pesagens.find((p) => p.id === id);
-  
-  if (!pesagem) {
-    return c.json({ error: "Pesagem não encontrada" }, 404);
-  }
-  
+  if (Number.isNaN(id)) return c.json({ error: "ID inválido" }, 400);
+
+  const pesagem = await getRepo().getPesagem(id);
+  if (!pesagem) return c.json({ error: "Pesagem não encontrada" }, 404);
   return c.json(pesagem);
 });
 
-// Criar pesagem
 pesagens.post("/", async (c) => {
   const body = await c.req.json();
-  const db = await readDB();
-  
-  // Validações obrigatórias
-  if (!body.animal_id) {
-    return c.json({ error: "ID do animal é obrigatório" }, 400);
-  }
-  if (!body.data_pesagem) {
-    return c.json({ error: "Data da pesagem é obrigatória" }, 400);
-  }
-  if (!body.peso || body.peso <= 0) {
-    return c.json({ error: "Peso é obrigatório" }, 400);
-  }
-  
-  // Validação: data não pode ser futura
+
+  if (!body.animal_id) return c.json({ error: "ID do animal é obrigatório" }, 400);
+  if (!body.data_pesagem) return c.json({ error: "Data da pesagem é obrigatória" }, 400);
+  if (!body.peso || body.peso <= 0) return c.json({ error: "Peso é obrigatório" }, 400);
+  if (body.peso < 0) return c.json({ error: "Peso não pode ser negativo" }, 400);
+
   const dataPesagem = new Date(body.data_pesagem);
+  if (Number.isNaN(dataPesagem.getTime())) {
+    return c.json({ error: "Data da pesagem inválida" }, 400);
+  }
+
   const hoje = new Date();
   hoje.setHours(23, 59, 59, 999);
   if (dataPesagem > hoje) {
     return c.json({ error: "Data da pesagem não pode ser futura" }, 400);
   }
-  
-  // Validação: peso não pode ser negativo
-  if (body.peso < 0) {
-    return c.json({ error: "Peso não pode ser negativo" }, 400);
+
+  const repo = getRepo();
+  const animal = await repo.getAnimal(body.animal_id);
+  if (!animal) return c.json({ error: "Animal não encontrado" }, 400);
+
+  if (new Date(dataPesagem) < new Date(animal.data_entrada)) {
+    return c.json({
+      error: "Data da pesagem não pode ser anterior à entrada do animal",
+    }, 400);
   }
-  
-  // Verifica se animal existe
-  const animal = db.animais.find((a) => a.id === body.animal_id);
-  if (!animal) {
-    return c.json({ error: "Animal não encontrado" }, 400);
-  }
-  
-  // Verifica se data não é anterior à entrada
-  if (new Date(body.data_pesagem) < new Date(animal.data_entrada)) {
-    return c.json({ error: "Data da pesagem não pode ser anterior à entrada do animal" }, 400);
-  }
-  
-  const id = await nextId("pesagemId");
-  
-  const novaPesagem = {
-    id,
+
+  const data: NewPesagem = {
     animal_id: body.animal_id,
     data_pesagem: body.data_pesagem,
     peso: body.peso,
-    tecnico: body.tecnico || null,
+    tecnico: body.tecnico || "Sistema",
     observacao: body.observacao || null,
-    created_at: new Date().toISOString()
   };
-  
-  db.pesagens.push(novaPesagem);
-  await writeDB(db);
-  
-  return c.json(novaPesagem, 201);
+
+  return c.json(await repo.createPesagem(data), 201);
 });
 
-// Deletar pesagem
 pesagens.delete("/:id", async (c) => {
   const id = parseInt(c.req.param("id"));
-  const db = await readDB();
-  
-  const index = db.pesagens.findIndex((p) => p.id === id);
-  if (index === -1) {
+  if (Number.isNaN(id)) return c.json({ error: "ID inválido" }, 400);
+
+  if (!(await getRepo().deletePesagem(id))) {
     return c.json({ error: "Pesagem não encontrada" }, 404);
   }
-  
-  db.pesagens.splice(index, 1);
-  await writeDB(db);
-  
   return c.body(null, 204);
 });
 
