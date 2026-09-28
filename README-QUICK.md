@@ -1,8 +1,8 @@
-# SISPEC — Sistema Inteligente de Pecuária de Confinamento
+# SISPEC — Início Rápido
 
-> ML + IoT + 3 dashboards · Agro 5.0
+> Rust + Deno + React · sem Python
 
-## Quick Start (Full Stack)
+## Subir tudo (Docker)
 
 ```bash
 docker compose up -d
@@ -10,29 +10,35 @@ docker compose up -d
 
 | Serviço | URL |
 |---------|-----|
-| Frontend | http://localhost:5173 |
 | Backend API | http://localhost:3000 |
-| ML Service | http://localhost:8001/docs |
+| ML Service | http://localhost:8001 |
+| Frontend (dev) | http://localhost:5173 |
 | PostgreSQL | localhost:5432 |
 
-## Quick Start (Dev)
+## Desenvolvimento local
 
-### Backend
 ```bash
-cd backend && deno run --allow-net --allow-read --allow-write --allow-env src/main.ts
-```
+# 1. banco
+docker compose up -d postgres redis
 
-### ML Service
-```bash
-cd ml_service && pip install -r requirements.txt && uvicorn api.main:app --reload --port 8001
-```
+# 2. ML Service (Rust)
+cd ml_service && cargo run --release
 
-### Frontend
-```bash
+# 3. backend (Deno)
+cd backend && deno task dev
+
+# 4. frontend
 cd frontend && npm install && npm run dev
 ```
 
-## Login de Teste
+## Migrations
+
+```bash
+cd backend
+flyway -url jdbc:postgresql://localhost:5432/sispec -user sispec -password sispec2025 migrate
+```
+
+## Login de teste
 
 | Usuário | Senha | Função |
 |---------|-------|--------|
@@ -47,14 +53,10 @@ cd frontend && npm install && npm run dev
 | Tático | Gerente | 8 indicadores + ranking | Semanal |
 | Estratégico | Executivo | 6 indicadores + ESG | Mensal |
 
-## Deploy
-
-```bash
-./deploy.sh
-```
-
 ## Problemas?
 
-- Backend: http://localhost:3000
+- Backend: http://localhost:3000/api/v1/health
+- ML: http://localhost:8001/ml/health
 - Frontend: http://localhost:5173
-- ML: http://localhost:8001/docs
+
+Detalhes de dependências e deploy: ver [README.md](README.md).

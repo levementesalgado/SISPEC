@@ -8,8 +8,6 @@ target/
 dist/
 build/
 .next/
-*.pyc
-__pycache__/
 .vercel
 *.db
 *.sqlite
@@ -22,3 +20,17 @@ __pycache__/
 *.exe
 *.AppImage
 *.docx
+
+# Python — projeto é 100% Rust + Deno, não commitar
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+requirements.txt
+pyproject.toml
+
+# Scripts de conveniência — Docker Compose cobre start/deploy
+*.sh
+*.bat
+!.github/**/*.sh

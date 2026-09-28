@@ -6,6 +6,6 @@ COPY . .
 
 RUN deno cache src/index.ts
 
-EXPOSE 10000
+EXPOSE 3000
 
 CMD deno run --allow-net --allow-read --allow-write --allow-env --allow-sys src/index.ts

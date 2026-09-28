@@ -19,6 +19,7 @@ services:
     ports:
       - "3000:3000"
     environment:
+      PORT: 3000
       DATABASE_URL: postgres://sispec:sispec2025@postgres:5432/sispec
       REDIS_URL: redis://redis:6379
       ML_SERVICE_URL: http://ml_service:8001

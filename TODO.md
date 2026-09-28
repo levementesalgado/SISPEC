@@ -8,7 +8,8 @@
 - [ ] **DB: migrar de JSON para PostgreSQL completo** — atomicidade, concorrência, migrations Flyway (schema inicial criado em `migrations/V001__initial_schema.sql`)
 - [ ] **Integrar ML Service no backend Deno** — chamadas REST para `/ml/predicao` e `/ml/anomalias`
 - [ ] **Testes: suíte automatizada** — Deno.test (backend) + Cypress (frontend) + k6 (carga)
-- [ ] **Remover todo código Python** — `backend/app/`, `backend/seed.py`, `backend/venv/`, FastAPI legado. Tudo em Rust ou Deno.
+- [ ] **Tipagem do backend** — 44 erros `TS7006` (implícito `any`) nos handlers Hono
+- [ ] **Tipagem do frontend** — erros TS2322 em `Lotes.tsx` e validadores Recharts
 
 ## 🟡 Médio
 - [ ] **ML: pipeline de treinamento contínuo** — integração com MLflow + retreinamento automático
@@ -29,8 +30,13 @@
 - [x] **IoT removido do projeto** — iot/ deletado, rotas removidas, docker-compose limpo, migrations sem iot_eventos
 - [x] **Docker Compose** — PostgreSQL + Redis + ML Service (sem Mosquitto/IoT)
 - [x] **Migration Flyway** — `migrations/V001__initial_schema.sql` (lotes, animais, pesagens)
-- [x] **README-QUICK.md** — guia rápido de start e deploy
+- [x] **README-QUICK.md** — guia rápido de start (sem Python, sem scripts .bat)
 - [x] **DOCX revisado** — artigo sem IoT, com ML em Rust
+- [x] **Python removido do repositório** — `backend/app/` (FastAPI), `seed.py`, `venv/` (59M), `requirements.txt` deletados
+- [x] **Scripts de conveniência removidos** — `deploy.sh/.bat`, `start*.sh/.bat` (raiz e backend). Docker Compose cobre
+- [x] **Frontend enxuto** — `@preact/compat` fora (redundante), React movido pra devDependencies (peer deps, fora do bundle)
+- [x] **Documentação completa** — README com todas as dependências (Deno/Rust/Node), API, env vars e deploy (Vercel + Render)
+- [x] **Portas consistentes** — `EXPOSE 3000` nos Dockerfiles (era 10000), `PORT` explícito no docker-compose
 
 ## 🔵 Baixo
 - [ ] **PWA: cache offline para uso em campo** — Service Workers + IndexedDB
