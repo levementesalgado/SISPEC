@@ -4,6 +4,8 @@
 
 > Da caderneta de campo ao Agro 5.0: Inteligência Artificial na Pecuária de Precisão
 
+Registro cronológico das mudanças e decisões técnicas: [COMPASS.md](COMPASS.md).
+
 ## Descrição
 
 Plataforma web para gestão de rebanho bovino que integra indicadores zootécnicos com aprendizado de máquina para monitoramento do desempenho produtivo:
