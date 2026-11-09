@@ -6,8 +6,8 @@
 - [x] **ML Service em Rust** — axum + smartcore (Random Forest, predição peso, anomalias). Endpoints: `/ml/predicao`, `/ml/anomalias`, `/ml/treinar`
 
 
-- [ ] **Integrar ML Service no backend Deno** — chamadas REST para `/ml/predicao` e `/ml/anomalias`
-- [ ] **Testes: suíte automatizada** — Deno.test (backend) + Cypress (frontend) + k6 (carga)
+- [ ] **Integrar ML Service no backend Deno** — chamadas REST para `/ml/predicao` e `/ml/anomalias` (WIP base: `mlClient.ts` tipado com timeout, ainda só proxy)
+- [ ] **Testes: suíte automatizada** — Deno.test (backend) + Cypress (frontend) + k6 (carga) (WIP base: `tests/calculos_test.ts` só funções puras + task `test`)
 
 ## 🟡 Médio
 - [ ] **ML: pipeline de treinamento contínuo** — integração com MLflow + retreinamento automático
@@ -39,7 +39,7 @@
 ## 🔵 Baixo
 - [ ] **PWA: cache offline para uso em campo** — Service Workers + IndexedDB
 - [ ] **i18n: internacionalização** — suporte a inglês e espanhol
-- [ ] **RBAC: controle de acesso granular** — admin, técnico, visualizador, produtor
+- [ ] **RBAC: controle de acesso granular** — admin, técnico, visualizador, produtor (WIP base: POST /animais admin/tecnico, DELETE admin)
 - [ ] **Exportação avançada** — PDF com gráficos embutidos + CSV + Excel
 - [ ] **Múltiplos protocolos de balança** — RS-232, Bluetooth LE
 - [ ] **OAuth 2.0** — login com Google, Facebook, gov.br

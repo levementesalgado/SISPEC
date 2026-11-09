@@ -469,12 +469,12 @@ isso o `EXPOSE 3000` do Dockerfile é o valor local, e o Render o ajusta via var
 - Migração de JSON para PostgreSQL completo — o backend ainda opera em JSON por padrão
   (`readDB` reporta `{"database":"json"}`); a camada PG existe mas atomicidade e concorrência não
   foram validadas
-- Suíte de testes automatizados (Deno.test, Cypress, k6)
+- Suíte de testes automatizados (Deno.test, Cypress, k6) (WIP base: `tests/calculos_test.ts` só funções puras)
 - Integração do ML Service no backend Deno — o proxy existe, mas o modelo treinado ainda usa
-  dados sintéticos
+  dados sintéticos (WIP base: `mlClient.ts` tipado com timeout, ainda só proxy)
 
 **Média**
 
 - Pipeline de treinamento contínuo e detecção de drift
-- RBAC: `requireRole()` foi implementado no middleware mas ainda não aplicado às rotas
+- RBAC: `requireRole()` aplicado em 2 rotas (WIP base: POST /animais admin/tecnico, DELETE admin), demais rotas pendentes
 - Persistência de refresh tokens em memória quando não há PostgreSQL (não sobrevive a restart)
