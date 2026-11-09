@@ -1,9 +1,10 @@
 import { Hono } from "hono";
 import { getRepo } from "../db/index.ts";
 import { getMetricsAnimal, getMetricsAnimalLeite } from "../services/metrics.ts";
+import { requireRole, type AuthEnv } from "../auth/middleware.ts";
 import type { AnimalCreate, ComposicaoRacial, Sexo, StatusAnimal } from "../types.ts";
 
-const animais = new Hono();
+const animais = new Hono<AuthEnv>();
 
 const STATUS_VALIDOS: StatusAnimal[] = ["ATIVO", "VENDIDO", "BAIXA", "MORTE"];
 
@@ -67,7 +68,7 @@ animais.get("/:id", async (c) => {
   return c.json({ ...animal, lote_nome: lote?.nome ?? null, metrics });
 });
 
-animais.post("/", async (c) => {
+animais.post("/", requireRole("admin", "tecnico"), async (c) => {
   const body = await c.req.json();
 
   if (!body.brinco) return c.json({ error: "Brinco é obrigatório" }, 400);
@@ -183,7 +184,7 @@ animais.put("/:id", async (c) => {
   });
 });
 
-animais.delete("/:id", async (c) => {
+animais.delete("/:id", requireRole("admin"), async (c) => {
   const id = parseInt(c.req.param("id"));
   if (Number.isNaN(id)) return c.json({ error: "ID inválido" }, 400);
 
