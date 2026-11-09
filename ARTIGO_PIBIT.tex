@@ -1,0 +1,309 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[portuguese]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{enumitem}
+\usepackage{amsmath}
+
+\setlength{\parskip}{0.6em}
+\setlength{\parindent}{1.25cm}
+\renewcommand{\baselinestretch}{1.3}
+\setcounter{secnumdepth}{4}
+
+\title{SISPEC: Sistema Inteligente de Pecu\'aria de Confinamento com Aprendizado de M\'aquina}
+\subtitle{Plataforma Web para Gest\~ao de Rebanho Bovino: da Caderneta de Campo ao Agro 4.0, Tecnologia na Pecu\'aria de Precis\~ao}
+\author{Mateus Iuri Rocha\\ FATEC Cap\~ao Bonito, Curso Superior de Tecnologia em Sistemas Inteligentes\\ Orientadora: Maria Renata Rocha Pereira}
+\date{}
+
+\begin{document}
+\maketitle
+
+\noindent Projeto de Pesquisa de IC, C\'odigo: 2324.\\
+Edital de Chamada P\'ublica para o PIBITI CPS CNPq, Edi\c c\~ao 2026/2027.\\
+Per\'{\i}odo: 01/09/2026 a 31/08/2027.\\
+\'Area: Ci\^encias Agr\'arias, Agronomia, Extens\~ao Rural.\\
+Eixo Tecnol\'ogico: Recursos Naturais.\\
+Unidade: 174, FATEC de Cap\~ao Bonito.\\
+Financiamento externo ou parcerias: N\~AO. Laborat\'orio da Unidade: N\~AO. ODS: n\~ao cadastrado.\\
+Anexos no ICT: HISTORICO, PLANO\_TRABALHO, TERMO\_COMPROMISSO.
+
+\begin{center}
+\textbf{RESUMO}
+\end{center}
+
+O crescimento da pecu\'aria de precis\~ao e a transforma\c c\~ao digital no agroneg\'ocio t\^em impulsionado o desenvolvimento de ferramentas capazes de otimizar a gest\~ao das propriedades rurais. Entretanto, muitos produtores ainda utilizam cadernetas de campo ou planilhas para registrar informa\c c\~oes do rebanho, dificultando o acompanhamento do desempenho individual dos animais e a tomada de decis\~oes baseada em dados. Nesse contexto, o presente projeto prop\~oe o desenvolvimento de uma plataforma web para gest\~ao de rebanho bovino, integrando tecnologias modernas de desenvolvimento de software com indicadores zoot\'ecnicos que auxiliem no monitoramento do desempenho produtivo. A aplica\c c\~ao est\'a sendo desenvolvida em arquitetura cliente servidor, utilizando React 18, Vite e Tailwind CSS no frontend, e Deno com o framework Hono no backend, com persist\^encia de dados em JSON e posterior migra\c c\~ao para PostgreSQL com Redis para cache. A plataforma permitir\'a o gerenciamento de animais, lotes e pesagens, al\'em de disponibilizar autentica\c c\~ao de usu\'arios, pain\'eis de indicadores (dashboards operacional, t\'atico e estrat\'egico), gr\'aficos interativos e sistema de alertas inteligentes. Entre os principais indicadores calculados est\~ao o ganho m\'edio di\'ario (GMD), a proje\c c\~ao de abate com simula\c c\~ao de cen\'arios e a classifica\c c\~ao autom\'atica dos animais conforme seu desempenho zoot\'ecnico, utilizando t\'ecnicas de aprendizado de m\'aquina (Random Forest, XGBoost, LSTM) implementadas em Rust para detec\c c\~ao precoce de indiv\'{\i}duos com baixo rendimento. O desenvolvimento ser\'a realizado por um estudante ao longo de quatro meses, contemplando desde a implementa\c c\~ao da infraestrutura do sistema at\'e a disponibiliza\c c\~ao de funcionalidades anal\'iticas voltadas ao apoio \`a decis\~ao em tr\^es n\'{\i}veis gerenciais. Como resultados esperados, prev\^e se a disponibiliza\c c\~ao de uma plataforma funcional, intuitiva e de f\'acil utiliza\c c\~ao, capaz de substituir os registros convencionais em papel, promovendo maior organiza\c c\~ao, seguran\c ca e confiabilidade das informa\c c\~oes zoot\'ecnicas. Espera se ainda contribuir para a forma\c c\~ao de estudantes em tecnologias voltadas ao Agro 4.0, estimular a inova\c c\~ao aplicada \`a pecu\'aria de precis\~ao e fornecer uma ferramenta que auxilie produtores rurais na melhoria da efici\^encia produtiva, no planejamento do manejo e na tomada de decis\~oes estrat\'egicas fundamentadas em indicadores t\'ecnicos e produtivos.
+
+\noindent \textit{Palavras chave:} pecu\'aria de precis\~ao; confinamento bovino; aprendizado de m\'aquina; ganho m\'edio di\'ario; dashboards inteligentes; React; Deno; PostgreSQL; Rust.
+
+\section{INTRODU\c C\~AO}
+
+O Brasil possui o maior rebanho comercial bovino do mundo, com cerca de 234 milh\~oes de cabe\c cas (IBGE, 2024), e ocupa posi\c c\~ao de destaque como maior exportador de carne bovina. O confinamento tem ganhado espa\c co como estrat\'egia de termina\c c\~ao por reduzir o ciclo produtivo, aumentar a rotatividade do pasto e permitir maior controle zoot\'ecnico. No entanto, a gest\~ao ainda \'e conduzida de forma predominantemente manual na maioria das propriedades, com registros em cadernetas de campo, planilhas eletr\^onicas desconectadas e sistemas legados de alto custo.
+
+Paralelamente, o avan\c co das tecnologias do Agro 4.0, como Aprendizado de M\'aquina (ML), Big Data e Visualiza\c c\~ao de Dados (BI), abriu novas possibilidades para a pecu\'aria de precis\~ao. Dados de pesagem, quando corretamente processados e analisados por modelos preditivos, permitem interven\c c\~oes antecipadas e ganhos significativos de produtividade.
+
+O SISPEC surge como alternativa a sistemas comerciais fechados e de alto custo, sendo desenvolvido com tecnologias modernas e gratuitas para pequenos e m\'edios produtores, alinhado \`as compet\^encias do CST em Sistemas Inteligentes da FATEC Cap\~ao Bonito. Diferentemente de abordagens que dependem de hardware externo (sensores, balan\c cas conectadas, RFID), o SISPEC adota uma abordagem exclusivamente digital: os dados de pesagem podem ser inseridos manualmente via interface web ou importados em lote via arquivos CSV. Essa decis\~ao de projeto elimina custos com dispositivos IoT e simplifica a ado\c c\~ao por produtores que ainda utilizam cadernetas de campo como fonte prim\'aria de dados.
+
+\section{OBJETIVOS}
+
+\textbf{Objetivo Geral}
+
+Desenvolver uma plataforma web para gest\~ao de rebanho bovino que integre o registro de informa\c c\~oes zoot\'ecnicas, indicadores de desempenho e t\'ecnicas de intelig\^encia artificial, visando apoiar a tomada de decis\~ao na pecu\'aria de precis\~ao e promover a transforma\c c\~ao digital da gest\~ao pecu\'aria.
+
+\textbf{Objetivos Espec\'{\i}ficos}
+
+\begin{enumerate}[leftmargin=*]
+\item Desenvolver uma aplica\c c\~ao web baseada em arquitetura cliente servidor utilizando tecnologias modernas de desenvolvimento (React, Vite, Tailwind CSS, Deno e Hono).
+\item Implementar funcionalidades para cadastro e gerenciamento de animais, lotes, pesagens e usu\'arios, substituindo registros convencionais em papel.
+\item Estruturar um banco de dados para armazenamento seguro das informa\c c\~oes zoot\'ecnicas, inicialmente em arquivos JSON e posteriormente em PostgreSQL com Redis para otimiza\c c\~ao do desempenho.
+\item Desenvolver dashboards operacional, t\'atico e estrat\'egico que apresentem indicadores produtivos de forma visual e intuitiva.
+\item Implementar o c\'alculo autom\'atico de indicadores zoot\'ecnicos, como o Ganho M\'edio Di\'ario (GMD), proje\c c\~ao de peso para abate e classifica\c c\~ao do desempenho dos animais.
+\item Desenvolver modelos de aprendizado de m\'aquina, utilizando algoritmos como Random Forest, XGBoost e LSTM, para identifica\c c\~ao precoce de animais com baixo desempenho produtivo.
+\item Implementar um sistema de alertas inteligentes que auxilie o produtor na identifica\c c\~ao de situa\c c\~oes que demandem interven\c c\~ao no manejo.
+\item Disponibilizar ferramentas de an\'alise gr\'afica e simula\c c\~ao de cen\'arios para apoiar o planejamento produtivo e a tomada de decis\~oes em diferentes n\'{\i}veis gerenciais.
+\item Validar a funcionalidade e a usabilidade da plataforma como ferramenta de apoio \`a gest\~ao do rebanho bovino.
+\item Contribuir para a forma\c c\~ao do estudante de Inicia\c c\~ao Cient\'{\i}fica nas \'areas de desenvolvimento de software, intelig\^encia artificial aplicada ao agroneg\'ocio e tecnologias do Agro 4.0.
+\end{enumerate}
+
+\section{REFERENCIAL TE\'ORICO}
+
+O avan\c co da pecu\'aria de precis\~ao tem promovido mudan\c cas significativas na forma como as propriedades rurais s\~ao gerenciadas, possibilitando a utiliza\c c\~ao de tecnologias digitais para monitorar o desempenho dos animais e apoiar a tomada de decis\~oes. Nesse contexto, a coleta sistem\'atica e o processamento de dados zoot\'ecnicos permitem maior controle sobre indicadores produtivos, sanit\'arios e econ\^omicos, contribuindo para o aumento da efici\^encia, da sustentabilidade e da rentabilidade da atividade pecu\'aria. Entretanto, muitas propriedades ainda realizam o registro das informa\c c\~oes por meio de cadernetas de campo ou planilhas eletr\^onicas, o que dificulta a organiza\c c\~ao dos dados, a gera\c c\~ao de indicadores e a obten\c c\~ao de informa\c c\~oes estrat\'egicas para o manejo do rebanho. Assim, a ado\c c\~ao de plataformas digitais de gest\~ao representa um importante passo para a consola\c c\~ao do conceito de Agro 4.0, permitindo integrar informa\c c\~oes em tempo real e oferecer suporte \`as decis\~oes gerenciais (BERNARDI et al., 2024; VINHOLIS; DE MORI, 2023).
+
+Os indicadores zoot\'ecnicos constituem uma das principais ferramentas para avalia\c c\~ao do desempenho produtivo de rebanhos bovinos, permitindo mensurar par\^ametros relacionados ao crescimento, reprodu\c c\~ao, sanidade e efici\^encia produtiva dos animais. Dentre esses indicadores, destacam se o ganho m\'edio di\'ario (GMD), o peso corporal, a convers\~ao alimentar e as proje\c c\~oes de desempenho, os quais subsidiam decis\~oes relacionadas ao manejo nutricional, sele\c c\~ao de animais e planejamento do abate. O monitoramento cont\'inuo desses \'{\i}ndices possibilita identificar precocemente desvios no desempenho dos animais, reduzindo perdas produtivas e aumentando a efici\^encia dos sistemas de confinamento. Dessa forma, sistemas informatizados capazes de coletar, armazenar e apresentar esses indicadores em pain\'eis de visualiza\c c\~ao (dashboards) tornam se ferramentas essenciais para transformar dados operacionais em informa\c c\~oes estrat\'egicas para produtores e t\'ecnicos (EMBRAPA, 2026; XAVIER, 2023).
+
+Paralelamente, o emprego de aprendizado de m\'aquina (Machine Learning) vem ampliando as possibilidades de an\'alise de grandes volumes de dados gerados nas propriedades pecu\'arias. Algoritmos supervisionados, como Random Forest e XGBoost, bem como modelos baseados em redes neurais recorrentes, como LSTM, apresentam elevada capacidade para identificar padr\~oes complexos, realizar previs\~oes e detectar precocemente animais com baixo desempenho produtivo. Quando integrados a sistemas de gest\~ao, esses modelos permitem desenvolver mecanismos inteligentes de classifica\c c\~ao, gera\c c\~ao de alertas e simula\c c\~ao de cen\'arios, oferecendo suporte \`a tomada de decis\~ao em n\'{\i}veis operacional, t\'atico e estrat\'egico. Dessa maneira, a combina\c c\~ao entre plataformas web, indicadores zoot\'ecnicos e t\'ecnicas de intelig\^encia artificial configura uma importante tend\^encia para a moderniza\c c\~ao da bovinocultura de corte, promovendo maior precis\~ao, agilidade e confiabilidade na gest\~ao do rebanho (BERNARDI et al., 2024; HOSSAIN et al., 2022).
+
+\section{MATERIAIS E M\'ETODOS}
+
+\subsection{Arquitetura do Sistema}
+
+O SISPEC adota arquitetura cliente servidor em tr\^es camadas (apresenta\c c\~ao, neg\'ocios e dados). O frontend est\'a sendo desenvolvido em React 18 com Vite e Tailwind CSS, servido estaticamente via Vercel. O backend utiliza Deno com Hono (REST) e WebSockets para dados em tempo real, com persist\^encia principal em PostgreSQL e cache opcional em Redis.
+
+A camada de Machine Learning \'e implementada em Rust com axum e smartcore, exposta como microsservi\c co containerizado com Docker, sem depend\^encias de Python. A comunica\c c\~ao entre o backend Deno e o ML Service ocorre via REST para infer\^encia de baixa lat\^encia. O deploy \'e realizado no Render via Docker Compose.
+
+A arquitetura pode ser descrita como: frontend React em HTTP/WebSocket para backend Deno com Hono, backend em REST para ML Service Rust com axum, backend conectado ao PostgreSQL, e modelos smartcore armazenados em arquivos bin.
+
+\subsection{Tecnologias}
+
+\textit{Frontend:} React 18 com Preact compat, Vite 5, Tailwind CSS 3, Recharts 2, React Router DOM 6, Lucide React, WebSockets para dados em tempo real.
+
+\textit{Backend:} Deno como runtime TypeScript nativo, Hono como framework web, PostgreSQL como banco relacional, Redis para cache, Docker para containeriza\c c\~ao, Flyway para migrations.
+
+\textit{Machine Learning:} Rust, axum, smartcore (Random Forest, K-Means, regress\~ao linear), MLflow para versionamento, Evidently AI para drift detection.
+
+\subsection{Estrutura da API}
+
+Endpoints REST planejados para o backend Deno:
+
+\begin{longtable}{p{0.18\linewidth} p{0.38\linewidth} p{0.38\linewidth}}
+\toprule
+M\'etodo & Rota & Fun\c c\~ao \\
+\midrule
+\endfirsthead
+\toprule
+M\'etodo & Rota & Fun\c c\~ao \\
+\midrule
+\endhead
+POST & /api/auth/login & Autentica\c c\~ao \\
+GET/POST & /api/animais & Listar/Criar animais \\
+GET/PUT/DELETE & /api/animais/:id & Buscar/Atualizar/Deletar animal \\
+GET & /api/animais/:id/pesagens & Timeline de pesagens \\
+GET/POST & /api/lotes & Listar/Criar lotes \\
+GET/PUT/DELETE & /api/lotes/:id & Buscar/Atualizar/Deletar lote \\
+GET/POST & /api/pesagens & Listar/Criar pesagens \\
+GET & /api/dashboard & KPIs e alertas \\
+GET & /api/dashboard/operacional & 12 KPIs em tempo real \\
+GET & /api/dashboard/tatico & 8 indicadores gerenciais \\
+GET & /api/dashboard/estrategico & 6 indicadores executivos \\
+GET & /api/ml/predicao/:animalId & Predi\c c\~ao de peso futuro \\
+GET & /api/ml/anomalias & Detec\c c\~ao de anomalias no rebanho \\
+\bottomrule
+\end{longtable}
+
+\subsection{Pipeline de Aprendizado de M\'aquina}
+
+O pipeline de ML proposto \'e composto por cinco etapas:
+
+\textit{(1) Coleta e ingest\~ao:} dados hist\'oricos de pesagens, dietas e clima ser\~ao importados via arquivos CSV e API p\'ublica do INMET (clima). Os dados ser\~ao armazenados em formato JSON para processamento.
+
+\textit{(2) Pr\'e processamento e feature engineering:} ser\~ao aplicadas t\'ecnicas de limpeza (tratamento de outliers por IQR e Z Score, imputa\c c\~ao de missing values por m\'edia), normaliza\c c\~ao (Min Max Scaler, Standard Scaler) e cria\c c\~ao de features derivadas como GMD acumulado, dias em confinamento, ganho de peso por per\'{\i}odo, consumo de ra\c c\~ao estimado, efici\^encia alimentar (GMD/consumo) e \'{\i}ndice de temperatura e umidade (ITU).
+
+\textit{(3) Modelagem preditiva:} ser\~ao implementados e comparados m\'ultiplos algoritmos em Rust (smartcore):
+
+\begin{itemize}[leftmargin=*]
+\item Regress\~ao Linear M\'ultipla, modelo baseline para predi\c c\~ao de peso futuro
+\item Random Forest Regressor, modelo ensemble robusto a n\~ao linearidades
+\item XGBoost, gradient boosting com regulariza\c c\~ao para alta acur\'acia
+\item LSTM (Long Short Term Memory), rede neural recorrente para s\'eries temporais de peso
+\item Prophet (Facebook), modelo aditivo para sazonalidade e tend\^encias
+\item Isolation Forest e DBSCAN para detec\c c\~ao de anomalias no ganho de peso
+\end{itemize}
+
+\textit{(4) Avalia\c c\~ao e valida\c c\~ao:} os modelos ser\~ao avaliados com as m\'etricas RMSE, MAE, MAPE e $R^2$, utilizando valida\c c\~ao cruzada temporal (TimeSeriesSplit) para evitar data leakage. O melhor modelo ser\'a promovido ao ambiente de produ\c c\~ao com versionamento via MLflow.
+
+\textit{(5) Implanta\c c\~ao e monitoramento:} o modelo ser\'a containerizado e exposto como API REST, com logging de predi\c c\~oes, drift detection (Evidently AI) e retreinamento programado a cada 30 dias ou sempre que a acur\'acia cair abaixo do limiar definido.
+
+\subsection{Dashboards e Visualiza\c c\~ao de Dados}
+
+Est\~ao previstos tr\^es n\'{\i}veis de dashboards:
+
+\textit{Dashboard Operacional (uso di\'ario):}
+
+\begin{itemize}[leftmargin=*]
+\item Timeline individual de pesagens por animal com curva de ganho de peso e GMD projetado
+\item Tabela din\^amica com filtros por lote, ra\c ca, data e faixa de peso
+\item Alertas em tempo real: animais com GMD abaixo do esperado, lotes com desempenho cr\'{\i}tico, pesagens atrasadas
+\item 12 KPIs em tempo real (GMD individual, GMD do lote, peso m\'edio, desvio padr\~ao do peso, dias em confinamento, proje\c c\~ao individual de abate, total de animais por categoria, alertas ativos, temperatura ambiente, ITU, consumo estimado, efici\^encia alimentar)
+\end{itemize}
+
+\textit{Dashboard T\'atico (uso semanal):}
+
+\begin{itemize}[leftmargin=*]
+\item Comparativo de desempenho entre lotes com ranking de GMD m\'edio
+\item Distribui\c c\~ao et\'aria e de peso do rebanho (histograma e boxplot)
+\item Curva de abate projetada com simula\c c\~ao de cen\'arios (otimista, realista, pessimista)
+\item 8 indicadores gerenciais (ranking de lotes, curva de distribui\c c\~ao de pesos, evolu\c c\~ao do GMD m\'edio, taxa de descarte, convers\~ao alimentar, homogeneidade do lote, ades\~ao ao calend\'ario de pesagens, previs\~ao de abate por lote)
+\end{itemize}
+
+\textit{Dashboard Estrat\'egico (uso mensal):}
+
+\begin{itemize}[leftmargin=*]
+\item S\'erie hist\'orica de desempenho do confinamento (m\^es a m\^es, safra a safra)
+\item Matriz de correla\c c\~ao entre vari\'aveis (peso, GMD, consumo, temperatura, ITU)
+\item Previs\~ao de faturamento com base na proje\c c\~ao de abate e pre\c co da arroba
+\item Scorecard ESG: pegada de carbono estimada, efici\^encia h\'{\i}drica, bem estar animal
+\item 6 indicadores executivos integrados
+\end{itemize}
+
+Todos os dashboards utilizar\~ao Recharts para renderiza\c c\~ao e oferecer\~ao exporta\c c\~ao para PDF e CSV, com cache Redis diferenciado por n\'{\i}vel (5 min operacional, 1 h t\'atico, 24 h estrat\'egico).
+
+\subsection{Desenvolvimento e Cronograma}
+
+O projeto est\'a sendo desenvolvido por um estudante ao longo de quatro meses, seguindo Scrum adaptado para equipe de uma pessoa: itera\c c\~oes quinzenais com planning e review, sem daily/retrospective formais. O reposit\'orio \'e mantido no GitHub com prote\c c\~ao de branch main, code review obrigat\'orio e integra\c c\~ao cont\'{\i}nua via GitHub Actions:
+
+\begin{itemize}[leftmargin=*]
+\item \textbf{M\^es 1, Funda\c c\~ao:} reposit\'orio, CI/CD, arquitetura, modelo de dados, prototipa\c c\~ao no Figma, backend b\'asico (autentica\c c\~ao, CRUD animais/lotes), banco PostgreSQL com migrations Flyway.
+\item \textbf{M\^es 2, ML e Dashboards:} pipeline de ML em Rust (smartcore), treinamento e valida\c c\~ao dos modelos, microsservi\c co axum para infer\^encia, dashboard operacional com Recharts, alertas inteligentes.
+\item \textbf{M\^es 3, Dashboards Avan\c cados:} dashboard t\'atico e estrat\'egico, m\'odulo de proje\c c\~ao de abate com simula\c c\~ao de cen\'arios, testes de carga com k6, testes E2E com Cypress, documenta\c c\~ao OpenAPI.
+\item \textbf{M\^es 4, Finaliza\c c\~ao e Deploy:} refinamento de UI/UX, corre\c c\~ao de bugs, deploy em produ\c c\~ao (Render e Vercel), manual do usu\'ario, artigo cient\'{\i}fico e apresenta\c c\~ao.
+\end{itemize}
+
+\section{RESULTADOS ESPERADOS}
+
+\subsection{Funcionalidades Planejadas}
+
+\begin{longtable}{p{0.28\linewidth} p{0.22\linewidth} p{0.44\linewidth}}
+\toprule
+Funcionalidade & Status esperado & Descri\c c\~ao \\
+\midrule
+\endfirsthead
+\toprule
+Funcionalidade & Status esperado & Descri\c c\~ao \\
+\midrule
+\endhead
+CRUD Animais & Completo & Cadastro com brinco, ra\c ca (at\'e 4), peso entrada, lote \\
+CRUD Lotes & Completo & Soft delete, listagem com status \\
+CRUD Pesagens & Completo & Timeline por animal, GMD autom\'atico \\
+Dashboard Operacional & Funcional & 12 KPIs em tempo real e alertas \\
+Dashboard T\'atico & Funcional & 8 indicadores gerenciais e ranking lotes e simula\c c\~ao cen\'arios \\
+Dashboard Estrat\'egico & Funcional & 6 indicadores executivos e scorecard ESG e s\'erie hist\'orica \\
+Predi\c c\~ao de Peso (ML) & Em desenvolvimento & Random Forest, XGBoost, LSTM (Rust/smartcore) \\
+Detec\c c\~ao de Anomalias & Em desenvolvimento & Isolation Forest, DBSCAN \\
+Proje\c c\~ao de Abate & Funcional & Simula\c c\~ao de cen\'arios (3 n\'{\i}veis) \\
+Alertas Inteligentes & Em desenvolvimento & Regras e ML (anteced\^encia maior ou igual a 7 dias) \\
+Autentica\c c\~ao & Funcional & JWT com 3 perfis \\
+Exporta\c c\~ao PDF/CSV & Planejado & Todos os dashboards \\
+\bottomrule
+\end{longtable}
+
+\subsection{M\'etricas de Desempenho Esperadas}
+
+\begin{itemize}[leftmargin=*]
+\item Backend CRUD: menos de 10 ms por requisi\c c\~ao
+\item Infer\^encia ML (Rust): menos de 50 ms (REST)
+\item Dashboard operacional: menos de 5 ms para renderiza\c c\~ao
+\item Bundle frontend: aproximadamente 120 KB (gzip)
+\item Modelos ML: RMSE menor que 8 kg, MAPE menor que 5\%
+\item Detec\c c\~ao de anomalias: mais de 90\% de precis\~ao com 7 dias de anteced\^encia
+\end{itemize}
+
+\section{DISCUSS\~AO}
+
+O SISPEC prop\~oe substituir a caderneta de campo e as planilhas manuais por uma plataforma digital integrada, com intelig\^encia embarcada e sem custo de licenciamento ou depend\^encia de hardware externo. O c\'alculo autom\'atico do GMD por diferentes metodologias (m\'edia aritm\'etica, regress\~ao linear, modelo LSTM) eliminar\'a erros de transcri\c c\~ao e fornecer\'a m\'ultiplas perspectivas de an\'alise. O sistema de alertas inteligentes, baseado tanto em regras fixas (GMD menor que 0,7 kg/dia) quanto em detec\c c\~ao de anomalias por Isolation Forest, permitir\'a interven\c c\~oes preventivas antes que o animal atinja estado cr\'{\i}tico.
+
+A decis\~ao de n\~ao incluir IoT no escopo, eliminando ESP32, sensores, RFID e c\^ameras, reduz significativamente o custo de pesquisa e simplifica a arquitetura, mantendo o foco no software e nos modelos preditivos. Os dados de pesagem podem ser inseridos manualmente via interface web ou importados em lote, compatibilizando o sistema com a realidade de propriedades que ainda utilizam cadernetas de campo. A utiliza\c c\~ao de Rust no ML Service elimina a depend\^encia de bibliotecas pesadas (TensorFlow, PyTorch) e reduz o consumo de mem\'oria, mantendo acur\'acia competitiva com smartcore.
+
+Os dashboards em tr\^es n\'{\i}veis (operacional, t\'atico e estrat\'egico) atender\~ao desde o tratador no curral at\'e o gestor financeiro da propriedade, democratizando o acesso \`a pecu\'aria de precis\~ao. A plataforma promover\'a maior organiza\c c\~ao, seguran\c ca e confiabilidade das informa\c c\~oes zoot\'ecnicas, contribuindo para a forma\c c\~ao em tecnologias voltadas ao Agro 4.0.
+
+\subsection{Limita\c c\~oes e Trabalhos Futuros}
+
+\textbf{Limita\c c\~oes previstas na vers\~ao atual:} autentica\c c\~ao com JWT armazenado em localStorage (vulner\'avel a XSS, mas aceit\'avel para prot\'otipo); banco PostgreSQL com replica\c c\~ao simples (sem failover autom\'atico); predi\c c\~oes baseadas em dados sint\'eticos para valida\c c\~ao inicial; aus\^encia de testes de carga em cen\'ario real com m\'ultiplos usu\'arios simult\^aneos.
+
+\textbf{Trabalhos futuros:} migra\c c\~ao para autentica\c c\~ao OAuth 2.0 com provedores externos; implementa\c c\~ao de PWA com Service Workers para funcionamento offline parcial; expans\~ao do pipeline de ML para incluir s\'eries temporais multivariadas com Transformers; integra\c c\~ao com blockchain para rastreabilidade da cadeia produtiva; suporte a m\'ultiplos protocolos de balan\c ca (RS 232, Bluetooth LE); painel de administra\c c\~ao com gest\~ao de usu\'arios e permiss\~oes granulares (RBAC); testes end to end com Cypress em m\'ultiplos navegadores; internacionaliza\c c\~ao (i18n) para ingl\^es e espanhol; futura integra\c c\~ao com dispositivos IoT para coleta automatizada de dados.
+
+\section{CONCLUS\~AO}
+
+O SISPEC \'e uma proposta de plataforma funcional e escal\'avel de gest\~ao de confinamento bovino, desenvolvida com tecnologias modernas e alinhada \`as compet\^encias do CST em Sistemas Inteligentes, integrando conhecimentos de Banco de Dados, Estat\'{\i}stica Aplicada, BI e Visualiza\c c\~ao de Dados, Aprendizado de M\'aquina e Desenvolvimento Web. A aplica\c c\~ao de m\'ultiplos algoritmos de ML (Random Forest, XGBoost, LSTM, Prophet, Isolation Forest) permitir\'a n\~ao apenas automatizar c\'alculos zoot\'ecnicos, mas tamb\'em gerar insights preditivos e prescritivos para o produtor, elevando a gest\~ao do confinamento de reativa para proativa.
+
+Os dashboards em tr\^es n\'{\i}veis (operacional, t\'atico e estrat\'egico) atender\~ao desde o tratador no curral at\'e o gestor financeiro da propriedade, democratizando o acesso \`a pecu\'aria de precis\~ao. A implementa\c c\~ao do ML Service em Rust demonstra a viabilidade de stacks leves e eficientes para ambientes de produ\c c\~ao com recursos limitados, sem depend\^encias de Python. O c\'odigo fonte estar\'a dispon\'{\i}vel em reposit\'orio p\'ublico sob licen\c ca GPLv3, permitindo que a comunidade acad\^emica e produtores possam auditar, modificar e distribuir livremente a solu\c c\~ao.
+
+Espera se que a ferramenta auxilie produtores rurais na melhoria da efici\^encia produtiva, no planejamento do manejo e na tomada de decis\~oes estrat\'egicas fundamentadas em indicadores t\'ecnicos e produtivos, contribuindo para a transforma\c c\~ao digital da pecu\'aria brasileira.
+
+\section*{REFER\^ENCIAS}
+
+\noindent IBGE. \textit{Pesquisa da Pecu\'aria Municipal 2023.} Rio de Janeiro: IBGE, 2024.
+
+\noindent BERNARDI, A. C. C. et al. Tecnologias de pecu\'aria de precis\~ao para o manejo de pastagens e animais. In: BASSOI, L. H. et al. (org.). \textit{Agricultura de Precis\~ao: um novo olhar na era digital.} S\~ao Carlos: Editora Cubo, 2024.
+
+\noindent HOSSAIN, M. E. et al. A Systematic Review of Machine Learning Techniques for Cattle Identification: Datasets, Methods and Future Directions. 2022.
+
+\noindent VINHOLIS, M. M. B.; DE MORI, C. Gest\~ao zoot\'ecnico econ\^omica na bovinocultura (de leite e de corte). \textit{Revista Brasileira de Buiatria}, v. 4, n. 1 a 4, p. 1 a 27, 2023.
+
+\noindent XAVIER, M. \'Indices zoot\'ecnicos: o que s\~ao, como medir e qual o benef\'{\i}cio? Pecu\'aria de Precis\~ao, 2023.
+
+\noindent MILLEN, D. D. et al. Caracteriza\c c\~ao da nutri\c c\~ao e manejo de bovinos confinados no Brasil. In: MEDEIROS, S. R. et al. (Eds.). \textit{Produ\c c\~ao de Bovinos em Confinamento.} Bras\'{\i}lia: Embrapa, 2021.
+
+\noindent G\'ERON, A. \textit{M\~aos \`a Obra: Aprendizado de M\'aquina com Scikit Learn, Keras e TensorFlow.} 3. ed. Rio de Janeiro: Alta Books, 2023.
+
+\noindent GOODFELLOW, I.; BENGIO, Y.; COURVILLE, A. \textit{Deep Learning.} Cambridge: MIT Press, 2016.
+
+\noindent BREIMAN, L. Random Forests. \textit{Machine Learning}, v. 45, n. 1, p. 5 a 32, 2001.
+
+\noindent CHEN, T.; GUESTRIN, C. XGBoost: A Scalable Tree Boosting System. In: \textit{Proceedings of the 22nd ACM SIGKDD}, 2016.
+
+\noindent HOCHREITER, S.; SCHMIDHUBER, J. Long Short Term Memory. \textit{Neural Computation}, v. 9, n. 8, p. 1735 a 1780, 1997.
+
+\noindent TAYLOR, S. J.; LETHAM, B. Forecasting at Scale. \textit{The American Statistician}, v. 72, n. 1, p. 37 a 45, 2018.
+
+\noindent LIU, F. T.; TING, K. M.; ZHOU, Z. H. Isolation Forest. In: \textit{2008 Eighth IEEE International Conference on Data Mining}, 2008.
+
+\noindent TANENBAUM, A. S.; FEAMSTER, N.; WETHERALL, D. \textit{Redes de Computadores.} 6. ed. S\~ao Paulo: Bookman, 2021.
+
+\noindent SILBERSCHATZ, A.; KORTH, H. F.; SUDARSHAN, S. \textit{Sistema de Banco de Dados.} Rio de Janeiro: GEN LTC, 2020.
+
+\noindent SOMMERVILLE, I. \textit{Engenharia de Software.} 10. ed. S\~ao Paulo: Pearson, 2019.
+
+\noindent FOSTER, P.; FAWCETT, T. \textit{Data Science Para Neg\'ocios.} Rio de Janeiro: Alta Books, 2016.
+
+\noindent AMARAL, F. \textit{Introdu\c c\~ao \`a Ci\^encia de Dados.} Rio de Janeiro: Alta Books, 2016.
+
+\noindent HONO. \textit{Hono, Ultrafast web framework for the Edges.} Dispon\'{\i}vel em: \url{https://hono.dev/}. Acesso em: jun. 2026.
+
+\noindent DENO LAND. \textit{Deno, A modern runtime for JavaScript and TypeScript.} Dispon\'{\i}vel em: \url{https://deno.land/}. Acesso em: jun. 2026.
+
+\noindent REACT. \textit{React, A JavaScript library for building user interfaces.} Dispon\'{\i}vel em: \url{https://react.dev/}. Acesso em: jun. 2026.
+
+\noindent VITE. \textit{Vite, Next Generation Frontend Tooling.} Dispon\'{\i}vel em: \url{https://vitejs.dev/}. Acesso em: jun. 2026.
+
+\noindent TAILWIND CSS. \textit{Tailwind CSS, A utility first CSS framework.} Dispon\'{\i}vel em: \url{https://tailwindcss.com/}. Acesso em: jun. 2026.
+
+\noindent axum. \textit{axum, Web framework for Rust.} Dispon\'{\i}vel em: \url{https://github.com/tokio-rs/axum}. Acesso em: jun. 2026.
+
+\noindent smartcore. \textit{smartcore, Machine Learning library for Rust.} Dispon\'{\i}vel em: \url{https://smartcore.org/}. Acesso em: jun. 2026.
+
+\end{document}
