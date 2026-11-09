@@ -1,3 +1,5 @@
+NOTA (2026-09): planejamento original de grupo (6 pessoas, stack FastAPI/React Native). Superseded pelo projeto ICT PIBITI CNPq 2026/2027 (Código 2324, 1 estudante, Mateus Iuri Rocha, orientadora Maria Renata Rocha Pereira, FATEC Capão Bonito, período 01/09/2026 a 31/08/2027) — stack atual Rust + Deno + React/Preact, sem Python/IoT. Ver README.md e ARTIGO_PIBIT.md para a versão vigente.
+
  MATEUS (Tech Lead)
 ├─ Backend completo (API REST)
 ├─ Banco de dados e lógica de negócio

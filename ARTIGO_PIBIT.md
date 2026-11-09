@@ -4,9 +4,21 @@
 
 ---
 
+**Projeto de Pesquisa de IC - Código: 2324**
+**EDITAL DE CHAMADA PÚBLICA PARA O PIBITI CPS-CNPq - Edição 2026/2027**
+**Período: 01/09/2026 a 31/08/2027**
+**Área: Ciências Agrárias - Agronomia - Extensão Rural**
+**Eixo Tecnológico: Recursos Naturais**
+**Unidade: 174 - FATEC de Capão Bonito**
+**Financiamento externo/parcerias: NÃO | Laboratório da Unidade: NÃO | ODS: não cadastrado**
+**Anexos no ICT: HISTORICO, PLANO_TRABALHO, TERMO_COMPROMISSO**
+
 **Autor:**
 Mateus Iuri Rocha
 *FATEC Capão Bonito, Curso Superior de Tecnologia em Sistemas Inteligentes*
+
+**Orientadora:**
+Maria Renata Rocha Pereira
 
 E-mail: [email do orientador], [email do coordenador]
 
@@ -30,18 +42,47 @@ O SISPEC surge como alternativa a sistemas comerciais fechados e de alto custo, 
 
 ---
 
+## Objetivos
+
+**Objetivo Geral**
+Desenvolver uma plataforma web para gestão de rebanho bovino que integre o registro de informações zootécnicas, indicadores de desempenho e técnicas de inteligência artificial, visando apoiar a tomada de decisão na pecuária de precisão e promover a transformação digital da gestão pecuária.
+
+**Objetivos Específicos**
+Desenvolver uma aplicação web baseada em arquitetura cliente-servidor utilizando tecnologias modernas de desenvolvimento (React, Vite, Tailwind CSS, Deno e Hono).
+Implementar funcionalidades para cadastro e gerenciamento de animais, lotes, pesagens e usuários, substituindo registros convencionais em papel.
+Estruturar um banco de dados para armazenamento seguro das informações zootécnicas, inicialmente em arquivos JSON e posteriormente em PostgreSQL com Redis para otimização do desempenho.
+Desenvolver dashboards operacional, tático e estratégico que apresentem indicadores produtivos de forma visual e intuitiva.
+Implementar o cálculo automático de indicadores zootécnicos, como o Ganho Médio Diário (GMD), projeção de peso para abate e classificação do desempenho dos animais.
+Desenvolver modelos de aprendizado de máquina, utilizando algoritmos como Random Forest, XGBoost e LSTM, para identificação precoce de animais com baixo desempenho produtivo.
+Implementar um sistema de alertas inteligentes que auxilie o produtor na identificação de situações que demandem intervenção no manejo.
+Disponibilizar ferramentas de análise gráfica e simulação de cenários para apoiar o planejamento produtivo e a tomada de decisões em diferentes níveis gerenciais.
+Validar a funcionalidade e a usabilidade da plataforma como ferramenta de apoio à gestão do rebanho bovino.
+Contribuir para a formação do estudante de Iniciação Científica nas áreas de desenvolvimento de software, inteligência artificial aplicada ao agronegócio e tecnologias do Agro 4.0.
+
+---
+
+## Referencial Teórico
+
+O avanço da pecuária de precisão tem promovido mudanças significativas na forma como as propriedades rurais são gerenciadas, possibilitando a utilização de tecnologias digitais para monitorar o desempenho dos animais e apoiar a tomada de decisões. Nesse contexto, a coleta sistemática e o processamento de dados zootécnicos permitem maior controle sobre indicadores produtivos, sanitários e econômicos, contribuindo para o aumento da eficiência, da sustentabilidade e da rentabilidade da atividade pecuária. Entretanto, muitas propriedades ainda realizam o registro das informações por meio de cadernetas de campo ou planilhas eletrônicas, o que dificulta a organização dos dados, a geração de indicadores e a obtenção de informações estratégicas para o manejo do rebanho. Assim, a adoção de plataformas digitais de gestão representa um importante passo para a consolidação do conceito de Agro 4.0, permitindo integrar informações em tempo real e oferecer suporte às decisões gerenciais (BERNARDI et al., 2024; VINHOLIS; DE MORI, 2023).
+
+Os indicadores zootécnicos constituem uma das principais ferramentas para avaliação do desempenho produtivo de rebanhos bovinos, permitindo mensurar parâmetros relacionados ao crescimento, reprodução, sanidade e eficiência produtiva dos animais. Dentre esses indicadores, destacam-se o ganho médio diário (GMD), o peso corporal, a conversão alimentar e as projeções de desempenho, os quais subsidiam decisões relacionadas ao manejo nutricional, seleção de animais e planejamento do abate. O monitoramento contínuo desses índices possibilita identificar precocemente desvios no desempenho dos animais, reduzindo perdas produtivas e aumentando a eficiência dos sistemas de confinamento. Dessa forma, sistemas informatizados capazes de coletar, armazenar e apresentar esses indicadores em painéis de visualização (dashboards) tornam-se ferramentas essenciais para transformar dados operacionais em informações estratégicas para produtores e técnicos (EMBRAPA, 2026; XAVIER, 2023).
+
+Paralelamente, o emprego de aprendizado de máquina (Machine Learning) vem ampliando as possibilidades de análise de grandes volumes de dados gerados nas propriedades pecuárias. Algoritmos supervisionados, como Random Forest e XGBoost, bem como modelos baseados em redes neurais recorrentes, como LSTM, apresentam elevada capacidade para identificar padrões complexos, realizar previsões e detectar precocemente animais com baixo desempenho produtivo. Quando integrados a sistemas de gestão, esses modelos permitem desenvolver mecanismos inteligentes de classificação, geração de alertas e simulação de cenários, oferecendo suporte à tomada de decisão em níveis operacional, tático e estratégico. Dessa maneira, a combinação entre plataformas web, indicadores zootécnicos e técnicas de inteligência artificial configura uma importante tendência para a modernização da bovinocultura de corte, promovendo maior precisão, agilidade e confiabilidade na gestão do rebanho (BERNARDI et al., 2024; HOSSAIN et al., 2022).
+
+---
+
 ## 2. MATERIAIS E MÉTODOS
 
 ### 2.1 Arquitetura do Sistema
 
 O SISPEC adota arquitetura cliente-servidor em três camadas (apresentação, negócios e dados). O frontend está sendo desenvolvido em React 18 com Vite e Tailwind CSS, servido estaticamente via Vercel. O backend utiliza Deno com Hono (REST) e WebSockets para dados em tempo real, com persistência principal em PostgreSQL e cache opcional em Redis.
 
-A camada de Machine Learning é implementada em Rust com axum e smartcore, exposta como microsserviço containerizado com Docker, sem dependências de Python. A comunicação entre o backend Deno e o ML Service ocorre via REST para inferência de baixa latência.
+A camada de Machine Learning é implementada em Rust com axum e smartcore, exposta como microsserviço containerizado com Docker, sem dependências de Python. A comunicação entre o backend Deno e o ML Service ocorre via REST para inferência de baixa latência. O deploy é realizado no Render via Docker Compose.
 
 ```
 [Frontend React] --HTTP/WS--> [Backend Deno + Hono] --REST--> [ML Service Rust + axum]
                                     |
-                               [PostgreSQL]
+                               [PostgreSQL] [Modelos smartcore .bin]
 ```
 
 ### 2.2 Tecnologias
@@ -119,7 +160,7 @@ Todos os dashboards utilizarão Recharts para renderização e oferecerão expor
 
 ### 2.6 Desenvolvimento e Cronograma
 
-O projeto está sendo desenvolvido por um estudante ao longo de quatro meses, seguindo a metodologia Scrum com sprints quinzenais:
+O projeto está sendo desenvolvido por um estudante ao longo de quatro meses, seguindo a metodologia Scrum com sprints quinzenais e cerimônias de planning, daily, review e retrospective. O repositório é mantido no GitHub com proteção de branch main, code review obrigatório e integração contínua via GitHub Actions:
 
 - **Mês 1, Fundação:** repositório, CI/CD, arquitetura, modelo de dados, prototipação no Figma, backend básico (autenticação, CRUD animais/lotes), banco PostgreSQL com migrations Flyway.
 - **Mês 2, ML e Dashboards:** pipeline de ML em Rust (smartcore), treinamento e validação dos modelos, microsserviço axum para inferência, dashboard operacional com Recharts, alertas inteligentes.
@@ -170,7 +211,7 @@ Os dashboards em três níveis (operacional, tático e estratégico) atenderão 
 
 **Limitações previstas na versão atual:** autenticação com JWT armazenado em localStorage (vulnerável a XSS, mas aceitável para protótipo); banco PostgreSQL com replicação simples (sem failover automático); predições baseadas em dados sintéticos para validação inicial; ausência de testes de carga em cenário real com múltiplos usuários simultâneos.
 
-**Trabalhos futuros:** migração para autenticação OAuth 2.0 com provedores externos; implementação de PWA com Service Workers para funcionamento offline parcial; expansão do pipeline de ML para incluir séries temporais multivariadas com Transformers; suporte a múltiplos protocolos de balança (RS-232, Bluetooth LE); painel de administração com gestão de usuários e permissões granulares (RBAC); testes end-to-end com Cypress em múltiplos navegadores; internacionalização (i18n) para inglês e espanhol; futura integração com dispositivos IoT para coleta automatizada de dados.
+**Trabalhos futuros:** migração para autenticação OAuth 2.0 com provedores externos; implementação de PWA com Service Workers para funcionamento offline parcial; expansão do pipeline de ML para incluir séries temporais multivariadas com Transformers; integração com blockchain para rastreabilidade da cadeia produtiva; suporte a múltiplos protocolos de balança (RS-232, Bluetooth LE); painel de administração com gestão de usuários e permissões granulares (RBAC); testes end-to-end com Cypress em múltiplos navegadores; internacionalização (i18n) para inglês e espanhol; futura integração com dispositivos IoT para coleta automatizada de dados.
 
 ---
 
@@ -187,6 +228,14 @@ Espera-se que a ferramenta auxilie produtores rurais na melhoria da eficiência 
 ## REFERÊNCIAS
 
 IBGE. **Pesquisa da Pecuária Municipal 2023.** Rio de Janeiro: IBGE, 2024.
+
+BERNARDI, A. C. C. et al. Tecnologias de pecuária de precisão para o manejo de pastagens e animais. In: BASSOI, L. H. et al. (org.). **Agricultura de Precisão: um novo olhar na era digital.** São Carlos: Editora Cubo, 2024.
+
+HOSSAIN, M. E. et al. A Systematic Review of Machine Learning Techniques for Cattle Identification: Datasets, Methods and Future Directions. 2022.
+
+VINHOLIS, M. M. B.; DE MORI, C. Gestão zootécnico-econômica na bovinocultura (de leite e de corte). **Revista Brasileira de Buiatria**, v. 4, n. 1-4, p. 1-27, 2023.
+
+XAVIER, M. Índices zootécnicos: o que são, como medir e qual o benefício? Pecuária de Precisão, 2023.
 
 MILLEN, D. D. et al. Caracterização da nutrição e manejo de bovinos confinados no Brasil. In: MEDEIROS, S. R. et al. (Eds.). **Produção de Bovinos em Confinamento.** Brasília: Embrapa, 2021.
 

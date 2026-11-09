@@ -6,6 +6,8 @@ Registro consolidado das mudanças do projeto, para síntese do relatório CNPq.
 
 **Sistema Inteligente de Pecuária de Confinamento com Aprendizado de Máquina**
 
+> Projeto ICT PIBITI CPS-CNPq 2026/2027 — Código 2324 | Orientadora: Maria Renata Rocha Pereira | Período formal: 01/09/2026 a 31/08/2027 | FATEC Capão Bonito (174) | Área Ciências Agrárias — Extensão Rural / Eixo Recursos Naturais
+
 ---
 
 ## Linha do tempo

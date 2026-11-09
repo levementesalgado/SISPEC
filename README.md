@@ -17,6 +17,19 @@ Plataforma web para gestão de rebanho bovino que integra indicadores zootécnic
 
 **Stack: Rust + Deno + React. Sem Python.**
 
+## Projeto PIBITI CNPq
+
+Projeto de Pesquisa de IC aprovado no ICT — Código 2324, Edital PIBITI CPS-CNPq 2026/2027.
+
+- **Autor:** Mateus Iuri Rocha (FATEC Capão Bonito, CST em Sistemas Inteligentes)
+- **Orientadora:** Maria Renata Rocha Pereira
+- **Período:** 01/09/2026 a 31/08/2027
+- **Área:** Ciências Agrárias — Agronomia — Extensão Rural | **Eixo:** Recursos Naturais | **Unidade:** 174 — FATEC de Capão Bonito
+- **Financiamento externo/parcerias:** NÃO | **Laboratório da Unidade:** NÃO | **ODS:** não cadastrado
+- **Desenvolvimento:** 1 estudante, 4 meses, metodologia Scrum com sprints quinzenais (planning, daily, review, retrospective); repositório GitHub com proteção da branch `main`, code review obrigatório e CI via GitHub Actions.
+- **Objetivo geral:** desenvolver uma plataforma web de gestão de rebanho bovino que integre registro zootécnico, indicadores de desempenho e IA para apoiar a tomada de decisão na pecuária de precisão e promover a transformação digital da gestão pecuária.
+- **Referencial:** pecuária de precisão e Agro 4.0 (BERNARDI et al., 2024; VINHOLIS; DE MORI, 2023); indicadores zootécnicos e dashboards (EMBRAPA, 2026; XAVIER, 2023); ML para predição/detecção (BERNARDI et al., 2024; HOSSAIN et al., 2022). Detalhes em [ARTIGO_PIBIT.md](ARTIGO_PIBIT.md).
+
 ## Arquitetura
 
 ```
