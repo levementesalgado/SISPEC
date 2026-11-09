@@ -160,7 +160,7 @@ Todos os dashboards utilizarão Recharts para renderização e oferecerão expor
 
 ### 2.6 Desenvolvimento e Cronograma
 
-O projeto está sendo desenvolvido por um estudante ao longo de quatro meses, seguindo a metodologia Scrum com sprints quinzenais e cerimônias de planning, daily, review e retrospective. O repositório é mantido no GitHub com proteção de branch main, code review obrigatório e integração contínua via GitHub Actions:
+O projeto está sendo desenvolvido por um estudante ao longo de quatro meses, seguindo Scrum adaptado para equipe de uma pessoa: iterações quinzenais com planning e review, sem daily/retrospective formais. O repositório é mantido no GitHub com proteção de branch main, code review obrigatório e integração contínua via GitHub Actions:
 
 - **Mês 1, Fundação:** repositório, CI/CD, arquitetura, modelo de dados, prototipação no Figma, backend básico (autenticação, CRUD animais/lotes), banco PostgreSQL com migrations Flyway.
 - **Mês 2, ML e Dashboards:** pipeline de ML em Rust (smartcore), treinamento e validação dos modelos, microsserviço axum para inferência, dashboard operacional com Recharts, alertas inteligentes.
